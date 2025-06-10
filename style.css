@@ -16,6 +16,29 @@ body {
     border-radius: 5px;
 }
 
+/* Added max-height and overflow for scrollability */
+#stats {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Added margin for better spacing within stats */
+#stats p {
+    margin: 8px 0;
+}
+
+#actions {
+    /* This selector was duplicated with #stats,
+       keeping it separate in case of future distinct styling.
+       The properties are the same as before for #actions. */
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+
 button {
     padding: 10px 15px;
     margin: 5px;
