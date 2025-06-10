@@ -1,6 +1,6 @@
 # idleinfinity
 
-このゲームはgoogleのjulesを用いて作成されました。github pages（https://rrrrr-euaeu.github.io/idleinfinity/）で遊ぶことができます。
+このゲームはgoogleのjulesを用いて作成されました。[github pages](https://rrrrr-euaeu.github.io/idleinfinity/)で遊ぶことができます。
 
 ## ゲームの遊び方
 
