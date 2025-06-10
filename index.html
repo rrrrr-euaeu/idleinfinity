@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idle Infinity Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Idle Infinity Game</h1>
+
+    <div id="stats">
+        <p>Cash: <span id="cash">0</span></p>
+        <p>Generator Lv1: <span id="gen1-count">0</span> | Cost: <span id="gen1-cost">10</span></p>
+        <p>Generator Lv2: <span id="gen2-count">0</span> | Cost: <span id="gen2-cost">100</span></p>
+    </div>
+
+    <div id="actions">
+        <button id="buy-gen1">Buy Generator Lv1</button>
+        <button id="buy-gen2">Buy Generator Lv2</button>
+    </div>
+
+    <div id="win-message" style="display:none;">
+        <h2>Congratulations! You've reached infinity!</h2>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
