@@ -1,7 +1,7 @@
 // Game logic for Idle Infinity Game will go here.
 // Basic structure and initial values
 
-let cash = 0;
+let cash = 10;
 let gen1Count = 0;
 let gen1Cost = 10;
 let gen2Count = 0;
