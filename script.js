@@ -54,23 +54,23 @@ const winMessage = document.getElementById('win-message');
 
 function updateDisplay() {
     cashDisplay.textContent = cash;
-    gen1CountDisplay.textContent = gen1Count;
+    gen1CountDisplay.textContent = "lv" + gen1Count;
     gen1CostDisplay.textContent = gen1Cost;
-    gen2CountDisplay.textContent = gen2Count;
+    gen2CountDisplay.textContent = "lv" + gen2Count;
     gen2CostDisplay.textContent = gen2Cost;
-    gen3CountDisplay.textContent = gen3Count;
+    gen3CountDisplay.textContent = "lv" + gen3Count;
     gen3CostDisplay.textContent = gen3Cost;
-    gen4CountDisplay.textContent = gen4Count;
+    gen4CountDisplay.textContent = "lv" + gen4Count;
     gen4CostDisplay.textContent = gen4Cost;
-    gen5CountDisplay.textContent = gen5Count;
+    gen5CountDisplay.textContent = "lv" + gen5Count;
     gen5CostDisplay.textContent = gen5Cost;
-    gen6CountDisplay.textContent = gen6Count;
+    gen6CountDisplay.textContent = "lv" + gen6Count;
     gen6CostDisplay.textContent = gen6Cost;
-    gen7CountDisplay.textContent = gen7Count;
+    gen7CountDisplay.textContent = "lv" + gen7Count;
     gen7CostDisplay.textContent = gen7Cost;
-    gen8CountDisplay.textContent = gen8Count;
+    gen8CountDisplay.textContent = "lv" + gen8Count;
     gen8CostDisplay.textContent = gen8Cost;
-    gen9CountDisplay.textContent = gen9Count;
+    gen9CountDisplay.textContent = "lv" + gen9Count;
     gen9CostDisplay.textContent = gen9Cost;
 }
 
