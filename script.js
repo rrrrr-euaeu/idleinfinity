@@ -53,25 +53,18 @@ const buyGen9Button = document.getElementById('buy-gen9');
 const winMessage = document.getElementById('win-message');
 
 function updateDisplay() {
-    cashDisplay.textContent = cash;
-    gen1CountDisplay.textContent = "lv" + gen1Count;
-    gen1CostDisplay.textContent = gen1Cost;
-    gen2CountDisplay.textContent = "lv" + gen2Count;
-    gen2CostDisplay.textContent = gen2Cost;
-    gen3CountDisplay.textContent = "lv" + gen3Count;
-    gen3CostDisplay.textContent = gen3Cost;
-    gen4CountDisplay.textContent = "lv" + gen4Count;
-    gen4CostDisplay.textContent = gen4Cost;
-    gen5CountDisplay.textContent = "lv" + gen5Count;
-    gen5CostDisplay.textContent = gen5Cost;
-    gen6CountDisplay.textContent = "lv" + gen6Count;
-    gen6CostDisplay.textContent = gen6Cost;
-    gen7CountDisplay.textContent = "lv" + gen7Count;
-    gen7CostDisplay.textContent = gen7Cost;
-    gen8CountDisplay.textContent = "lv" + gen8Count;
-    gen8CostDisplay.textContent = gen8Cost;
-    gen9CountDisplay.textContent = "lv" + gen9Count;
-    gen9CostDisplay.textContent = gen9Cost;
+    cashDisplay.textContent = cash; // Keep this
+
+    // Update button texts dynamically
+    buyGen1Button.innerHTML = "Buy Generator1<br>lv" + gen1Count + " | Cost: " + gen1Cost;
+    buyGen2Button.innerHTML = "Buy Generator2<br>lv" + gen2Count + " | Cost: " + gen2Cost;
+    buyGen3Button.innerHTML = "Buy Generator3<br>lv" + gen3Count + " | Cost: " + gen3Cost;
+    buyGen4Button.innerHTML = "Buy Generator4<br>lv" + gen4Count + " | Cost: " + gen4Cost;
+    buyGen5Button.innerHTML = "Buy Generator5<br>lv" + gen5Count + " | Cost: " + gen5Cost;
+    buyGen6Button.innerHTML = "Buy Generator6<br>lv" + gen6Count + " | Cost: " + gen6Cost;
+    buyGen7Button.innerHTML = "Buy Generator7<br>lv" + gen7Count + " | Cost: " + gen7Cost;
+    buyGen8Button.innerHTML = "Buy Generator8<br>lv" + gen8Count + " | Cost: " + gen8Cost;
+    buyGen9Button.innerHTML = "Buy Generator9<br>lv" + gen9Count + " | Cost: " + gen9Cost;
 }
 
 buyGen1Button.addEventListener('click', () => {
