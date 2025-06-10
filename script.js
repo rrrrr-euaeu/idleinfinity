@@ -2,23 +2,32 @@
 // Basic structure and initial values
 
 let cash = 10;
-let gen1Count = 0;
+let gen1TotalCount = 0;
+let gen1PurchasedCount = 0;
 let gen1Cost = 10;
-let gen2Count = 0;
+let gen2TotalCount = 0;
+let gen2PurchasedCount = 0;
 let gen2Cost = 100;
-let gen3Count = 0;
+let gen3TotalCount = 0;
+let gen3PurchasedCount = 0;
 let gen3Cost = 1000;
-let gen4Count = 0;
+let gen4TotalCount = 0;
+let gen4PurchasedCount = 0;
 let gen4Cost = 10000;
-let gen5Count = 0;
+let gen5TotalCount = 0;
+let gen5PurchasedCount = 0;
 let gen5Cost = 100000;
-let gen6Count = 0;
+let gen6TotalCount = 0;
+let gen6PurchasedCount = 0;
 let gen6Cost = 1000000;
-let gen7Count = 0;
+let gen7TotalCount = 0;
+let gen7PurchasedCount = 0;
 let gen7Cost = 10000000;
-let gen8Count = 0;
+let gen8TotalCount = 0;
+let gen8PurchasedCount = 0;
 let gen8Cost = 100000000;
-let gen9Count = 0;
+let gen9TotalCount = 0;
+let gen9PurchasedCount = 0;
 let gen9Cost = 1000000000;
 
 const cashDisplay = document.getElementById('cash');
@@ -75,46 +84,56 @@ function updateDisplay() {
     cashDisplay.textContent = cash; // Keep this
 
     gen1NameDisplay.textContent = "Generator1";
-    gen1LevelDisplay.textContent = "(lv" + gen1Count + ")";
+    let producedCount1 = gen1TotalCount - gen1PurchasedCount;
+    gen1LevelDisplay.textContent = "lv " + gen1PurchasedCount + " + " + producedCount1;
     buyGen1Button.innerHTML = "Buy<br>Cost: " + gen1Cost;
 
     gen2NameDisplay.textContent = "Generator2";
-    gen2LevelDisplay.textContent = "(lv" + gen2Count + ")";
+    let producedCount2 = gen2TotalCount - gen2PurchasedCount;
+    gen2LevelDisplay.textContent = "lv " + gen2PurchasedCount + " + " + producedCount2;
     buyGen2Button.innerHTML = "Buy<br>Cost: " + gen2Cost;
 
     gen3NameDisplay.textContent = "Generator3";
-    gen3LevelDisplay.textContent = "(lv" + gen3Count + ")";
+    let producedCount3 = gen3TotalCount - gen3PurchasedCount;
+    gen3LevelDisplay.textContent = "lv " + gen3PurchasedCount + " + " + producedCount3;
     buyGen3Button.innerHTML = "Buy<br>Cost: " + gen3Cost;
 
     gen4NameDisplay.textContent = "Generator4";
-    gen4LevelDisplay.textContent = "(lv" + gen4Count + ")";
+    let producedCount4 = gen4TotalCount - gen4PurchasedCount;
+    gen4LevelDisplay.textContent = "lv " + gen4PurchasedCount + " + " + producedCount4;
     buyGen4Button.innerHTML = "Buy<br>Cost: " + gen4Cost;
 
     gen5NameDisplay.textContent = "Generator5";
-    gen5LevelDisplay.textContent = "(lv" + gen5Count + ")";
+    let producedCount5 = gen5TotalCount - gen5PurchasedCount;
+    gen5LevelDisplay.textContent = "lv " + gen5PurchasedCount + " + " + producedCount5;
     buyGen5Button.innerHTML = "Buy<br>Cost: " + gen5Cost;
 
     gen6NameDisplay.textContent = "Generator6";
-    gen6LevelDisplay.textContent = "(lv" + gen6Count + ")";
+    let producedCount6 = gen6TotalCount - gen6PurchasedCount;
+    gen6LevelDisplay.textContent = "lv " + gen6PurchasedCount + " + " + producedCount6;
     buyGen6Button.innerHTML = "Buy<br>Cost: " + gen6Cost;
 
     gen7NameDisplay.textContent = "Generator7";
-    gen7LevelDisplay.textContent = "(lv" + gen7Count + ")";
+    let producedCount7 = gen7TotalCount - gen7PurchasedCount;
+    gen7LevelDisplay.textContent = "lv " + gen7PurchasedCount + " + " + producedCount7;
     buyGen7Button.innerHTML = "Buy<br>Cost: " + gen7Cost;
 
     gen8NameDisplay.textContent = "Generator8";
-    gen8LevelDisplay.textContent = "(lv" + gen8Count + ")";
+    let producedCount8 = gen8TotalCount - gen8PurchasedCount;
+    gen8LevelDisplay.textContent = "lv " + gen8PurchasedCount + " + " + producedCount8;
     buyGen8Button.innerHTML = "Buy<br>Cost: " + gen8Cost;
 
     gen9NameDisplay.textContent = "Generator9";
-    gen9LevelDisplay.textContent = "(lv" + gen9Count + ")";
+    let producedCount9 = gen9TotalCount - gen9PurchasedCount;
+    gen9LevelDisplay.textContent = "lv " + gen9PurchasedCount + " + " + producedCount9;
     buyGen9Button.innerHTML = "Buy<br>Cost: " + gen9Cost;
 }
 
 buyGen1Button.addEventListener('click', () => {
     if (cash >= gen1Cost) {
         cash -= gen1Cost;
-        gen1Count++;
+        gen1TotalCount++;
+        gen1PurchasedCount++;
         gen1Cost = Math.ceil(gen1Cost * 1.15); // Increase cost by 15%
         updateDisplay();
     }
@@ -123,7 +142,8 @@ buyGen1Button.addEventListener('click', () => {
 buyGen3Button.addEventListener('click', () => {
     if (cash >= gen3Cost) {
         cash -= gen3Cost;
-        gen3Count++;
+        gen3TotalCount++;
+        gen3PurchasedCount++;
         gen3Cost = Math.ceil(gen3Cost * 1.20); // Increase cost by 20%
         updateDisplay();
     }
@@ -132,7 +152,8 @@ buyGen3Button.addEventListener('click', () => {
 buyGen4Button.addEventListener('click', () => {
     if (cash >= gen4Cost) {
         cash -= gen4Cost;
-        gen4Count++;
+        gen4TotalCount++;
+        gen4PurchasedCount++;
         gen4Cost = Math.ceil(gen4Cost * 1.20); // Increase cost by 20%
         updateDisplay();
     }
@@ -141,7 +162,8 @@ buyGen4Button.addEventListener('click', () => {
 buyGen5Button.addEventListener('click', () => {
     if (cash >= gen5Cost) {
         cash -= gen5Cost;
-        gen5Count++;
+        gen5TotalCount++;
+        gen5PurchasedCount++;
         gen5Cost = Math.ceil(gen5Cost * 1.20); // Increase cost by 20%
         updateDisplay();
     }
@@ -150,7 +172,8 @@ buyGen5Button.addEventListener('click', () => {
 buyGen6Button.addEventListener('click', () => {
     if (cash >= gen6Cost) {
         cash -= gen6Cost;
-        gen6Count++;
+        gen6TotalCount++;
+        gen6PurchasedCount++;
         gen6Cost = Math.ceil(gen6Cost * 1.20); // Increase cost by 20%
         updateDisplay();
     }
@@ -159,7 +182,8 @@ buyGen6Button.addEventListener('click', () => {
 buyGen7Button.addEventListener('click', () => {
     if (cash >= gen7Cost) {
         cash -= gen7Cost;
-        gen7Count++;
+        gen7TotalCount++;
+        gen7PurchasedCount++;
         gen7Cost = Math.ceil(gen7Cost * 1.20); // Increase cost by 20%
         updateDisplay();
     }
@@ -168,7 +192,8 @@ buyGen7Button.addEventListener('click', () => {
 buyGen8Button.addEventListener('click', () => {
     if (cash >= gen8Cost) {
         cash -= gen8Cost;
-        gen8Count++;
+        gen8TotalCount++;
+        gen8PurchasedCount++;
         gen8Cost = Math.ceil(gen8Cost * 1.20); // Increase cost by 20%
         updateDisplay();
     }
@@ -177,7 +202,8 @@ buyGen8Button.addEventListener('click', () => {
 buyGen9Button.addEventListener('click', () => {
     if (cash >= gen9Cost) {
         cash -= gen9Cost;
-        gen9Count++;
+        gen9TotalCount++;
+        gen9PurchasedCount++;
         gen9Cost = Math.ceil(gen9Cost * 1.20); // Increase cost by 20%
         updateDisplay();
     }
@@ -186,7 +212,8 @@ buyGen9Button.addEventListener('click', () => {
 buyGen2Button.addEventListener('click', () => {
     if (cash >= gen2Cost) {
         cash -= gen2Cost;
-        gen2Count++;
+        gen2TotalCount++;
+        gen2PurchasedCount++;
         gen2Cost = Math.ceil(gen2Cost * 1.20); // Increase cost by 20%
         updateDisplay();
     }
@@ -194,15 +221,15 @@ buyGen2Button.addEventListener('click', () => {
 
 // Game loop - called every second
 setInterval(() => {
-    cash += gen1Count; // Gen1 produces 1 cash per second
-    gen1Count += gen2Count; // Gen2 produces 1 Gen1 per second
-    gen2Count += gen3Count; // Gen3 produces 1 Gen2 per second
-    gen3Count += gen4Count; // Gen4 produces 1 Gen3 per second
-    gen4Count += gen5Count; // Gen5 produces 1 Gen4 per second
-    gen5Count += gen6Count; // Gen6 produces 1 Gen5 per second
-    gen6Count += gen7Count; // Gen7 produces 1 Gen6 per second
-    gen7Count += gen8Count; // Gen8 produces 1 Gen7 per second
-    gen8Count += gen9Count; // Gen9 produces 1 Gen8 per second
+    cash += gen1TotalCount; // Gen1 produces 1 cash per second
+    gen1TotalCount += gen2TotalCount; // Gen2 produces 1 Gen1 per second
+    gen2TotalCount += gen3TotalCount; // Gen3 produces 1 Gen2 per second
+    gen3TotalCount += gen4TotalCount; // Gen4 produces 1 Gen3 per second
+    gen4TotalCount += gen5TotalCount; // Gen5 produces 1 Gen4 per second
+    gen5TotalCount += gen6TotalCount; // Gen6 produces 1 Gen5 per second
+    gen6TotalCount += gen7TotalCount; // Gen7 produces 1 Gen6 per second
+    gen7TotalCount += gen8TotalCount; // Gen8 produces 1 Gen7 per second
+    gen8TotalCount += gen9TotalCount; // Gen9 produces 1 Gen8 per second
 
     // Win condition (example: reach 1,000,000 cash)
     if (cash >= Math.pow(2, 32)) { // Updated win condition
