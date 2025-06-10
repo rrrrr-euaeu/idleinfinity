@@ -80,53 +80,174 @@ const buyGen8Button = document.getElementById('buy-gen8');
 const buyGen9Button = document.getElementById('buy-gen9');
 const winMessage = document.getElementById('win-message');
 
+function formatNumber(num) {
+    if (num === undefined || num === null) {
+        return '0'; // Or handle as an error/default
+    }
+    return num.toLocaleString('en-US');
+}
+
 function updateDisplay() {
-    cashDisplay.textContent = cash; // Keep this
+    cashDisplay.textContent = formatNumber(cash); // Keep this
+
+    // Generator 1 (always visible)
+    // Ensure buyGen1Button and its parent .generator-action-row exist before trying to set style
+    if (buyGen1Button && buyGen1Button.closest('.generator-action-row')) {
+        buyGen1Button.closest('.generator-action-row').style.display = 'flex';
+    }
+
+    // Generator 2 visibility
+    if (buyGen2Button && buyGen2Button.closest('.generator-action-row')) {
+        if (gen1TotalCount >= 5) {
+            buyGen2Button.closest('.generator-action-row').style.display = 'flex';
+        } else {
+            buyGen2Button.closest('.generator-action-row').style.display = 'none';
+        }
+    }
+
+    // Generator 3 visibility
+    if (buyGen3Button && buyGen3Button.closest('.generator-action-row')) {
+        if (gen2TotalCount >= 5) {
+            buyGen3Button.closest('.generator-action-row').style.display = 'flex';
+        } else {
+            buyGen3Button.closest('.generator-action-row').style.display = 'none';
+        }
+    }
+
+    // Generator 4 visibility
+    if (buyGen4Button && buyGen4Button.closest('.generator-action-row')) {
+        if (gen3TotalCount >= 5) {
+            buyGen4Button.closest('.generator-action-row').style.display = 'flex';
+        } else {
+            buyGen4Button.closest('.generator-action-row').style.display = 'none';
+        }
+    }
+
+    // Generator 5 visibility
+    if (buyGen5Button && buyGen5Button.closest('.generator-action-row')) {
+        if (gen4TotalCount >= 5) {
+            buyGen5Button.closest('.generator-action-row').style.display = 'flex';
+        } else {
+            buyGen5Button.closest('.generator-action-row').style.display = 'none';
+        }
+    }
+
+    // Generator 6 visibility
+    if (buyGen6Button && buyGen6Button.closest('.generator-action-row')) {
+        if (gen5TotalCount >= 5) {
+            buyGen6Button.closest('.generator-action-row').style.display = 'flex';
+        } else {
+            buyGen6Button.closest('.generator-action-row').style.display = 'none';
+        }
+    }
+
+    // Generator 7 visibility
+    if (buyGen7Button && buyGen7Button.closest('.generator-action-row')) {
+        if (gen6TotalCount >= 5) {
+            buyGen7Button.closest('.generator-action-row').style.display = 'flex';
+        } else {
+            buyGen7Button.closest('.generator-action-row').style.display = 'none';
+        }
+    }
+
+    // Generator 8 visibility
+    if (buyGen8Button && buyGen8Button.closest('.generator-action-row')) {
+        if (gen7TotalCount >= 5) {
+            buyGen8Button.closest('.generator-action-row').style.display = 'flex';
+        } else {
+            buyGen8Button.closest('.generator-action-row').style.display = 'none';
+        }
+    }
+
+    // Generator 9 visibility
+    if (buyGen9Button && buyGen9Button.closest('.generator-action-row')) {
+        if (gen8TotalCount >= 5) {
+            buyGen9Button.closest('.generator-action-row').style.display = 'flex';
+        } else {
+            buyGen9Button.closest('.generator-action-row').style.display = 'none';
+        }
+    }
 
     gen1NameDisplay.textContent = "Generator1";
     let producedCount1 = gen1TotalCount - gen1PurchasedCount;
-    gen1LevelDisplay.textContent = "lv " + gen1PurchasedCount + " + " + producedCount1;
-    buyGen1Button.innerHTML = "Buy<br>Cost: " + gen1Cost;
+    if (producedCount1 <= 0) {
+        gen1LevelDisplay.textContent = "lv " + gen1PurchasedCount;
+    } else {
+        gen1LevelDisplay.textContent = "lv " + gen1PurchasedCount + " + " + producedCount1;
+    }
+    buyGen1Button.innerHTML = "Buy<br>Cost: " + formatNumber(gen1Cost);
 
     gen2NameDisplay.textContent = "Generator2";
     let producedCount2 = gen2TotalCount - gen2PurchasedCount;
-    gen2LevelDisplay.textContent = "lv " + gen2PurchasedCount + " + " + producedCount2;
-    buyGen2Button.innerHTML = "Buy<br>Cost: " + gen2Cost;
+    if (producedCount2 <= 0) {
+        gen2LevelDisplay.textContent = "lv " + gen2PurchasedCount;
+    } else {
+        gen2LevelDisplay.textContent = "lv " + gen2PurchasedCount + " + " + producedCount2;
+    }
+    buyGen2Button.innerHTML = "Buy<br>Cost: " + formatNumber(gen2Cost);
 
     gen3NameDisplay.textContent = "Generator3";
     let producedCount3 = gen3TotalCount - gen3PurchasedCount;
-    gen3LevelDisplay.textContent = "lv " + gen3PurchasedCount + " + " + producedCount3;
-    buyGen3Button.innerHTML = "Buy<br>Cost: " + gen3Cost;
+    if (producedCount3 <= 0) {
+        gen3LevelDisplay.textContent = "lv " + gen3PurchasedCount;
+    } else {
+        gen3LevelDisplay.textContent = "lv " + gen3PurchasedCount + " + " + producedCount3;
+    }
+    buyGen3Button.innerHTML = "Buy<br>Cost: " + formatNumber(gen3Cost);
 
     gen4NameDisplay.textContent = "Generator4";
     let producedCount4 = gen4TotalCount - gen4PurchasedCount;
-    gen4LevelDisplay.textContent = "lv " + gen4PurchasedCount + " + " + producedCount4;
-    buyGen4Button.innerHTML = "Buy<br>Cost: " + gen4Cost;
+    if (producedCount4 <= 0) {
+        gen4LevelDisplay.textContent = "lv " + gen4PurchasedCount;
+    } else {
+        gen4LevelDisplay.textContent = "lv " + gen4PurchasedCount + " + " + producedCount4;
+    }
+    buyGen4Button.innerHTML = "Buy<br>Cost: " + formatNumber(gen4Cost);
 
     gen5NameDisplay.textContent = "Generator5";
     let producedCount5 = gen5TotalCount - gen5PurchasedCount;
-    gen5LevelDisplay.textContent = "lv " + gen5PurchasedCount + " + " + producedCount5;
-    buyGen5Button.innerHTML = "Buy<br>Cost: " + gen5Cost;
+    if (producedCount5 <= 0) {
+        gen5LevelDisplay.textContent = "lv " + gen5PurchasedCount;
+    } else {
+        gen5LevelDisplay.textContent = "lv " + gen5PurchasedCount + " + " + producedCount5;
+    }
+    buyGen5Button.innerHTML = "Buy<br>Cost: " + formatNumber(gen5Cost);
 
     gen6NameDisplay.textContent = "Generator6";
     let producedCount6 = gen6TotalCount - gen6PurchasedCount;
-    gen6LevelDisplay.textContent = "lv " + gen6PurchasedCount + " + " + producedCount6;
-    buyGen6Button.innerHTML = "Buy<br>Cost: " + gen6Cost;
+    if (producedCount6 <= 0) {
+        gen6LevelDisplay.textContent = "lv " + gen6PurchasedCount;
+    } else {
+        gen6LevelDisplay.textContent = "lv " + gen6PurchasedCount + " + " + producedCount6;
+    }
+    buyGen6Button.innerHTML = "Buy<br>Cost: " + formatNumber(gen6Cost);
 
     gen7NameDisplay.textContent = "Generator7";
     let producedCount7 = gen7TotalCount - gen7PurchasedCount;
-    gen7LevelDisplay.textContent = "lv " + gen7PurchasedCount + " + " + producedCount7;
-    buyGen7Button.innerHTML = "Buy<br>Cost: " + gen7Cost;
+    if (producedCount7 <= 0) {
+        gen7LevelDisplay.textContent = "lv " + gen7PurchasedCount;
+    } else {
+        gen7LevelDisplay.textContent = "lv " + gen7PurchasedCount + " + " + producedCount7;
+    }
+    buyGen7Button.innerHTML = "Buy<br>Cost: " + formatNumber(gen7Cost);
 
     gen8NameDisplay.textContent = "Generator8";
     let producedCount8 = gen8TotalCount - gen8PurchasedCount;
-    gen8LevelDisplay.textContent = "lv " + gen8PurchasedCount + " + " + producedCount8;
-    buyGen8Button.innerHTML = "Buy<br>Cost: " + gen8Cost;
+    if (producedCount8 <= 0) {
+        gen8LevelDisplay.textContent = "lv " + gen8PurchasedCount;
+    } else {
+        gen8LevelDisplay.textContent = "lv " + gen8PurchasedCount + " + " + producedCount8;
+    }
+    buyGen8Button.innerHTML = "Buy<br>Cost: " + formatNumber(gen8Cost);
 
     gen9NameDisplay.textContent = "Generator9";
     let producedCount9 = gen9TotalCount - gen9PurchasedCount;
-    gen9LevelDisplay.textContent = "lv " + gen9PurchasedCount + " + " + producedCount9;
-    buyGen9Button.innerHTML = "Buy<br>Cost: " + gen9Cost;
+    if (producedCount9 <= 0) {
+        gen9LevelDisplay.textContent = "lv " + gen9PurchasedCount;
+    } else {
+        gen9LevelDisplay.textContent = "lv " + gen9PurchasedCount + " + " + producedCount9;
+    }
+    buyGen9Button.innerHTML = "Buy<br>Cost: " + formatNumber(gen9Cost);
 }
 
 buyGen1Button.addEventListener('click', () => {
