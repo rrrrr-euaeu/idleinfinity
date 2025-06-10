@@ -10,12 +10,11 @@ body {
 
 #stats {
     margin-bottom: 20px;
-    padding: 15px; /* Adjusted padding */
+    padding: 15px;
     border: 1px solid #ccc;
     background-color: #fff;
     border-radius: 5px;
-    min-height: 40px; /* Added min-height */
-    /* max-height: 300px; and overflow-y: auto; removed */
+    min-height: 40px;
 }
 
 #stats p {
@@ -24,23 +23,51 @@ body {
 
 #actions {
     margin-bottom: 20px;
-    padding: 10px; /* Original padding, can be adjusted if actions div needs more/less */
+    padding: 10px;
     border: 1px solid #ccc;
     background-color: #fff;
     border-radius: 5px;
+    width: 400px; /* Give actions a defined width for flex items to work against */
+}
+
+.generator-action-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px; /* Adjusted padding */
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.generator-info {
+    flex-basis: 60%; /* Takes 60% of the row */
+    padding-right: 10px; /* Space between info and button */
+}
+
+.generator-name {
+    display: block;
+    font-weight: bold;
+}
+
+.generator-level {
+    display: block;
+    font-size: 0.9em;
+    color: #555;
 }
 
 button {
-    padding: 12px 15px; /* Adjusted padding for multi-line */
-    margin: 5px;
+    padding: 8px 10px; /* Adjusted padding for 2 lines */
+    margin: 0; /* Reset margin as spacing is handled by flex container and row margin */
     border: none;
     border-radius: 5px;
     background-color: #007bff;
     color: white;
     cursor: pointer;
-    height: auto; /* Added for multi-line text */
-    line-height: 1.4; /* Added for multi-line text */
-    text-align: left; /* Added for multi-line text */
+    height: auto;
+    line-height: 1.5; /* Adjusted line-height for two lines */
+    text-align: center; /* Center text within button */
+    flex-basis: 40%; /* Takes 40% of the row */
+    /* Removed text-align: left; from previous global button style */
 }
 
 button:hover {

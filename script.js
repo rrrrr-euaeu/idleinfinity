@@ -41,6 +41,25 @@ const gen8CostDisplay = document.getElementById('gen8-cost');
 const gen9CountDisplay = document.getElementById('gen9-count');
 const gen9CostDisplay = document.getElementById('gen9-cost');
 
+const gen1NameDisplay = document.getElementById('gen1-name-display');
+const gen1LevelDisplay = document.getElementById('gen1-level-display');
+const gen2NameDisplay = document.getElementById('gen2-name-display');
+const gen2LevelDisplay = document.getElementById('gen2-level-display');
+const gen3NameDisplay = document.getElementById('gen3-name-display');
+const gen3LevelDisplay = document.getElementById('gen3-level-display');
+const gen4NameDisplay = document.getElementById('gen4-name-display');
+const gen4LevelDisplay = document.getElementById('gen4-level-display');
+const gen5NameDisplay = document.getElementById('gen5-name-display');
+const gen5LevelDisplay = document.getElementById('gen5-level-display');
+const gen6NameDisplay = document.getElementById('gen6-name-display');
+const gen6LevelDisplay = document.getElementById('gen6-level-display');
+const gen7NameDisplay = document.getElementById('gen7-name-display');
+const gen7LevelDisplay = document.getElementById('gen7-level-display');
+const gen8NameDisplay = document.getElementById('gen8-name-display');
+const gen8LevelDisplay = document.getElementById('gen8-level-display');
+const gen9NameDisplay = document.getElementById('gen9-name-display');
+const gen9LevelDisplay = document.getElementById('gen9-level-display');
+
 const buyGen1Button = document.getElementById('buy-gen1');
 const buyGen2Button = document.getElementById('buy-gen2');
 const buyGen3Button = document.getElementById('buy-gen3');
@@ -55,16 +74,41 @@ const winMessage = document.getElementById('win-message');
 function updateDisplay() {
     cashDisplay.textContent = cash; // Keep this
 
-    // Update button texts dynamically
-    buyGen1Button.innerHTML = "Buy Generator1<br>lv" + gen1Count + " | Cost: " + gen1Cost;
-    buyGen2Button.innerHTML = "Buy Generator2<br>lv" + gen2Count + " | Cost: " + gen2Cost;
-    buyGen3Button.innerHTML = "Buy Generator3<br>lv" + gen3Count + " | Cost: " + gen3Cost;
-    buyGen4Button.innerHTML = "Buy Generator4<br>lv" + gen4Count + " | Cost: " + gen4Cost;
-    buyGen5Button.innerHTML = "Buy Generator5<br>lv" + gen5Count + " | Cost: " + gen5Cost;
-    buyGen6Button.innerHTML = "Buy Generator6<br>lv" + gen6Count + " | Cost: " + gen6Cost;
-    buyGen7Button.innerHTML = "Buy Generator7<br>lv" + gen7Count + " | Cost: " + gen7Cost;
-    buyGen8Button.innerHTML = "Buy Generator8<br>lv" + gen8Count + " | Cost: " + gen8Cost;
-    buyGen9Button.innerHTML = "Buy Generator9<br>lv" + gen9Count + " | Cost: " + gen9Cost;
+    gen1NameDisplay.textContent = "Generator1";
+    gen1LevelDisplay.textContent = "(lv" + gen1Count + ")";
+    buyGen1Button.innerHTML = "Buy<br>Cost: " + gen1Cost;
+
+    gen2NameDisplay.textContent = "Generator2";
+    gen2LevelDisplay.textContent = "(lv" + gen2Count + ")";
+    buyGen2Button.innerHTML = "Buy<br>Cost: " + gen2Cost;
+
+    gen3NameDisplay.textContent = "Generator3";
+    gen3LevelDisplay.textContent = "(lv" + gen3Count + ")";
+    buyGen3Button.innerHTML = "Buy<br>Cost: " + gen3Cost;
+
+    gen4NameDisplay.textContent = "Generator4";
+    gen4LevelDisplay.textContent = "(lv" + gen4Count + ")";
+    buyGen4Button.innerHTML = "Buy<br>Cost: " + gen4Cost;
+
+    gen5NameDisplay.textContent = "Generator5";
+    gen5LevelDisplay.textContent = "(lv" + gen5Count + ")";
+    buyGen5Button.innerHTML = "Buy<br>Cost: " + gen5Cost;
+
+    gen6NameDisplay.textContent = "Generator6";
+    gen6LevelDisplay.textContent = "(lv" + gen6Count + ")";
+    buyGen6Button.innerHTML = "Buy<br>Cost: " + gen6Cost;
+
+    gen7NameDisplay.textContent = "Generator7";
+    gen7LevelDisplay.textContent = "(lv" + gen7Count + ")";
+    buyGen7Button.innerHTML = "Buy<br>Cost: " + gen7Cost;
+
+    gen8NameDisplay.textContent = "Generator8";
+    gen8LevelDisplay.textContent = "(lv" + gen8Count + ")";
+    buyGen8Button.innerHTML = "Buy<br>Cost: " + gen8Cost;
+
+    gen9NameDisplay.textContent = "Generator9";
+    gen9LevelDisplay.textContent = "(lv" + gen9Count + ")";
+    buyGen9Button.innerHTML = "Buy<br>Cost: " + gen9Cost;
 }
 
 buyGen1Button.addEventListener('click', () => {

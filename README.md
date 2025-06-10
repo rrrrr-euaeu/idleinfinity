@@ -1,7 +1,5 @@
 # idleinfinity
 
-このゲームはgoogleのjulesを用いて作成されました。[github pages](https://rrrrr-euaeu.github.io/idleinfinity/)で遊ぶことができます。
-
 ## ゲームの遊び方
 
 このゲームは、放置系（アイドル）ゲームです。目標は、手持ちのキャッシュを **2^32 (約42.9億)** まで増やすことです。
