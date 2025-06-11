@@ -186,8 +186,13 @@ function updateDisplay() {
     const costIncreaseRate1 = 1.15;
     if (selectedBuyAmount === 'MAX') {
         const maxInfo = calculateMaxBuyableAmount(cash, gen1Cost, costIncreaseRate1);
-        displayAmount1 = maxInfo.count;
-        currentTotalCost1 = maxInfo.totalCost;
+        if (maxInfo.count === 0) {
+            displayAmount1 = 1;
+            currentTotalCost1 = gen1Cost;
+        } else {
+            displayAmount1 = maxInfo.count;
+            currentTotalCost1 = maxInfo.totalCost;
+        }
     } else {
         displayAmount1 = selectedBuyAmount;
         const costInfo = calculateTotalCostForAmount(gen1Cost, displayAmount1, costIncreaseRate1);
@@ -207,8 +212,13 @@ function updateDisplay() {
     const costIncreaseRate2 = 1.20;
     if (selectedBuyAmount === 'MAX') {
         const maxInfo = calculateMaxBuyableAmount(cash, gen2Cost, costIncreaseRate2);
-        displayAmount2 = maxInfo.count;
-        currentTotalCost2 = maxInfo.totalCost;
+        if (maxInfo.count === 0) {
+            displayAmount2 = 1;
+            currentTotalCost2 = gen2Cost;
+        } else {
+            displayAmount2 = maxInfo.count;
+            currentTotalCost2 = maxInfo.totalCost;
+        }
     } else {
         displayAmount2 = selectedBuyAmount;
         const costInfo = calculateTotalCostForAmount(gen2Cost, displayAmount2, costIncreaseRate2);
@@ -228,8 +238,13 @@ function updateDisplay() {
     const costIncreaseRate3 = 1.20;
     if (selectedBuyAmount === 'MAX') {
         const maxInfo = calculateMaxBuyableAmount(cash, gen3Cost, costIncreaseRate3);
-        displayAmount3 = maxInfo.count;
-        currentTotalCost3 = maxInfo.totalCost;
+        if (maxInfo.count === 0) {
+            displayAmount3 = 1;
+            currentTotalCost3 = gen3Cost;
+        } else {
+            displayAmount3 = maxInfo.count;
+            currentTotalCost3 = maxInfo.totalCost;
+        }
     } else {
         displayAmount3 = selectedBuyAmount;
         const costInfo = calculateTotalCostForAmount(gen3Cost, displayAmount3, costIncreaseRate3);
@@ -249,8 +264,13 @@ function updateDisplay() {
     const costIncreaseRate4 = 1.20;
     if (selectedBuyAmount === 'MAX') {
         const maxInfo = calculateMaxBuyableAmount(cash, gen4Cost, costIncreaseRate4);
-        displayAmount4 = maxInfo.count;
-        currentTotalCost4 = maxInfo.totalCost;
+        if (maxInfo.count === 0) {
+            displayAmount4 = 1;
+            currentTotalCost4 = gen4Cost;
+        } else {
+            displayAmount4 = maxInfo.count;
+            currentTotalCost4 = maxInfo.totalCost;
+        }
     } else {
         displayAmount4 = selectedBuyAmount;
         const costInfo = calculateTotalCostForAmount(gen4Cost, displayAmount4, costIncreaseRate4);
@@ -270,8 +290,13 @@ function updateDisplay() {
     const costIncreaseRate5 = 1.20;
     if (selectedBuyAmount === 'MAX') {
         const maxInfo = calculateMaxBuyableAmount(cash, gen5Cost, costIncreaseRate5);
-        displayAmount5 = maxInfo.count;
-        currentTotalCost5 = maxInfo.totalCost;
+        if (maxInfo.count === 0) {
+            displayAmount5 = 1;
+            currentTotalCost5 = gen5Cost;
+        } else {
+            displayAmount5 = maxInfo.count;
+            currentTotalCost5 = maxInfo.totalCost;
+        }
     } else {
         displayAmount5 = selectedBuyAmount;
         const costInfo = calculateTotalCostForAmount(gen5Cost, displayAmount5, costIncreaseRate5);
@@ -291,8 +316,13 @@ function updateDisplay() {
     const costIncreaseRate6 = 1.20;
     if (selectedBuyAmount === 'MAX') {
         const maxInfo = calculateMaxBuyableAmount(cash, gen6Cost, costIncreaseRate6);
-        displayAmount6 = maxInfo.count;
-        currentTotalCost6 = maxInfo.totalCost;
+        if (maxInfo.count === 0) {
+            displayAmount6 = 1;
+            currentTotalCost6 = gen6Cost;
+        } else {
+            displayAmount6 = maxInfo.count;
+            currentTotalCost6 = maxInfo.totalCost;
+        }
     } else {
         displayAmount6 = selectedBuyAmount;
         const costInfo = calculateTotalCostForAmount(gen6Cost, displayAmount6, costIncreaseRate6);
@@ -312,8 +342,13 @@ function updateDisplay() {
     const costIncreaseRate7 = 1.20;
     if (selectedBuyAmount === 'MAX') {
         const maxInfo = calculateMaxBuyableAmount(cash, gen7Cost, costIncreaseRate7);
-        displayAmount7 = maxInfo.count;
-        currentTotalCost7 = maxInfo.totalCost;
+        if (maxInfo.count === 0) {
+            displayAmount7 = 1;
+            currentTotalCost7 = gen7Cost;
+        } else {
+            displayAmount7 = maxInfo.count;
+            currentTotalCost7 = maxInfo.totalCost;
+        }
     } else {
         displayAmount7 = selectedBuyAmount;
         const costInfo = calculateTotalCostForAmount(gen7Cost, displayAmount7, costIncreaseRate7);
@@ -333,8 +368,13 @@ function updateDisplay() {
     const costIncreaseRate8 = 1.20;
     if (selectedBuyAmount === 'MAX') {
         const maxInfo = calculateMaxBuyableAmount(cash, gen8Cost, costIncreaseRate8);
-        displayAmount8 = maxInfo.count;
-        currentTotalCost8 = maxInfo.totalCost;
+        if (maxInfo.count === 0) {
+            displayAmount8 = 1;
+            currentTotalCost8 = gen8Cost;
+        } else {
+            displayAmount8 = maxInfo.count;
+            currentTotalCost8 = maxInfo.totalCost;
+        }
     } else {
         displayAmount8 = selectedBuyAmount;
         const costInfo = calculateTotalCostForAmount(gen8Cost, displayAmount8, costIncreaseRate8);
@@ -354,8 +394,13 @@ function updateDisplay() {
     const costIncreaseRate9 = 1.20;
     if (selectedBuyAmount === 'MAX') {
         const maxInfo = calculateMaxBuyableAmount(cash, gen9Cost, costIncreaseRate9);
-        displayAmount9 = maxInfo.count;
-        currentTotalCost9 = maxInfo.totalCost;
+        if (maxInfo.count === 0) {
+            displayAmount9 = 1;
+            currentTotalCost9 = gen9Cost;
+        } else {
+            displayAmount9 = maxInfo.count;
+            currentTotalCost9 = maxInfo.totalCost;
+        }
     } else {
         displayAmount9 = selectedBuyAmount;
         const costInfo = calculateTotalCostForAmount(gen9Cost, displayAmount9, costIncreaseRate9);
