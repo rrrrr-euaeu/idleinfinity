@@ -38,18 +38,52 @@ body {
     margin-right: 10px;
     font-weight: bold;
 }
-#buy-amount-selector label {
-    margin: 0 5px; /* Spacing between radio options */
-    cursor: pointer;
-    display: inline-flex; /* Align radio and text */
-    align-items: center;
-}
+
+/* Hide actual radio buttons */
 #buy-amount-selector input[type="radio"] {
-    margin-right: 3px;
+    appearance: none; /* Remove default appearance */
+    -webkit-appearance: none; /* For Safari/Chrome */
+    -moz-appearance: none; /* For Firefox */
+    position: absolute;
+    left: -9999px; /* Move off-screen */
+    /* margin-right: 3px; No longer needed as input is hidden */
 }
+
+/* Style labels to look like buttons */
+#buy-amount-selector label {
+    margin: 0 3px; /* Reduced margin slightly for tighter button group */
+    padding: 8px 12px; /* Button-like padding */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f9fa; /* Default button background */
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    display: inline-block; /* was inline-flex, changed for simplicity as radio is hidden */
+    /* align-items: center; Not needed if radio is hidden and text is centered or simple */
+    font-size: 0.9em; /* Slightly smaller font for these buttons */
+    color: #333; /* Default text color */
+}
+
 /* Style for the last radio button label to add some padding on the right */
+/* This might need adjustment if the first/last labels are styled differently due to hidden input */
+#buy-amount-selector label[for="buy1"] {
+    margin-left: 5px; /* Ensure some space from the "Buy Amount:" text */
+}
 #buy-amount-selector label[for="buyMAX"] {
     margin-right: 15px;
+}
+
+/* Hover style for labels */
+#buy-amount-selector label:hover {
+    background-color: #e9ecef; /* Slightly darker on hover */
+    border-color: #bbb;
+}
+
+/* Style for selected (checked) labels */
+#buy-amount-selector input[type="radio"]:checked + label {
+    background-color: #007bff; /* Active/selected background (e.g., blue) */
+    color: white; /* Text color for selected state */
+    border-color: #0056b3; /* Border color for selected state */
 }
 
 
