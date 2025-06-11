@@ -21,6 +21,38 @@ body {
     margin: 8px 0;
 }
 
+#buy-amount-selector {
+    display: flex;
+    justify-content: center; /* Center the radio buttons */
+    align-items: center;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    background-color: #e9e9e9; /* Light grey background for the selector bar */
+    border-radius: 5px;
+    width: fit-content; /* Adjust width to content */
+    margin-left: auto;
+    margin-right: auto;
+}
+#buy-amount-selector span {
+    margin-left: 15px; /* Added padding for the label */
+    margin-right: 10px;
+    font-weight: bold;
+}
+#buy-amount-selector label {
+    margin: 0 5px; /* Spacing between radio options */
+    cursor: pointer;
+    display: inline-flex; /* Align radio and text */
+    align-items: center;
+}
+#buy-amount-selector input[type="radio"] {
+    margin-right: 3px;
+}
+/* Style for the last radio button label to add some padding on the right */
+#buy-amount-selector label[for="buyMAX"] {
+    margin-right: 15px;
+}
+
+
 #actions {
     /* Removed width: 400px; */
     /* Removed border, background-color, border-radius as these are now on rows or not needed for container */
@@ -67,17 +99,27 @@ button {
     margin: 0;
     border: none;
     border-radius: 5px;
-    background-color: #007bff;
+    /* background-color: #007bff; Default active color moved to .can-buy */
     color: white;
     cursor: pointer;
     height: auto;
     line-height: 1.5;
     text-align: center;
     flex-basis: 40%;
+    background-color: #cccccc; /* Default "disabled" background */
+    opacity: 0.7; /* Further indicate disabled state */
+    transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out; /* Smooth transition */
 }
 
-button:hover {
-    background-color: #0056b3;
+/* Removed general button:hover, hover effect now specific to .can-buy */
+
+button.can-buy {
+    background-color: #007bff; /* "Enabled" background */
+    opacity: 1; /* Full opacity for enabled state */
+}
+
+button.can-buy:hover {
+    background-color: #0056b3; /* Hover effect only for enabled buttons */
 }
 
 #win-message {
