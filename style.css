@@ -43,6 +43,7 @@ body {
     margin: 10px; /* Spacing around each item */
     background-color: #fff; /* Give rows their own background */
     box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Optional: add some depth */
+    visibility: hidden; /* Initially hidden, made visible by JS */
 }
 
 .generator-info {
