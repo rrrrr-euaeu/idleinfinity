@@ -167,7 +167,7 @@ body {
     top: 0;
     right: 0;
     height: 100vh;
-    width: 300px;
+    width: 480px; /* Changed from 300px */
     max-width: 80vw;
     background-color: #f0f0f0;
     padding: 20px;
