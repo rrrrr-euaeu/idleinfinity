@@ -15,10 +15,25 @@ body {
     background-color: #fff;
     border-radius: 5px;
     min-height: 40px;
+    width: 100%; /* Make stats bar take more width */
+    max-width: 600px; /* But not too wide */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 #stats p {
     margin: 8px 0;
+    text-align: center; /* Explicitly center the paragraph content */
+}
+
+#cash {
+    font-weight: bold;
+    color: #2c3e50; /* Example: Dark blue/grey for cash */
+}
+
+#prestige-points-display {
+    font-weight: bold;
+    color: #e67e22; /* Example: Carrot color */
+    margin-left: 10px; /* Space after the pipe separator */
 }
 
 #buy-amount-selector {
@@ -94,17 +109,50 @@ body {
     background-color: #007bff;
     color: white;
     border-color: #0056b3; /* This will apply to left, top, bottom. Right border is handled by general/last rule */
-    /* If the selected item is also the last item, its right border should also reflect selection */
 }
 /* Specific fix for selected last item's right border */
 #buy-amount-selector input[type="radio"]#buyMAX:checked + label[for="buyMAX"] {
     border-right-color: #0056b3;
 }
-/* If a selected item is not the last, and it's hovered, ensure its right border (which is 0 width) doesn't cause visual glitch for next item's left border */
+/* If a selected item is not the last, ensure its right border (which is 0 width) doesn't cause visual glitch for next item's left border */
 #buy-amount-selector input[type="radio"]:checked + label:not([for="buyMAX"]) {
     border-right-width: 0; /* Explicitly keep it 0 */
 }
 
+#reset-container {
+    height: 0; /* Initially hidden, JS will set height to show */
+    overflow: hidden;
+    transition: height 0.5s ease-in-out;
+    text-align: center; /* Center its content (message and button) */
+    padding: 0px 20px; /* Padding when open, 0px top/bottom for when height is 0 */
+    margin-top: 15px; /* Space below stats */
+    margin-bottom: 15px; /* Space above actions */
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 600px; /* Match stats bar width */
+}
+
+#milestone-message h2 {
+    color: #27ae60; /* Example: Green color for success */
+    font-size: 1.8em;
+    margin-top: 10px; /* Adjusted for padding in container */
+    margin-bottom: 15px; /* Spacing to button */
+}
+
+#reset-button {
+    padding: 12px 25px;
+    font-size: 1.1em;
+    color: white;
+    background-color: #c0392b; /* Example: Red color for reset */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    margin-bottom: 10px; /* Spacing if container padding is not enough */
+}
+#reset-button:hover {
+    background-color: #a93226; /* Darker red on hover */
+}
 
 
 #actions {
@@ -145,7 +193,7 @@ body {
     color: #555;
 }
 
-button {
+button { /* This is the general rule for generator buy buttons */
     padding: 8px 10px;
     margin: 0;
     border: none;
@@ -170,7 +218,7 @@ button.can-buy:hover {
     background-color: #0056b3;
 }
 
-#win-message {
+#win-message { /* This ID is no longer used, milestone-message is */
     color: green;
     font-weight: bold;
 }

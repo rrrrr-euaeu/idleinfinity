@@ -19,7 +19,14 @@
     </div>
 
     <div id="stats">
-        <p>Cash: <span id="cash">0</span></p>
+        <p>Cash: <span id="cash">0</span> | Prestige Points: <span id="prestige-points-display">0</span></p>
+    </div>
+
+    <div id="reset-container">
+        <div id="milestone-message" style="display:block;"> <!-- display:block for initial visibility if JS controls height -->
+            <h2></h2> <!-- Content will be set by JS -->
+        </div>
+        <button id="reset-button">Reset for Prestige</button> <!-- Example button text -->
     </div>
 
     <div id="actions">
@@ -88,9 +95,7 @@
         </div>
     </div>
 
-    <div id="win-message" style="display:none;">
-        <h2>Congratulations! You've reached infinity!</h2>
-    </div>
+    <!-- Note: The original #win-message div is now #milestone-message and moved. -->
 
     <script src="script.js"></script>
 </body>

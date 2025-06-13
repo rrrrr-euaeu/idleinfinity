@@ -1,6 +1,9 @@
 // Game logic for Idle Infinity Game will go here.
 // Basic structure and initial values
 
+const FIRST_GOAL_CASH = 2147483647; // Math.pow(2, 31) - 1
+let prestigePoints = 0;
+let gameHasReachedFirstGoal = false; // Flag to manage goal state
 let selectedBuyAmount = 1; // Default buy amount
 let cash = 10;
 let gen1TotalCount = 0;
@@ -81,6 +84,10 @@ const buyGen8Button = document.getElementById('buy-gen8');
 const buyGen9Button = document.getElementById('buy-gen9');
 const winMessage = document.getElementById('win-message');
 const buyAmountRadios = document.querySelectorAll('input[name="buyAmount"]');
+const prestigePointsDisplay = document.getElementById('prestige-points-display');
+const resetContainer = document.getElementById('reset-container');
+const milestoneMessage = document.getElementById('milestone-message'); // This was #win-message
+const resetButton = document.getElementById('reset-button');
 
 buyAmountRadios.forEach(radio => {
     radio.addEventListener('change', () => {
@@ -92,6 +99,68 @@ buyAmountRadios.forEach(radio => {
         updateDisplay(); // Call updateDisplay to refresh UI based on new selection
     });
 });
+
+if (resetButton) { // Check if resetButton was successfully found
+    resetButton.addEventListener('click', () => {
+        // 1. Increment prestige points
+        prestigePoints++;
+
+        // 2. Reset game progress variables
+        cash = 10; // Initial cash
+
+        // Reset generator counts and costs
+        gen1TotalCount = 0;
+        gen1PurchasedCount = 0;
+        gen1Cost = 10; // Initial cost for Gen1
+
+        gen2TotalCount = 0;
+        gen2PurchasedCount = 0;
+        gen2Cost = 100; // Initial cost for Gen2
+
+        gen3TotalCount = 0;
+        gen3PurchasedCount = 0;
+        gen3Cost = 1000;
+
+        gen4TotalCount = 0;
+        gen4PurchasedCount = 0;
+        gen4Cost = 10000;
+
+        gen5TotalCount = 0;
+        gen5PurchasedCount = 0;
+        gen5Cost = 100000;
+
+        gen6TotalCount = 0;
+        gen6PurchasedCount = 0;
+        gen6Cost = 1000000;
+
+        gen7TotalCount = 0;
+        gen7PurchasedCount = 0;
+        gen7Cost = 10000000;
+
+        gen8TotalCount = 0;
+        gen8PurchasedCount = 0;
+        gen8Cost = 100000000;
+
+        gen9TotalCount = 0;
+        gen9PurchasedCount = 0;
+        gen9Cost = 1000000000;
+
+        // Reset buy amount selector
+        selectedBuyAmount = 1;
+        if (document.getElementById('buy1')) { // Ensure radio button exists
+            document.getElementById('buy1').checked = true;
+        }
+
+        // 3. Reset UI states related to goal achievement
+        if (resetContainer) {
+            resetContainer.style.height = '0px'; // Hide reset container
+        }
+        gameHasReachedFirstGoal = false; // Reset goal flag
+
+        // 4. Update the display
+        updateDisplay();
+    });
+}
 
 function formatNumber(num) {
     if (num === undefined || num === null) {
@@ -138,6 +207,9 @@ function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncrea
 
 function updateDisplay() {
     cashDisplay.textContent = formatNumber(cash); // Keep this
+    if (prestigePointsDisplay) { // Check if the element exists
+        prestigePointsDisplay.textContent = formatNumber(prestigePoints);
+    }
 
     // --- Visibility Logic (from previous step, unchanged) ---
     if (buyGen1Button && buyGen1Button.closest('.generator-action-row')) {
@@ -694,10 +766,25 @@ setInterval(() => {
     gen7TotalCount += gen8TotalCount; // Gen8 produces 1 Gen7 per second
     gen8TotalCount += gen9TotalCount; // Gen9 produces 1 Gen8 per second
 
-    // Win condition (example: reach 1,000,000 cash)
-    if (cash >= Math.pow(2, 32)) { // Updated win condition
-        winMessage.style.display = 'block';
-        // Potentially disable buttons or stop game updates here
+    // First Goal Achievement Check
+    if (!gameHasReachedFirstGoal && cash >= FIRST_GOAL_CASH) {
+        if (milestoneMessage && milestoneMessage.querySelector('h2')) {
+            milestoneMessage.querySelector('h2').textContent = '第1臨界点 達成！ Prestige Point獲得のチャンス！';
+        }
+        if (resetContainer) {
+            // To make the height transition work, the container needs to be block/flex etc.
+            // It's currently height:0, overflow:hidden.
+            // Setting a specific target height or using scrollHeight.
+            // Let's try a fixed estimated height first for simplicity, can be refined.
+            // Estimate based on h2 font size (1.8em ~30px) + button padding/size (~50px) + margins.
+            // Say, roughly 120px to 150px. Let's use 130px as an example.
+            // A more robust way is to temporarily set height to auto, get scrollHeight, then set to that.
+            // For this subtask, let's use a fixed height:
+            resetContainer.style.height = '130px'; // Example height, adjust based on actual content
+        }
+        gameHasReachedFirstGoal = true;
+        // Optional: Code to disable further generator purchases could go here
+        // For example, by adding a class to all buy buttons or setting a global flag.
     }
 
     updateDisplay();
