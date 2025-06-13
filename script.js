@@ -173,7 +173,7 @@ const resetButton = document.getElementById('reset-button');
 const prestigeInfoContainer = document.getElementById('prestige-info-container');
 const optionsButton = document.getElementById('options-button');
 const optionsPanel = document.getElementById('options-panel');
-const closeOptionsButton = document.getElementById('close-options-button');
+// const closeOptionsButton = document.getElementById('close-options-button'); // Removed
 const numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
 
 generatorsData.forEach(gen => {
@@ -227,19 +227,19 @@ if (resetButton) { // Check if resetButton was successfully found
     });
 }
 
-// Listener for the main "Options" button to toggle the panel
+// Listener for the main "Options" button to toggle the panel and change icon
 if (optionsButton && optionsPanel) {
     optionsButton.addEventListener('click', () => {
         optionsPanel.classList.toggle('open');
+        if (optionsPanel.classList.contains('open')) {
+            optionsButton.textContent = '✖️'; // Or '✕', '✖'
+        } else {
+            optionsButton.textContent = '⚙️';
+        }
     });
 }
 
-// Listener for the "Close" button inside the options panel
-if (closeOptionsButton && optionsPanel) {
-    closeOptionsButton.addEventListener('click', () => {
-        optionsPanel.classList.remove('open');
-    });
-}
+// Listener for the "Close" button inside the options panel - REMOVED
 
 // Listeners for number format radio buttons
 if (numberFormatRadios) {

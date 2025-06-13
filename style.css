@@ -141,13 +141,22 @@ body {
     position: fixed;
     top: 10px;
     right: 10px;
-    padding: 8px 15px;
-    background-color: #555; /* Darker button for options */
+    background-color: #555;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    z-index: 1001; /* Ensure it's above other content if panel is modal */
+    z-index: 1001;
+
+    padding: 0; /* Changed */
+    font-size: 1.8em; /* Adjusted for icon */
+    width: 44px; /* Fixed size */
+    height: 44px; /* Fixed size */
+    line-height: 1; /* Alignment helper */
+    display: flex; /* For centering content */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    text-decoration: none; /* Remove underline if any */
 }
 #options-button:hover {
     background-color: #333;
@@ -155,26 +164,30 @@ body {
 
 #options-panel {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.95); /* Initial state for animation */
-    width: 90%;
-    max-width: 400px;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 300px;
+    max-width: 80vw;
     background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     padding: 20px;
     z-index: 1000;
-    opacity: 0; /* Initial state for animation */
-    pointer-events: none; /* Initial state for animation */
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-    display: block; /* Keep it block, control visibility with opacity/pointer-events + JS class */
+    display: block;
+    box-sizing: border-box;
+    overflow-y: auto;
+
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+
+    border: none;
+    border-left: 1px solid #ccc;
+    border-radius: 0;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    box-shadow: -3px 0 8px rgba(0,0,0,0.15);
 }
-#options-panel.open { /* Class to be added by JS to show the panel */
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-    pointer-events: auto;
+#options-panel.open {
+    transform: translateX(0%);
 }
 #options-panel h2 {
     text-align: center;
@@ -187,13 +200,13 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 20px; /* Space before close button */
+    margin-bottom: 20px;
 }
-#number-format-selector span { /* The "Number Format:" text */
+#number-format-selector span {
     margin-right: 10px;
     font-weight: bold;
 }
-#number-format-selector input[type="radio"] { /* Hidden */
+#number-format-selector input[type="radio"] {
     appearance: none; -webkit-appearance: none; -moz-appearance: none;
     position: absolute; left: -9999px;
 }
@@ -214,16 +227,16 @@ body {
     background-color: #e9ecef;
     border-color: #bbb;
 }
-#number-format-selector label[for="formatStandard"] { /* First label */
+#number-format-selector label[for="formatStandard"] {
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
 }
-#number-format-selector label[for="formatScientific"] { /* Last label */
+#number-format-selector label[for="formatScientific"] {
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
     border-right-width: 1px;
 }
-#number-format-selector label[for="formatScientific"]:hover { /* Last label hover border */
+#number-format-selector label[for="formatScientific"]:hover {
      border-right-color: #bbb;
 }
 #number-format-selector input[type="radio"]:checked + label {
@@ -238,17 +251,17 @@ body {
     border-right-width: 0;
 }
 
-#close-options-button {
+#close-options-button { /* This button was removed from HTML, rule can be removed later */
     display: block;
     padding: 10px 20px;
-    background-color: #6c757d; /* Grey color */
+    background-color: #6c757d;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin: 20px auto 0 auto; /* Center it if block */
+    margin: 20px auto 0 auto;
 }
-#close-options-button:hover {
+#close-options-button:hover { /* This button was removed from HTML, rule can be removed later */
     background-color: #5a6268;
 }
 
