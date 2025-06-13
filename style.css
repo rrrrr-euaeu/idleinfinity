@@ -106,17 +106,17 @@ body {
 
 /* Style for selected (checked) labels */
 #buy-amount-selector input[type="radio"]:checked + label {
-    background-color: #007bff !important;
-    color: white !important;
-    border-color: #0056b3 !important;
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
 }
 /* Specific fix for selected last item's right border */
 #buy-amount-selector input[type="radio"]#buyMAX:checked + label[for="buyMAX"] {
-    border-right-color: #0056b3; /* This will inherit !important if #0056b3 !important is on border-color above, or can be added here if needed */
+    border-right-color: #0056b3;
 }
 /* If a selected item is not the last, ensure its right border (which is 0 width) doesn't cause visual glitch for next item's left border */
 #buy-amount-selector input[type="radio"]:checked + label:not([for="buyMAX"]) {
-    border-right-width: 0; /* Explicitly keep it 0. May need !important if border-color !important above tries to show it */
+    border-right-width: 0;
 }
 
 #reset-container {
