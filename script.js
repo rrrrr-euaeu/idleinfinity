@@ -7,6 +7,7 @@ const INITIAL_CASH = 10;
 const MAX_BUY_SAFETY_LIMIT = 10000;
 let prestigePoints = 0;
 let gameHasReachedFirstGoal = false; // Flag to manage goal state
+let selectedNumberFormat = 'standard'; // Default number format
 
 const generatorsData = [
     {
@@ -170,6 +171,10 @@ const resetContainer = document.getElementById('reset-container');
 const milestoneMessage = document.getElementById('milestone-message'); // This was #win-message
 const resetButton = document.getElementById('reset-button');
 const prestigeInfoContainer = document.getElementById('prestige-info-container');
+const optionsButton = document.getElementById('options-button');
+const optionsPanel = document.getElementById('options-panel');
+const closeOptionsButton = document.getElementById('close-options-button');
+const numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
 
 generatorsData.forEach(gen => {
     gen.nameDisplayElement = document.getElementById(gen.nameDisplayId);
@@ -222,11 +227,110 @@ if (resetButton) { // Check if resetButton was successfully found
     });
 }
 
-function formatNumber(num) {
-    if (num === undefined || num === null) {
-        return '0'; // Or handle as an error/default
+// Listener for the main "Options" button to toggle the panel
+if (optionsButton && optionsPanel) {
+    optionsButton.addEventListener('click', () => {
+        optionsPanel.classList.toggle('open');
+    });
+}
+
+// Listener for the "Close" button inside the options panel
+if (closeOptionsButton && optionsPanel) {
+    closeOptionsButton.addEventListener('click', () => {
+        optionsPanel.classList.remove('open');
+    });
+}
+
+// Listeners for number format radio buttons
+if (numberFormatRadios) {
+    numberFormatRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.checked) { // Ensure the event is for the selected radio
+                selectedNumberFormat = radio.value;
+                updateDisplay(); // Update all numbers based on new format
+            }
+        });
+    });
+}
+
+function formatStandard(num) {
+    if (num === undefined || num === null) return '0';
+    if (num === 0) return '0';
+
+    // Scientific notation for numbers >= 1e18 (1京)
+    if (num >= 1e18) {
+        return num.toExponential(2).replace('e+', 'e');
     }
-    return num.toLocaleString('en-US');
+
+    // Suffix notation for Qa (1千兆 = 1e15) for numbers in [1e15, 1e18)
+    if (num >= 1e15) {
+        let value = num / 1e15;
+        if (value < 10) return value.toFixed(2) + 'Qa'; // e.g., 1.23Qa
+        if (value < 100) return value.toFixed(1) + 'Qa';// e.g., 12.3Qa
+        return Math.floor(value).toFixed(0) + 'Qa'; // e.g., 123Qa
+    }
+
+    // Suffix notation for T (1兆 = 1e12) for numbers in [1e12, 1e15)
+    if (num >= 1e12) {
+        let value = num / 1e12;
+        if (value < 10) return value.toFixed(2) + 'T';
+        if (value < 100) return value.toFixed(1) + 'T';
+        return Math.floor(value).toFixed(0) + 'T';
+    }
+
+    // Suffix notation for B (10億 = 1e9) for numbers in [1e9, 1e12)
+    if (num >= 1e9) {
+        let value = num / 1e9;
+        if (value < 10) return value.toFixed(2) + 'B';
+        if (value < 100) return value.toFixed(1) + 'B';
+        return Math.floor(value).toFixed(0) + 'B';
+    }
+
+    // Standard comma formatting for numbers < 1e9
+    // Ensure no decimal places for these smaller numbers unless they are inherently fractional.
+    // Given game context, cash and costs are likely integers until they become very large.
+    return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
+function formatHex(num) {
+    if (num === undefined || num === null) return '0';
+    if (num === 0) return '0';
+    if (num < 0) return '-' + formatHex(Math.abs(num)); // Handle negative numbers if necessary
+
+    let hexString = Math.floor(num).toString(16).toLowerCase(); // Ensure integer, convert to hex, lowercase
+
+    // Add space every 4 characters from the right
+    let formattedHexString = '';
+    for (let i = 0; i < hexString.length; i++) {
+        if (i > 0 && (hexString.length - i) % 4 === 0) {
+            formattedHexString += ' ';
+        }
+        formattedHexString += hexString[i];
+    }
+    return formattedHexString;
+}
+
+function formatScientific(num) {
+    if (num === undefined || num === null) return '0';
+    if (num === 0) return '0.00e0'; // Or just '0' if preferred for zero
+
+    // toExponential(2) gives two digits after the decimal point.
+    // Replace 'e+' with 'e' for a cleaner look if desired, or keep 'e+'.
+    return num.toExponential(2).replace('e+', 'e');
+}
+
+function formatNumber(num) {
+    switch (selectedNumberFormat) {
+        case 'standard':
+            return formatStandard(num);
+        case 'hex':
+            return formatHex(num);
+        case 'scientific':
+            return formatScientific(num);
+        default:
+            // Fallback to standard or a simple toString if something goes wrong
+            return formatStandard(num); // Or num.toString();
+    }
 }
 
 // Calculates the total cost for buying a specific amount of a generator

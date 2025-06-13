@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <button id="options-button">Options</button> <!-- Position with CSS -->
     <h1>Idle Infinity Game</h1>
 
     <!-- Buy Amount Selector Section -->
@@ -102,6 +103,17 @@
     </div>
 
     <!-- Note: The original #win-message div is now #milestone-message and moved. -->
+
+    <div id="options-panel" style="display: none;">
+        <h2>Options</h2>
+        <div id="number-format-selector">
+            <span>Number Format:</span>
+            <input type="radio" id="formatStandard" name="numberFormat" value="standard" checked> <label for="formatStandard">Standard</label>
+            <input type="radio" id="formatHex" name="numberFormat" value="hex"> <label for="formatHex">Hexadecimal</label>
+            <input type="radio" id="formatScientific" name="numberFormat" value="scientific"> <label for="formatScientific">Scientific</label>
+        </div>
+        <button id="close-options-button">Close</button>
+    </div>
 
     <script src="script.js"></script>
 </body>
