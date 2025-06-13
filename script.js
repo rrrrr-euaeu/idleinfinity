@@ -2,93 +2,186 @@
 // Basic structure and initial values
 
 const FIRST_GOAL_CASH = 2147483647; // Math.pow(2, 31) - 1
+const GENERATOR_UNLOCK_THRESHOLD = 5;
+const INITIAL_CASH = 10;
+const MAX_BUY_SAFETY_LIMIT = 10000;
 let prestigePoints = 0;
 let gameHasReachedFirstGoal = false; // Flag to manage goal state
+
+const generatorsData = [
+    {
+        id: 1,
+        namePrefix: "Generator",
+        initialCost: 10,
+        currentCost: 10,
+        costIncreaseRate: 1.15,
+        totalCount: 0,
+        purchasedCount: 0,
+        nameDisplayId: 'gen1-name-display',
+        levelDisplayId: 'gen1-level-display',
+        buttonId: 'buy-gen1',
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null // To be populated later
+    },
+    {
+        id: 2,
+        namePrefix: "Generator",
+        initialCost: 100,
+        currentCost: 100,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        nameDisplayId: 'gen2-name-display',
+        levelDisplayId: 'gen2-level-display',
+        buttonId: 'buy-gen2',
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 3,
+        namePrefix: "Generator",
+        initialCost: 1000,
+        currentCost: 1000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        nameDisplayId: 'gen3-name-display',
+        levelDisplayId: 'gen3-level-display',
+        buttonId: 'buy-gen3',
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 4,
+        namePrefix: "Generator",
+        initialCost: 10000,
+        currentCost: 10000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        nameDisplayId: 'gen4-name-display',
+        levelDisplayId: 'gen4-level-display',
+        buttonId: 'buy-gen4',
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 5,
+        namePrefix: "Generator",
+        initialCost: 100000,
+        currentCost: 100000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        nameDisplayId: 'gen5-name-display',
+        levelDisplayId: 'gen5-level-display',
+        buttonId: 'buy-gen5',
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 6,
+        namePrefix: "Generator",
+        initialCost: 1000000,
+        currentCost: 1000000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        nameDisplayId: 'gen6-name-display',
+        levelDisplayId: 'gen6-level-display',
+        buttonId: 'buy-gen6',
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 7,
+        namePrefix: "Generator",
+        initialCost: 10000000,
+        currentCost: 10000000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        nameDisplayId: 'gen7-name-display',
+        levelDisplayId: 'gen7-level-display',
+        buttonId: 'buy-gen7',
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 8,
+        namePrefix: "Generator",
+        initialCost: 100000000,
+        currentCost: 100000000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        nameDisplayId: 'gen8-name-display',
+        levelDisplayId: 'gen8-level-display',
+        buttonId: 'buy-gen8',
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 9,
+        namePrefix: "Generator",
+        initialCost: 1000000000,
+        currentCost: 1000000000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        nameDisplayId: 'gen9-name-display',
+        levelDisplayId: 'gen9-level-display',
+        buttonId: 'buy-gen9',
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    }
+];
+
 let selectedBuyAmount = 1; // Default buy amount
 let cash = 10;
-let gen1TotalCount = 0;
-let gen1PurchasedCount = 0;
-let gen1Cost = 10;
-let gen2TotalCount = 0;
-let gen2PurchasedCount = 0;
-let gen2Cost = 100;
-let gen3TotalCount = 0;
-let gen3PurchasedCount = 0;
-let gen3Cost = 1000;
-let gen4TotalCount = 0;
-let gen4PurchasedCount = 0;
-let gen4Cost = 10000;
-let gen5TotalCount = 0;
-let gen5PurchasedCount = 0;
-let gen5Cost = 100000;
-let gen6TotalCount = 0;
-let gen6PurchasedCount = 0;
-let gen6Cost = 1000000;
-let gen7TotalCount = 0;
-let gen7PurchasedCount = 0;
-let gen7Cost = 10000000;
-let gen8TotalCount = 0;
-let gen8PurchasedCount = 0;
-let gen8Cost = 100000000;
-let gen9TotalCount = 0;
-let gen9PurchasedCount = 0;
-let gen9Cost = 1000000000;
+// Old individual generator state variables (genXTotalCount, genXPurchasedCount, genXCost) removed.
+// This data is now managed within the objects in the generatorsData array.
 
 const cashDisplay = document.getElementById('cash');
-const gen1CountDisplay = document.getElementById('gen1-count');
-const gen1CostDisplay = document.getElementById('gen1-cost');
-const gen2CountDisplay = document.getElementById('gen2-count');
-const gen2CostDisplay = document.getElementById('gen2-cost');
-const gen3CountDisplay = document.getElementById('gen3-count');
-const gen3CostDisplay = document.getElementById('gen3-cost');
-const gen4CountDisplay = document.getElementById('gen4-count');
-const gen4CostDisplay = document.getElementById('gen4-cost');
-const gen5CountDisplay = document.getElementById('gen5-count');
-const gen5CostDisplay = document.getElementById('gen5-cost');
-const gen6CountDisplay = document.getElementById('gen6-count');
-const gen6CostDisplay = document.getElementById('gen6-cost');
-const gen7CountDisplay = document.getElementById('gen7-count');
-const gen7CostDisplay = document.getElementById('gen7-cost');
-const gen8CountDisplay = document.getElementById('gen8-count');
-const gen8CostDisplay = document.getElementById('gen8-cost');
-const gen9CountDisplay = document.getElementById('gen9-count');
-const gen9CostDisplay = document.getElementById('gen9-cost');
-
-const gen1NameDisplay = document.getElementById('gen1-name-display');
-const gen1LevelDisplay = document.getElementById('gen1-level-display');
-const gen2NameDisplay = document.getElementById('gen2-name-display');
-const gen2LevelDisplay = document.getElementById('gen2-level-display');
-const gen3NameDisplay = document.getElementById('gen3-name-display');
-const gen3LevelDisplay = document.getElementById('gen3-level-display');
-const gen4NameDisplay = document.getElementById('gen4-name-display');
-const gen4LevelDisplay = document.getElementById('gen4-level-display');
-const gen5NameDisplay = document.getElementById('gen5-name-display');
-const gen5LevelDisplay = document.getElementById('gen5-level-display');
-const gen6NameDisplay = document.getElementById('gen6-name-display');
-const gen6LevelDisplay = document.getElementById('gen6-level-display');
-const gen7NameDisplay = document.getElementById('gen7-name-display');
-const gen7LevelDisplay = document.getElementById('gen7-level-display');
-const gen8NameDisplay = document.getElementById('gen8-name-display');
-const gen8LevelDisplay = document.getElementById('gen8-level-display');
-const gen9NameDisplay = document.getElementById('gen9-name-display');
-const gen9LevelDisplay = document.getElementById('gen9-level-display');
-
-const buyGen1Button = document.getElementById('buy-gen1');
-const buyGen2Button = document.getElementById('buy-gen2');
-const buyGen3Button = document.getElementById('buy-gen3');
-const buyGen4Button = document.getElementById('buy-gen4');
-const buyGen5Button = document.getElementById('buy-gen5');
-const buyGen6Button = document.getElementById('buy-gen6');
-const buyGen7Button = document.getElementById('buy-gen7');
-const buyGen8Button = document.getElementById('buy-gen8');
-const buyGen9Button = document.getElementById('buy-gen9');
-const winMessage = document.getElementById('win-message');
+// Obsolete generator-specific DOM constants removed.
+// Their references are now populated within generatorsData array.
+const winMessage = document.getElementById('win-message'); // This is actually milestoneMessage, but keeping as-is if not specified to change this specific line. The HTML has milestone-message.
 const buyAmountRadios = document.querySelectorAll('input[name="buyAmount"]');
 const prestigePointsDisplay = document.getElementById('prestige-points-display');
 const resetContainer = document.getElementById('reset-container');
 const milestoneMessage = document.getElementById('milestone-message'); // This was #win-message
 const resetButton = document.getElementById('reset-button');
 const prestigeInfoContainer = document.getElementById('prestige-info-container');
+
+generatorsData.forEach(gen => {
+    gen.nameDisplayElement = document.getElementById(gen.nameDisplayId);
+    gen.levelDisplayElement = document.getElementById(gen.levelDisplayId);
+    gen.buttonElement = document.getElementById(gen.buttonId);
+    if (gen.buttonElement) { // Ensure buttonElement was found before trying to use it
+        gen.actionRowElement = gen.buttonElement.closest('.generator-action-row');
+    } else {
+        // console.error("Button not found for generator:", gen.id); // Optional error logging
+        gen.actionRowElement = null; // Or handle error appropriately
+    }
+});
 
 buyAmountRadios.forEach(radio => {
     radio.addEventListener('change', () => {
@@ -107,44 +200,14 @@ if (resetButton) { // Check if resetButton was successfully found
         prestigePoints++;
 
         // 2. Reset game progress variables
-        cash = 10; // Initial cash
+        cash = INITIAL_CASH; // Initial cash
 
-        // Reset generator counts and costs
-        gen1TotalCount = 0;
-        gen1PurchasedCount = 0;
-        gen1Cost = 10; // Initial cost for Gen1
-
-        gen2TotalCount = 0;
-        gen2PurchasedCount = 0;
-        gen2Cost = 100; // Initial cost for Gen2
-
-        gen3TotalCount = 0;
-        gen3PurchasedCount = 0;
-        gen3Cost = 1000;
-
-        gen4TotalCount = 0;
-        gen4PurchasedCount = 0;
-        gen4Cost = 10000;
-
-        gen5TotalCount = 0;
-        gen5PurchasedCount = 0;
-        gen5Cost = 100000;
-
-        gen6TotalCount = 0;
-        gen6PurchasedCount = 0;
-        gen6Cost = 1000000;
-
-        gen7TotalCount = 0;
-        gen7PurchasedCount = 0;
-        gen7Cost = 10000000;
-
-        gen8TotalCount = 0;
-        gen8PurchasedCount = 0;
-        gen8Cost = 100000000;
-
-        gen9TotalCount = 0;
-        gen9PurchasedCount = 0;
-        gen9Cost = 1000000000;
+        // Reset generator states using generatorsData array
+        generatorsData.forEach(gen => {
+            gen.totalCount = 0;
+            gen.purchasedCount = 0;
+            gen.currentCost = gen.initialCost; // Reset currentCost to its initialCost
+        });
 
         // Buy amount selector is NOT reset
 
@@ -195,7 +258,7 @@ function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncrea
         totalSpent += costOfNextItem;
         itemsBought++;
         costOfNextItem = Math.ceil(costOfNextItem * costIncreaseRate);
-        if (itemsBought >= 10000) { // Safety break for very large MAX buys, adjust if needed
+        if (itemsBought >= MAX_BUY_SAFETY_LIMIT) { // Safety break for very large MAX buys, adjust if needed
             break;
         }
     }
@@ -203,572 +266,127 @@ function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncrea
 }
 
 function updateDisplay() {
-    cashDisplay.textContent = formatNumber(cash); // Keep this
+    cashDisplay.textContent = formatNumber(cash);
     if (prestigeInfoContainer) {
         if (prestigePoints > 0) {
-            prestigeInfoContainer.style.display = 'inline'; // Show the container
+            prestigeInfoContainer.style.display = 'inline';
         } else {
-            prestigeInfoContainer.style.display = 'none'; // Keep it hidden if no points
+            prestigeInfoContainer.style.display = 'none';
         }
     }
-    if (prestigePointsDisplay) { // Check if the element exists
+    if (prestigePointsDisplay) {
         prestigePointsDisplay.textContent = formatNumber(prestigePoints);
     }
 
-    // --- Visibility Logic (from previous step, unchanged) ---
-    if (buyGen1Button && buyGen1Button.closest('.generator-action-row')) {
-        buyGen1Button.closest('.generator-action-row').style.visibility = 'visible';
-    }
-    if (buyGen2Button && buyGen2Button.closest('.generator-action-row')) {
-        if (gen1TotalCount >= 5) { buyGen2Button.closest('.generator-action-row').style.visibility = 'visible'; }
-        else { buyGen2Button.closest('.generator-action-row').style.visibility = 'hidden'; }
-    }
-    if (buyGen3Button && buyGen3Button.closest('.generator-action-row')) {
-        if (gen2TotalCount >= 5) { buyGen3Button.closest('.generator-action-row').style.visibility = 'visible'; }
-        else { buyGen3Button.closest('.generator-action-row').style.visibility = 'hidden'; }
-    }
-    if (buyGen4Button && buyGen4Button.closest('.generator-action-row')) {
-        if (gen3TotalCount >= 5) { buyGen4Button.closest('.generator-action-row').style.visibility = 'visible'; }
-        else { buyGen4Button.closest('.generator-action-row').style.visibility = 'hidden'; }
-    }
-    if (buyGen5Button && buyGen5Button.closest('.generator-action-row')) {
-        if (gen4TotalCount >= 5) { buyGen5Button.closest('.generator-action-row').style.visibility = 'visible'; }
-        else { buyGen5Button.closest('.generator-action-row').style.visibility = 'hidden'; }
-    }
-    if (buyGen6Button && buyGen6Button.closest('.generator-action-row')) {
-        if (gen5TotalCount >= 5) { buyGen6Button.closest('.generator-action-row').style.visibility = 'visible'; }
-        else { buyGen6Button.closest('.generator-action-row').style.visibility = 'hidden'; }
-    }
-    if (buyGen7Button && buyGen7Button.closest('.generator-action-row')) {
-        if (gen6TotalCount >= 5) { buyGen7Button.closest('.generator-action-row').style.visibility = 'visible'; }
-        else { buyGen7Button.closest('.generator-action-row').style.visibility = 'hidden'; }
-    }
-    if (buyGen8Button && buyGen8Button.closest('.generator-action-row')) {
-        if (gen7TotalCount >= 5) { buyGen8Button.closest('.generator-action-row').style.visibility = 'visible'; }
-        else { buyGen8Button.closest('.generator-action-row').style.visibility = 'hidden'; }
-    }
-    if (buyGen9Button && buyGen9Button.closest('.generator-action-row')) {
-        if (gen8TotalCount >= 5) { buyGen9Button.closest('.generator-action-row').style.visibility = 'visible'; }
-        else { buyGen9Button.closest('.generator-action-row').style.visibility = 'hidden'; }
-    }
-    // --- End of Visibility Logic ---
-
-    // --- Generator 1 ---
-    gen1NameDisplay.textContent = "Generator1";
-    let producedCount1 = gen1TotalCount - gen1PurchasedCount;
-    if (producedCount1 <= 0) { gen1LevelDisplay.textContent = "lv " + formatNumber(gen1PurchasedCount); }
-    else { gen1LevelDisplay.textContent = "lv " + formatNumber(gen1PurchasedCount) + " + " + formatNumber(producedCount1); }
-    let displayAmount1, currentTotalCost1;
-    const costIncreaseRate1 = 1.15;
-    if (selectedBuyAmount === 'MAX') {
-        const maxInfo = calculateMaxBuyableAmount(cash, gen1Cost, costIncreaseRate1);
-        if (maxInfo.count === 0) {
-            displayAmount1 = 1;
-            currentTotalCost1 = gen1Cost;
-        } else {
-            displayAmount1 = maxInfo.count;
-            currentTotalCost1 = maxInfo.totalCost;
+    generatorsData.forEach((gen, index) => {
+        // Visibility Control
+        if (gen.actionRowElement) {
+            if (gen.id === 1) {
+                gen.actionRowElement.style.visibility = 'visible';
+            } else {
+                const prevGen = generatorsData[index - 1];
+                if (prevGen && prevGen.totalCount >= GENERATOR_UNLOCK_THRESHOLD) {
+                    gen.actionRowElement.style.visibility = 'visible';
+                } else {
+                    gen.actionRowElement.style.visibility = 'hidden';
+                }
+            }
         }
-    } else {
-        displayAmount1 = selectedBuyAmount;
-        const costInfo = calculateTotalCostForAmount(gen1Cost, displayAmount1, costIncreaseRate1);
-        currentTotalCost1 = costInfo.totalCost;
-    }
-    if (buyGen1Button) {
-        buyGen1Button.innerHTML = "Buy " + formatNumber(displayAmount1) + "<br>Cost: " + formatNumber(currentTotalCost1);
-        buyGen1Button.classList.toggle('can-buy', cash >= currentTotalCost1 && displayAmount1 > 0);
-    }
 
-    // --- Generator 2 ---
-    gen2NameDisplay.textContent = "Generator2";
-    let producedCount2 = gen2TotalCount - gen2PurchasedCount;
-    if (producedCount2 <= 0) { gen2LevelDisplay.textContent = "lv " + formatNumber(gen2PurchasedCount); }
-    else { gen2LevelDisplay.textContent = "lv " + formatNumber(gen2PurchasedCount) + " + " + formatNumber(producedCount2); }
-    let displayAmount2, currentTotalCost2;
-    const costIncreaseRate2 = 1.20;
-    if (selectedBuyAmount === 'MAX') {
-        const maxInfo = calculateMaxBuyableAmount(cash, gen2Cost, costIncreaseRate2);
-        if (maxInfo.count === 0) {
-            displayAmount2 = 1;
-            currentTotalCost2 = gen2Cost;
-        } else {
-            displayAmount2 = maxInfo.count;
-            currentTotalCost2 = maxInfo.totalCost;
+        // Update Name Display
+        if (gen.nameDisplayElement) {
+            gen.nameDisplayElement.textContent = gen.namePrefix + gen.id;
         }
-    } else {
-        displayAmount2 = selectedBuyAmount;
-        const costInfo = calculateTotalCostForAmount(gen2Cost, displayAmount2, costIncreaseRate2);
-        currentTotalCost2 = costInfo.totalCost;
-    }
-    if (buyGen2Button) {
-        buyGen2Button.innerHTML = "Buy " + formatNumber(displayAmount2) + "<br>Cost: " + formatNumber(currentTotalCost2);
-        buyGen2Button.classList.toggle('can-buy', cash >= currentTotalCost2 && displayAmount2 > 0);
-    }
 
-    // --- Generator 3 ---
-    gen3NameDisplay.textContent = "Generator3";
-    let producedCount3 = gen3TotalCount - gen3PurchasedCount;
-    if (producedCount3 <= 0) { gen3LevelDisplay.textContent = "lv " + formatNumber(gen3PurchasedCount); }
-    else { gen3LevelDisplay.textContent = "lv " + formatNumber(gen3PurchasedCount) + " + " + formatNumber(producedCount3); }
-    let displayAmount3, currentTotalCost3;
-    const costIncreaseRate3 = 1.20;
-    if (selectedBuyAmount === 'MAX') {
-        const maxInfo = calculateMaxBuyableAmount(cash, gen3Cost, costIncreaseRate3);
-        if (maxInfo.count === 0) {
-            displayAmount3 = 1;
-            currentTotalCost3 = gen3Cost;
-        } else {
-            displayAmount3 = maxInfo.count;
-            currentTotalCost3 = maxInfo.totalCost;
+        // Update Level Display
+        if (gen.levelDisplayElement) {
+            let producedCount = gen.totalCount - gen.purchasedCount;
+            if (producedCount < 0) producedCount = 0; // Ensure producedCount isn't negative
+            if (producedCount <= 0) {
+                gen.levelDisplayElement.textContent = "lv " + formatNumber(gen.purchasedCount);
+            } else {
+                gen.levelDisplayElement.textContent = "lv " + formatNumber(gen.purchasedCount) + " + " + formatNumber(producedCount);
+            }
         }
-    } else {
-        displayAmount3 = selectedBuyAmount;
-        const costInfo = calculateTotalCostForAmount(gen3Cost, displayAmount3, costIncreaseRate3);
-        currentTotalCost3 = costInfo.totalCost;
-    }
-    if (buyGen3Button) {
-        buyGen3Button.innerHTML = "Buy " + formatNumber(displayAmount3) + "<br>Cost: " + formatNumber(currentTotalCost3);
-        buyGen3Button.classList.toggle('can-buy', cash >= currentTotalCost3 && displayAmount3 > 0);
-    }
 
-    // --- Generator 4 ---
-    gen4NameDisplay.textContent = "Generator4";
-    let producedCount4 = gen4TotalCount - gen4PurchasedCount;
-    if (producedCount4 <= 0) { gen4LevelDisplay.textContent = "lv " + formatNumber(gen4PurchasedCount); }
-    else { gen4LevelDisplay.textContent = "lv " + formatNumber(gen4PurchasedCount) + " + " + formatNumber(producedCount4); }
-    let displayAmount4, currentTotalCost4;
-    const costIncreaseRate4 = 1.20;
-    if (selectedBuyAmount === 'MAX') {
-        const maxInfo = calculateMaxBuyableAmount(cash, gen4Cost, costIncreaseRate4);
-        if (maxInfo.count === 0) {
-            displayAmount4 = 1;
-            currentTotalCost4 = gen4Cost;
-        } else {
-            displayAmount4 = maxInfo.count;
-            currentTotalCost4 = maxInfo.totalCost;
-        }
-    } else {
-        displayAmount4 = selectedBuyAmount;
-        const costInfo = calculateTotalCostForAmount(gen4Cost, displayAmount4, costIncreaseRate4);
-        currentTotalCost4 = costInfo.totalCost;
-    }
-    if (buyGen4Button) {
-        buyGen4Button.innerHTML = "Buy " + formatNumber(displayAmount4) + "<br>Cost: " + formatNumber(currentTotalCost4);
-        buyGen4Button.classList.toggle('can-buy', cash >= currentTotalCost4 && displayAmount4 > 0);
-    }
+        // Update Buy Button
+        if (gen.buttonElement) {
+            let displayAmount;
+            let currentTotalCost;
 
-    // --- Generator 5 ---
-    gen5NameDisplay.textContent = "Generator5";
-    let producedCount5 = gen5TotalCount - gen5PurchasedCount;
-    if (producedCount5 <= 0) { gen5LevelDisplay.textContent = "lv " + formatNumber(gen5PurchasedCount); }
-    else { gen5LevelDisplay.textContent = "lv " + formatNumber(gen5PurchasedCount) + " + " + formatNumber(producedCount5); }
-    let displayAmount5, currentTotalCost5;
-    const costIncreaseRate5 = 1.20;
-    if (selectedBuyAmount === 'MAX') {
-        const maxInfo = calculateMaxBuyableAmount(cash, gen5Cost, costIncreaseRate5);
-        if (maxInfo.count === 0) {
-            displayAmount5 = 1;
-            currentTotalCost5 = gen5Cost;
-        } else {
-            displayAmount5 = maxInfo.count;
-            currentTotalCost5 = maxInfo.totalCost;
-        }
-    } else {
-        displayAmount5 = selectedBuyAmount;
-        const costInfo = calculateTotalCostForAmount(gen5Cost, displayAmount5, costIncreaseRate5);
-        currentTotalCost5 = costInfo.totalCost;
-    }
-    if (buyGen5Button) {
-        buyGen5Button.innerHTML = "Buy " + formatNumber(displayAmount5) + "<br>Cost: " + formatNumber(currentTotalCost5);
-        buyGen5Button.classList.toggle('can-buy', cash >= currentTotalCost5 && displayAmount5 > 0);
-    }
+            if (selectedBuyAmount === 'MAX') {
+                const maxInfo = calculateMaxBuyableAmount(cash, gen.currentCost, gen.costIncreaseRate);
+                if (maxInfo.count === 0) {
+                    displayAmount = 1;
+                    currentTotalCost = gen.currentCost;
+                } else {
+                    displayAmount = maxInfo.count;
+                    currentTotalCost = maxInfo.totalCost;
+                }
+            } else {
+                displayAmount = selectedBuyAmount;
+                const costInfo = calculateTotalCostForAmount(gen.currentCost, displayAmount, gen.costIncreaseRate);
+                currentTotalCost = costInfo.totalCost;
+            }
 
-    // --- Generator 6 ---
-    gen6NameDisplay.textContent = "Generator6";
-    let producedCount6 = gen6TotalCount - gen6PurchasedCount;
-    if (producedCount6 <= 0) { gen6LevelDisplay.textContent = "lv " + formatNumber(gen6PurchasedCount); }
-    else { gen6LevelDisplay.textContent = "lv " + formatNumber(gen6PurchasedCount) + " + " + formatNumber(producedCount6); }
-    let displayAmount6, currentTotalCost6;
-    const costIncreaseRate6 = 1.20;
-    if (selectedBuyAmount === 'MAX') {
-        const maxInfo = calculateMaxBuyableAmount(cash, gen6Cost, costIncreaseRate6);
-        if (maxInfo.count === 0) {
-            displayAmount6 = 1;
-            currentTotalCost6 = gen6Cost;
-        } else {
-            displayAmount6 = maxInfo.count;
-            currentTotalCost6 = maxInfo.totalCost;
+            gen.buttonElement.innerHTML = "Buy " + formatNumber(displayAmount) + "<br>Cost: " + formatNumber(currentTotalCost);
+            let canAfford = cash >= currentTotalCost && displayAmount > 0;
+            gen.buttonElement.classList.toggle('can-buy', canAfford);
         }
-    } else {
-        displayAmount6 = selectedBuyAmount;
-        const costInfo = calculateTotalCostForAmount(gen6Cost, displayAmount6, costIncreaseRate6);
-        currentTotalCost6 = costInfo.totalCost;
-    }
-    if (buyGen6Button) {
-        buyGen6Button.innerHTML = "Buy " + formatNumber(displayAmount6) + "<br>Cost: " + formatNumber(currentTotalCost6);
-        buyGen6Button.classList.toggle('can-buy', cash >= currentTotalCost6 && displayAmount6 > 0);
-    }
-
-    // --- Generator 7 ---
-    gen7NameDisplay.textContent = "Generator7";
-    let producedCount7 = gen7TotalCount - gen7PurchasedCount;
-    if (producedCount7 <= 0) { gen7LevelDisplay.textContent = "lv " + formatNumber(gen7PurchasedCount); }
-    else { gen7LevelDisplay.textContent = "lv " + formatNumber(gen7PurchasedCount) + " + " + formatNumber(producedCount7); }
-    let displayAmount7, currentTotalCost7;
-    const costIncreaseRate7 = 1.20;
-    if (selectedBuyAmount === 'MAX') {
-        const maxInfo = calculateMaxBuyableAmount(cash, gen7Cost, costIncreaseRate7);
-        if (maxInfo.count === 0) {
-            displayAmount7 = 1;
-            currentTotalCost7 = gen7Cost;
-        } else {
-            displayAmount7 = maxInfo.count;
-            currentTotalCost7 = maxInfo.totalCost;
-        }
-    } else {
-        displayAmount7 = selectedBuyAmount;
-        const costInfo = calculateTotalCostForAmount(gen7Cost, displayAmount7, costIncreaseRate7);
-        currentTotalCost7 = costInfo.totalCost;
-    }
-    if (buyGen7Button) {
-        buyGen7Button.innerHTML = "Buy " + formatNumber(displayAmount7) + "<br>Cost: " + formatNumber(currentTotalCost7);
-        buyGen7Button.classList.toggle('can-buy', cash >= currentTotalCost7 && displayAmount7 > 0);
-    }
-
-    // --- Generator 8 ---
-    gen8NameDisplay.textContent = "Generator8";
-    let producedCount8 = gen8TotalCount - gen8PurchasedCount;
-    if (producedCount8 <= 0) { gen8LevelDisplay.textContent = "lv " + formatNumber(gen8PurchasedCount); }
-    else { gen8LevelDisplay.textContent = "lv " + formatNumber(gen8PurchasedCount) + " + " + formatNumber(producedCount8); }
-    let displayAmount8, currentTotalCost8;
-    const costIncreaseRate8 = 1.20;
-    if (selectedBuyAmount === 'MAX') {
-        const maxInfo = calculateMaxBuyableAmount(cash, gen8Cost, costIncreaseRate8);
-        if (maxInfo.count === 0) {
-            displayAmount8 = 1;
-            currentTotalCost8 = gen8Cost;
-        } else {
-            displayAmount8 = maxInfo.count;
-            currentTotalCost8 = maxInfo.totalCost;
-        }
-    } else {
-        displayAmount8 = selectedBuyAmount;
-        const costInfo = calculateTotalCostForAmount(gen8Cost, displayAmount8, costIncreaseRate8);
-        currentTotalCost8 = costInfo.totalCost;
-    }
-    if (buyGen8Button) {
-        buyGen8Button.innerHTML = "Buy " + formatNumber(displayAmount8) + "<br>Cost: " + formatNumber(currentTotalCost8);
-        buyGen8Button.classList.toggle('can-buy', cash >= currentTotalCost8 && displayAmount8 > 0);
-    }
-
-    // --- Generator 9 ---
-    gen9NameDisplay.textContent = "Generator9";
-    let producedCount9 = gen9TotalCount - gen9PurchasedCount;
-    if (producedCount9 <= 0) { gen9LevelDisplay.textContent = "lv " + formatNumber(gen9PurchasedCount); }
-    else { gen9LevelDisplay.textContent = "lv " + formatNumber(gen9PurchasedCount) + " + " + formatNumber(producedCount9); }
-    let displayAmount9, currentTotalCost9;
-    const costIncreaseRate9 = 1.20;
-    if (selectedBuyAmount === 'MAX') {
-        const maxInfo = calculateMaxBuyableAmount(cash, gen9Cost, costIncreaseRate9);
-        if (maxInfo.count === 0) {
-            displayAmount9 = 1;
-            currentTotalCost9 = gen9Cost;
-        } else {
-            displayAmount9 = maxInfo.count;
-            currentTotalCost9 = maxInfo.totalCost;
-        }
-    } else {
-        displayAmount9 = selectedBuyAmount;
-        const costInfo = calculateTotalCostForAmount(gen9Cost, displayAmount9, costIncreaseRate9);
-        currentTotalCost9 = costInfo.totalCost;
-    }
-    if (buyGen9Button) {
-        buyGen9Button.innerHTML = "Buy " + formatNumber(displayAmount9) + "<br>Cost: " + formatNumber(currentTotalCost9);
-        buyGen9Button.classList.toggle('can-buy', cash >= currentTotalCost9 && displayAmount9 > 0);
-    }
+    });
 }
 
-buyGen1Button.addEventListener('click', () => {
-    const costIncreaseRate = 1.15;
-    let purchaseDetails;
-    let effectiveBuyAmount;
+// New loop-based event listener setup
+generatorsData.forEach(gen => {
+    if (gen.buttonElement) { // Ensure the button element exists
+        gen.buttonElement.addEventListener('click', () => {
+            // Purchase logic for 'gen'
+            let effectiveBuyAmount;
+            let purchaseDetails; // To store result from helper functions
 
-    if (selectedBuyAmount === 'MAX') {
-        purchaseDetails = calculateMaxBuyableAmount(cash, gen1Cost, costIncreaseRate);
-        effectiveBuyAmount = purchaseDetails.count;
-    } else {
-        effectiveBuyAmount = selectedBuyAmount;
-        purchaseDetails = calculateTotalCostForAmount(gen1Cost, effectiveBuyAmount, costIncreaseRate);
-    }
+            if (selectedBuyAmount === 'MAX') {
+                purchaseDetails = calculateMaxBuyableAmount(cash, gen.currentCost, gen.costIncreaseRate);
+                effectiveBuyAmount = purchaseDetails.count;
+            } else {
+                effectiveBuyAmount = selectedBuyAmount;
+                purchaseDetails = calculateTotalCostForAmount(gen.currentCost, effectiveBuyAmount, gen.costIncreaseRate);
+            }
 
-    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
-        cash -= purchaseDetails.totalCost;
+            if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
+                cash -= purchaseDetails.totalCost;
 
-        for (let i = 0; i < effectiveBuyAmount; i++) {
-            gen1TotalCount++;
-            gen1PurchasedCount++;
-        }
+                for (let i = 0; i < effectiveBuyAmount; i++) {
+                    gen.totalCount++;
+                    gen.purchasedCount++;
+                }
 
-        if (selectedBuyAmount === 'MAX') {
-            gen1Cost = purchaseDetails.costForNextSingleItemAfterMax;
-        } else {
-            gen1Cost = purchaseDetails.costForNextSingleItem;
-        }
-        updateDisplay();
-    }
-});
-
-buyGen3Button.addEventListener('click', () => {
-    const costIncreaseRate = 1.20;
-    let purchaseDetails;
-    let effectiveBuyAmount;
-
-    if (selectedBuyAmount === 'MAX') {
-        purchaseDetails = calculateMaxBuyableAmount(cash, gen3Cost, costIncreaseRate);
-        effectiveBuyAmount = purchaseDetails.count;
-    } else {
-        effectiveBuyAmount = selectedBuyAmount;
-        purchaseDetails = calculateTotalCostForAmount(gen3Cost, effectiveBuyAmount, costIncreaseRate);
-    }
-
-    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
-        cash -= purchaseDetails.totalCost;
-
-        for (let i = 0; i < effectiveBuyAmount; i++) {
-            gen3TotalCount++;
-            gen3PurchasedCount++;
-        }
-
-        if (selectedBuyAmount === 'MAX') {
-            gen3Cost = purchaseDetails.costForNextSingleItemAfterMax;
-        } else {
-            gen3Cost = purchaseDetails.costForNextSingleItem;
-        }
-        updateDisplay();
-    }
-});
-
-buyGen4Button.addEventListener('click', () => {
-    const costIncreaseRate = 1.20;
-    let purchaseDetails;
-    let effectiveBuyAmount;
-
-    if (selectedBuyAmount === 'MAX') {
-        purchaseDetails = calculateMaxBuyableAmount(cash, gen4Cost, costIncreaseRate);
-        effectiveBuyAmount = purchaseDetails.count;
-    } else {
-        effectiveBuyAmount = selectedBuyAmount;
-        purchaseDetails = calculateTotalCostForAmount(gen4Cost, effectiveBuyAmount, costIncreaseRate);
-    }
-
-    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
-        cash -= purchaseDetails.totalCost;
-
-        for (let i = 0; i < effectiveBuyAmount; i++) {
-            gen4TotalCount++;
-            gen4PurchasedCount++;
-        }
-
-        if (selectedBuyAmount === 'MAX') {
-            gen4Cost = purchaseDetails.costForNextSingleItemAfterMax;
-        } else {
-            gen4Cost = purchaseDetails.costForNextSingleItem;
-        }
-        updateDisplay();
-    }
-});
-
-buyGen5Button.addEventListener('click', () => {
-    const costIncreaseRate = 1.20;
-    let purchaseDetails;
-    let effectiveBuyAmount;
-
-    if (selectedBuyAmount === 'MAX') {
-        purchaseDetails = calculateMaxBuyableAmount(cash, gen5Cost, costIncreaseRate);
-        effectiveBuyAmount = purchaseDetails.count;
-    } else {
-        effectiveBuyAmount = selectedBuyAmount;
-        purchaseDetails = calculateTotalCostForAmount(gen5Cost, effectiveBuyAmount, costIncreaseRate);
-    }
-
-    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
-        cash -= purchaseDetails.totalCost;
-
-        for (let i = 0; i < effectiveBuyAmount; i++) {
-            gen5TotalCount++;
-            gen5PurchasedCount++;
-        }
-
-        if (selectedBuyAmount === 'MAX') {
-            gen5Cost = purchaseDetails.costForNextSingleItemAfterMax;
-        } else {
-            gen5Cost = purchaseDetails.costForNextSingleItem;
-        }
-        updateDisplay();
-    }
-});
-
-buyGen6Button.addEventListener('click', () => {
-    const costIncreaseRate = 1.20;
-    let purchaseDetails;
-    let effectiveBuyAmount;
-
-    if (selectedBuyAmount === 'MAX') {
-        purchaseDetails = calculateMaxBuyableAmount(cash, gen6Cost, costIncreaseRate);
-        effectiveBuyAmount = purchaseDetails.count;
-    } else {
-        effectiveBuyAmount = selectedBuyAmount;
-        purchaseDetails = calculateTotalCostForAmount(gen6Cost, effectiveBuyAmount, costIncreaseRate);
-    }
-
-    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
-        cash -= purchaseDetails.totalCost;
-
-        for (let i = 0; i < effectiveBuyAmount; i++) {
-            gen6TotalCount++;
-            gen6PurchasedCount++;
-        }
-
-        if (selectedBuyAmount === 'MAX') {
-            gen6Cost = purchaseDetails.costForNextSingleItemAfterMax;
-        } else {
-            gen6Cost = purchaseDetails.costForNextSingleItem;
-        }
-        updateDisplay();
-    }
-});
-
-buyGen7Button.addEventListener('click', () => {
-    const costIncreaseRate = 1.20;
-    let purchaseDetails;
-    let effectiveBuyAmount;
-
-    if (selectedBuyAmount === 'MAX') {
-        purchaseDetails = calculateMaxBuyableAmount(cash, gen7Cost, costIncreaseRate);
-        effectiveBuyAmount = purchaseDetails.count;
-    } else {
-        effectiveBuyAmount = selectedBuyAmount;
-        purchaseDetails = calculateTotalCostForAmount(gen7Cost, effectiveBuyAmount, costIncreaseRate);
-    }
-
-    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
-        cash -= purchaseDetails.totalCost;
-
-        for (let i = 0; i < effectiveBuyAmount; i++) {
-            gen7TotalCount++;
-            gen7PurchasedCount++;
-        }
-
-        if (selectedBuyAmount === 'MAX') {
-            gen7Cost = purchaseDetails.costForNextSingleItemAfterMax;
-        } else {
-            gen7Cost = purchaseDetails.costForNextSingleItem;
-        }
-        updateDisplay();
-    }
-});
-
-buyGen8Button.addEventListener('click', () => {
-    const costIncreaseRate = 1.20;
-    let purchaseDetails;
-    let effectiveBuyAmount;
-
-    if (selectedBuyAmount === 'MAX') {
-        purchaseDetails = calculateMaxBuyableAmount(cash, gen8Cost, costIncreaseRate);
-        effectiveBuyAmount = purchaseDetails.count;
-    } else {
-        effectiveBuyAmount = selectedBuyAmount;
-        purchaseDetails = calculateTotalCostForAmount(gen8Cost, effectiveBuyAmount, costIncreaseRate);
-    }
-
-    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
-        cash -= purchaseDetails.totalCost;
-
-        for (let i = 0; i < effectiveBuyAmount; i++) {
-            gen8TotalCount++;
-            gen8PurchasedCount++;
-        }
-
-        if (selectedBuyAmount === 'MAX') {
-            gen8Cost = purchaseDetails.costForNextSingleItemAfterMax;
-        } else {
-            gen8Cost = purchaseDetails.costForNextSingleItem;
-        }
-        updateDisplay();
-    }
-});
-
-buyGen9Button.addEventListener('click', () => {
-    const costIncreaseRate = 1.20;
-    let purchaseDetails;
-    let effectiveBuyAmount;
-
-    if (selectedBuyAmount === 'MAX') {
-        purchaseDetails = calculateMaxBuyableAmount(cash, gen9Cost, costIncreaseRate);
-        effectiveBuyAmount = purchaseDetails.count;
-    } else {
-        effectiveBuyAmount = selectedBuyAmount;
-        purchaseDetails = calculateTotalCostForAmount(gen9Cost, effectiveBuyAmount, costIncreaseRate);
-    }
-
-    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
-        cash -= purchaseDetails.totalCost;
-
-        for (let i = 0; i < effectiveBuyAmount; i++) {
-            gen9TotalCount++;
-            gen9PurchasedCount++;
-        }
-
-        if (selectedBuyAmount === 'MAX') {
-            gen9Cost = purchaseDetails.costForNextSingleItemAfterMax;
-        } else {
-            gen9Cost = purchaseDetails.costForNextSingleItem;
-        }
-        updateDisplay();
-    }
-});
-
-buyGen2Button.addEventListener('click', () => {
-    const costIncreaseRate = 1.20;
-    let purchaseDetails;
-    let effectiveBuyAmount;
-
-    if (selectedBuyAmount === 'MAX') {
-        purchaseDetails = calculateMaxBuyableAmount(cash, gen2Cost, costIncreaseRate);
-        effectiveBuyAmount = purchaseDetails.count;
-    } else {
-        effectiveBuyAmount = selectedBuyAmount;
-        purchaseDetails = calculateTotalCostForAmount(gen2Cost, effectiveBuyAmount, costIncreaseRate);
-    }
-
-    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
-        cash -= purchaseDetails.totalCost;
-
-        for (let i = 0; i < effectiveBuyAmount; i++) {
-            gen2TotalCount++;
-            gen2PurchasedCount++;
-        }
-
-        if (selectedBuyAmount === 'MAX') {
-            gen2Cost = purchaseDetails.costForNextSingleItemAfterMax;
-        } else {
-            gen2Cost = purchaseDetails.costForNextSingleItem;
-        }
-        updateDisplay();
+                // Update currentCost to the cost of the very next item
+                if (selectedBuyAmount === 'MAX') {
+                    gen.currentCost = purchaseDetails.costForNextSingleItemAfterMax;
+                } else {
+                    gen.currentCost = purchaseDetails.costForNextSingleItem;
+                }
+                updateDisplay();
+            }
+        });
     }
 });
 
 // Game loop - called every second
 setInterval(() => {
-    cash += gen1TotalCount; // Gen1 produces 1 cash per second
-    gen1TotalCount += gen2TotalCount; // Gen2 produces 1 Gen1 per second
-    gen2TotalCount += gen3TotalCount; // Gen3 produces 1 Gen2 per second
-    gen3TotalCount += gen4TotalCount; // Gen4 produces 1 Gen3 per second
-    gen4TotalCount += gen5TotalCount; // Gen5 produces 1 Gen4 per second
-    gen5TotalCount += gen6TotalCount; // Gen6 produces 1 Gen5 per second
-    gen6TotalCount += gen7TotalCount; // Gen7 produces 1 Gen6 per second
-    gen7TotalCount += gen8TotalCount; // Gen8 produces 1 Gen7 per second
-    gen8TotalCount += gen9TotalCount; // Gen9 produces 1 Gen8 per second
+    // Cash production from Generator 1
+    if (generatorsData[0]) { // Ensure Gen1 data exists
+        cash += generatorsData[0].totalCount;
+    }
+
+    // Generator production (e.g., Gen9 produces Gen8, ..., Gen2 produces Gen1)
+    for (let i = generatorsData.length - 1; i > 0; i--) {
+        // generatorsData[i] is the producing generator (e.g., Gen9 if i=8)
+        // generatorsData[i-1] is the generator being produced (e.g., Gen8 if i=8)
+        if (generatorsData[i].totalCount > 0) { // Only produce if the producing generator exists
+            generatorsData[i-1].totalCount += generatorsData[i].totalCount;
+        }
+    }
 
     // First Goal Achievement Check
     if (!gameHasReachedFirstGoal && cash >= FIRST_GOAL_CASH) {
