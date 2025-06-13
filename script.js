@@ -88,6 +88,7 @@ const prestigePointsDisplay = document.getElementById('prestige-points-display')
 const resetContainer = document.getElementById('reset-container');
 const milestoneMessage = document.getElementById('milestone-message'); // This was #win-message
 const resetButton = document.getElementById('reset-button');
+const prestigeInfoContainer = document.getElementById('prestige-info-container');
 
 buyAmountRadios.forEach(radio => {
     radio.addEventListener('change', () => {
@@ -145,11 +146,7 @@ if (resetButton) { // Check if resetButton was successfully found
         gen9PurchasedCount = 0;
         gen9Cost = 1000000000;
 
-        // Reset buy amount selector
-        selectedBuyAmount = 1;
-        if (document.getElementById('buy1')) { // Ensure radio button exists
-            document.getElementById('buy1').checked = true;
-        }
+        // Buy amount selector is NOT reset
 
         // 3. Reset UI states related to goal achievement
         if (resetContainer) {
@@ -207,6 +204,13 @@ function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncrea
 
 function updateDisplay() {
     cashDisplay.textContent = formatNumber(cash); // Keep this
+    if (prestigeInfoContainer) {
+        if (prestigePoints > 0) {
+            prestigeInfoContainer.style.display = 'inline'; // Show the container
+        } else {
+            prestigeInfoContainer.style.display = 'none'; // Keep it hidden if no points
+        }
+    }
     if (prestigePointsDisplay) { // Check if the element exists
         prestigePointsDisplay.textContent = formatNumber(prestigePoints);
     }
@@ -769,7 +773,7 @@ setInterval(() => {
     // First Goal Achievement Check
     if (!gameHasReachedFirstGoal && cash >= FIRST_GOAL_CASH) {
         if (milestoneMessage && milestoneMessage.querySelector('h2')) {
-            milestoneMessage.querySelector('h2').textContent = '第1臨界点 達成！ Prestige Point獲得のチャンス！';
+            milestoneMessage.querySelector('h2').textContent = 'First Critical Point Reached!';
         }
         if (resetContainer) {
             // To make the height transition work, the container needs to be block/flex etc.
