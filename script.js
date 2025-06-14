@@ -13,11 +13,11 @@ const generatorsData = [
     {
         id: 1,
         namePrefix: "Generator",
-        initialCost: 10,
-        currentCost: 10,
+        initialCost: 10, // Stays 10 for reset purposes
+        currentCost: 12, // Cost for the *next* purchase (effectively the 2nd generator)
         costIncreaseRate: 1.15,
-        totalCount: 0,
-        purchasedCount: 0,
+        totalCount: 1,   // Starts with 1 generator
+        purchasedCount: 1, // Assumed this one was 'purchased' at start
         nameDisplayId: 'gen1-name-display',
         levelDisplayId: 'gen1-level-display',
         buttonId: 'buy-gen1',
@@ -157,7 +157,7 @@ const generatorsData = [
 ];
 
 let selectedBuyAmount = 1; // Default buy amount
-let cash = 10;
+let cash = 0; // Changed initial cash to 0
 // Old individual generator state variables (genXTotalCount, genXPurchasedCount, genXCost) removed.
 // This data is now managed within the objects in the generatorsData array.
 
@@ -319,6 +319,59 @@ function formatScientific(num) {
     return num.toExponential(2).replace('e+', 'e');
 }
 
+function formatTimeToBuy(totalSeconds) {
+    if (!isFinite(totalSeconds) || totalSeconds < 0) {
+        return "way too much"; // Handles Infinity or negative seconds
+    }
+    // Correctly handle 0 seconds or very small positive numbers that would floor to 0s
+    if (totalSeconds < 1 && totalSeconds >= 0) {
+        return "0s";
+    }
+    if (totalSeconds < 60) {
+        return Math.floor(totalSeconds) + "s";
+    }
+
+    // Check for "way too much" (999 years or more)
+    const secondsInDay = 24 * 60 * 60;
+    const secondsInYear = 365 * secondsInDay; // Approximate for display
+    if (totalSeconds >= 999 * secondsInYear) {
+        return "way too much";
+    }
+
+    let remainingSeconds = Math.floor(totalSeconds);
+
+    const years = Math.floor(remainingSeconds / secondsInYear);
+    remainingSeconds %= secondsInYear;
+
+    const days = Math.floor(remainingSeconds / secondsInDay);
+    remainingSeconds %= secondsInDay;
+
+    const hours = Math.floor(remainingSeconds / (60 * 60));
+    remainingSeconds %= (60 * 60);
+
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+
+    let parts = [];
+    if (years > 0) {
+        parts.push(years + "y");
+    }
+    if (days > 0) {
+        parts.push(days + "d");
+    }
+
+    // Always format HH:MM:SS part since totalSeconds >= 60
+    // and we want it even if years/days are 0 but hours/minutes/seconds are not.
+    let timeStr =
+        hours.toString().padStart(2, '0') + ":" +
+        minutes.toString().padStart(2, '0') + ":" +
+        seconds.toString().padStart(2, '0');
+
+    parts.push(timeStr);
+
+    return parts.join(" ");
+}
+
 function formatNumber(num) {
     switch (selectedNumberFormat) {
         case 'standard':
@@ -433,7 +486,26 @@ function updateDisplay() {
                 currentTotalCost = costInfo.totalCost;
             }
 
-            gen.buttonElement.innerHTML = "Buy " + formatNumber(displayAmount) + "<br>Cost: " + formatNumber(currentTotalCost);
+            // New logic for timeToBuyString
+            let timeToBuyString;
+            const cashNeeded = currentTotalCost - cash;
+            // Ensure generatorsData[0] exists and its totalCount is valid for cashPerSecond calculation
+            const cashPerSecond = (generatorsData[0] && generatorsData[0].totalCount > 0) ? generatorsData[0].totalCount : 0;
+
+            if (cashNeeded <= 0) {
+                timeToBuyString = ""; // Affordable or already have enough
+            } else if (cashPerSecond === 0) {
+                timeToBuyString = "No income"; // Cannot afford if no income and cashNeeded > 0
+            } else {
+                const secondsToAfford = cashNeeded / cashPerSecond;
+                timeToBuyString = formatTimeToBuy(secondsToAfford);
+            }
+
+            gen.buttonElement.innerHTML =
+                "Buy " + formatNumber(displayAmount) +
+                "<br><span class='time-to-buy'>" + timeToBuyString + "</span>" +
+                "<br>Cost: " + formatNumber(currentTotalCost);
+
             let canAfford = cash >= currentTotalCost && displayAmount > 0;
             gen.buttonElement.classList.toggle('can-buy', canAfford);
         }
