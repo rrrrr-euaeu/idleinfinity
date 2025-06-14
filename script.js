@@ -8,6 +8,7 @@ const MAX_BUY_SAFETY_LIMIT = 10000;
 let prestigePoints = 0;
 let gameHasReachedFirstGoal = false; // Flag to manage goal state
 let selectedNumberFormat = 'standard'; // Default number format
+let resetBoostRate = 1.0;
 
 const generatorsData = [
     {
@@ -18,6 +19,7 @@ const generatorsData = [
         costIncreaseRate: 1.15,
         totalCount: 1,   // Starts with 1 generator
         purchasedCount: 1, // Assumed this one was 'purchased' at start
+        boostRate: 1.0,
         nameDisplayId: 'gen1-name-display',
         levelDisplayId: 'gen1-level-display',
         buttonId: 'buy-gen1',
@@ -34,6 +36,7 @@ const generatorsData = [
         costIncreaseRate: 1.20,
         totalCount: 0,
         purchasedCount: 0,
+        boostRate: 1.0,
         nameDisplayId: 'gen2-name-display',
         levelDisplayId: 'gen2-level-display',
         buttonId: 'buy-gen2',
@@ -50,6 +53,7 @@ const generatorsData = [
         costIncreaseRate: 1.20,
         totalCount: 0,
         purchasedCount: 0,
+        boostRate: 1.0,
         nameDisplayId: 'gen3-name-display',
         levelDisplayId: 'gen3-level-display',
         buttonId: 'buy-gen3',
@@ -66,6 +70,7 @@ const generatorsData = [
         costIncreaseRate: 1.20,
         totalCount: 0,
         purchasedCount: 0,
+        boostRate: 1.0,
         nameDisplayId: 'gen4-name-display',
         levelDisplayId: 'gen4-level-display',
         buttonId: 'buy-gen4',
@@ -82,6 +87,7 @@ const generatorsData = [
         costIncreaseRate: 1.20,
         totalCount: 0,
         purchasedCount: 0,
+        boostRate: 1.0,
         nameDisplayId: 'gen5-name-display',
         levelDisplayId: 'gen5-level-display',
         buttonId: 'buy-gen5',
@@ -98,6 +104,7 @@ const generatorsData = [
         costIncreaseRate: 1.20,
         totalCount: 0,
         purchasedCount: 0,
+        boostRate: 1.0,
         nameDisplayId: 'gen6-name-display',
         levelDisplayId: 'gen6-level-display',
         buttonId: 'buy-gen6',
@@ -114,6 +121,7 @@ const generatorsData = [
         costIncreaseRate: 1.20,
         totalCount: 0,
         purchasedCount: 0,
+        boostRate: 1.0,
         nameDisplayId: 'gen7-name-display',
         levelDisplayId: 'gen7-level-display',
         buttonId: 'buy-gen7',
@@ -130,6 +138,7 @@ const generatorsData = [
         costIncreaseRate: 1.20,
         totalCount: 0,
         purchasedCount: 0,
+        boostRate: 1.0,
         nameDisplayId: 'gen8-name-display',
         levelDisplayId: 'gen8-level-display',
         buttonId: 'buy-gen8',
@@ -146,6 +155,7 @@ const generatorsData = [
         costIncreaseRate: 1.20,
         totalCount: 0,
         purchasedCount: 0,
+        boostRate: 1.0,
         nameDisplayId: 'gen9-name-display',
         levelDisplayId: 'gen9-level-display',
         buttonId: 'buy-gen9',
@@ -201,17 +211,26 @@ buyAmountRadios.forEach(radio => {
 
 if (resetButton) { // Check if resetButton was successfully found
     resetButton.addEventListener('click', () => {
-        // 1. Increment prestige points
+        // 1. Increment prestige points and reset boost
         prestigePoints++;
+        resetBoostRate += 1.0;
 
         // 2. Reset game progress variables
-        cash = INITIAL_CASH; // Initial cash
+        cash = 0; // Corrected: Reset cash to 0
 
         // Reset generator states using generatorsData array
         generatorsData.forEach(gen => {
-            gen.totalCount = 0;
-            gen.purchasedCount = 0;
-            gen.currentCost = gen.initialCost; // Reset currentCost to its initialCost
+            if (gen.id === 1) {
+                gen.totalCount = 1;
+                gen.purchasedCount = 1;
+                // gen.initialCost is 10, gen.costIncreaseRate is 1.15
+                gen.currentCost = Math.ceil(gen.initialCost * gen.costIncreaseRate); // Should be 12
+            } else {
+                gen.totalCount = 0;
+                gen.purchasedCount = 0;
+                gen.currentCost = gen.initialCost;
+            }
+            gen.boostRate = 1.0; // Reset boost rate for ALL generators
         });
 
         // Buy amount selector is NOT reset
@@ -424,15 +443,38 @@ function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncrea
 
 function updateDisplay() {
     cashDisplay.textContent = formatNumber(cash);
+
+    // Update Prestige Points and Reset Boost Display
     if (prestigeInfoContainer) {
         if (prestigePoints > 0) {
             prestigeInfoContainer.style.display = 'inline';
+            if (prestigePointsDisplay) {
+                prestigePointsDisplay.textContent = formatNumber(prestigePoints);
+            }
         } else {
             prestigeInfoContainer.style.display = 'none';
         }
     }
-    if (prestigePointsDisplay) {
-        prestigePointsDisplay.textContent = formatNumber(prestigePoints);
+    if (resetBoostInfoContainer) {
+        if (prestigePoints > 0) {
+            resetBoostInfoContainer.style.display = 'inline';
+            if (resetBoostDisplay) {
+                resetBoostDisplay.textContent = resetBoostRate.toFixed(1);
+            }
+        } else {
+            resetBoostInfoContainer.style.display = 'none';
+        }
+    }
+
+    // Update Income Per Second Display
+    let combinedGeneratorBoostForIncome = 1.0;
+    generatorsData.forEach(g => { combinedGeneratorBoostForIncome *= g.boostRate; });
+    let actualCashPerSecond = 0;
+    if (generatorsData[0] && generatorsData[0].totalCount > 0) {
+        actualCashPerSecond = generatorsData[0].totalCount * combinedGeneratorBoostForIncome * resetBoostRate;
+    }
+    if (incomePerSecondDisplay) {
+        incomePerSecondDisplay.textContent = formatNumber(actualCashPerSecond);
     }
 
     generatorsData.forEach((gen, index) => {
@@ -464,6 +506,10 @@ function updateDisplay() {
             } else {
                 gen.levelDisplayElement.textContent = "lv " + formatNumber(gen.purchasedCount) + " + " + formatNumber(producedCount);
             }
+        }
+        // Generator-Specific Boost Display
+        if (gen.boostDisplayElement) {
+            gen.boostDisplayElement.textContent = "Boost: " + gen.boostRate.toFixed(3);
         }
 
         // Update Buy Button
@@ -550,10 +596,28 @@ generatorsData.forEach(gen => {
 
 // Game loop - called every second
 setInterval(() => {
-    // Cash production from Generator 1
-    if (generatorsData[0]) { // Ensure Gen1 data exists
-        cash += generatorsData[0].totalCount;
+    // Update generator boost rates
+    generatorsData.forEach(gen => {
+        if (gen.totalCount > 0) {
+            gen.boostRate += 0.001;
+            // Optional: Cap boostRate if needed, e.g., gen.boostRate = Math.min(gen.boostRate, MAX_BOOST_RATE);
+            // For now, no cap as per current plan.
+        }
+    });
+
+    // Calculate effective total boost from all generators
+    let combinedGeneratorBoost = 1.0;
+    generatorsData.forEach(gen => {
+        combinedGeneratorBoost *= gen.boostRate;
+    });
+
+    // Calculate cash produced this tick
+    let cashProducedThisTick = 0;
+    if (generatorsData[0] && generatorsData[0].totalCount > 0) {
+        cashProducedThisTick = generatorsData[0].totalCount * combinedGeneratorBoost * resetBoostRate;
     }
+
+    cash += cashProducedThisTick;
 
     // Generator production (e.g., Gen9 produces Gen8, ..., Gen2 produces Gen1)
     for (let i = generatorsData.length - 1; i > 0; i--) {

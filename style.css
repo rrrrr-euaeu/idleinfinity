@@ -36,6 +36,17 @@ body {
     margin-left: 10px; /* Space after the pipe separator */
 }
 
+#reset-boost-display {
+    font-weight: bold;
+    color: #f4a261; /* An orange/sandy color for reset boost */
+    margin-left: 5px;
+}
+
+#income-per-second-display {
+    font-weight: bold;
+    color: #264653; /* A dark blue/cyan for income rate */
+}
+
 #buy-amount-selector {
     display: flex;
     justify-content: center;
@@ -306,6 +317,13 @@ body {
     color: #555;
 }
 
+.generator-boost-display {
+    display: block; /* To appear on a new line below level */
+    font-size: 0.85em;
+    color: #2a9d8f; /* A teal/greenish color for boost */
+    margin-top: 3px; /* Little space from the level display */
+}
+
 .time-to-buy {
     color: grey;
     font-size: 0.8em; /* Slightly smaller for the sub-line */
@@ -315,14 +333,14 @@ body {
 }
 
 button { /* This is the general rule for generator buy buttons */
-    padding: 10px; /* Adjusted for potentially more content */
+    padding: 10px;
     margin: 0;
     border: none;
     border-radius: 5px;
     color: white;
     cursor: pointer;
     height: auto;
-    line-height: 1.3; /* Adjusted for 3 lines */
+    line-height: 1.3;
     text-align: center;
     flex-basis: 40%;
     background-color: #cccccc;
