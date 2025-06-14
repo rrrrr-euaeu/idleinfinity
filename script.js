@@ -185,6 +185,10 @@ const optionsButton = document.getElementById('options-button');
 const optionsPanel = document.getElementById('options-panel');
 // const closeOptionsButton = document.getElementById('close-options-button'); // Removed
 const numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
+const incomePerSecondDisplay = document.getElementById('income-per-second-display');
+const resetBoostInfoContainer = document.getElementById('reset-boost-info-container'); // Already exists, but good to confirm
+const resetBoostDisplay = document.getElementById('reset-boost-display');
+
 
 generatorsData.forEach(gen => {
     gen.nameDisplayElement = document.getElementById(gen.nameDisplayId);
@@ -192,9 +196,15 @@ generatorsData.forEach(gen => {
     gen.buttonElement = document.getElementById(gen.buttonId);
     if (gen.buttonElement) { // Ensure buttonElement was found before trying to use it
         gen.actionRowElement = gen.buttonElement.closest('.generator-action-row');
+        if (gen.actionRowElement) { // Ensure actionRowElement exists before querying inside it
+            gen.boostDisplayElement = gen.actionRowElement.querySelector('.generator-boost-display');
+        } else {
+            gen.boostDisplayElement = null;
+        }
     } else {
         // console.error("Button not found for generator:", gen.id); // Optional error logging
-        gen.actionRowElement = null; // Or handle error appropriately
+        gen.actionRowElement = null;
+        gen.boostDisplayElement = null;
     }
 });
 
