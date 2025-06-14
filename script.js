@@ -497,7 +497,7 @@ function updateDisplay() {
             } else if (cashPerSecond === 0) {
                 timeToBuyString = "No income"; // Cannot afford if no income and cashNeeded > 0
             } else {
-                const secondsToAfford = cashNeeded / cashPerSecond;
+                const secondsToAfford = Math.ceil(cashNeeded / cashPerSecond); // Apply Math.ceil()
                 timeToBuyString = formatTimeToBuy(secondsToAfford);
             }
 
