@@ -9,6 +9,13 @@
 <body>
     <button id="options-button">⚙️</button> <!-- Position with CSS -->
     <h1>Idle Infinity Game</h1>
+    <div id="total-boost-formula-display"></div>
+
+    <!-- Stats Display Section -->
+    <div id="stats">
+        <p>Cash: <span id="cash">0</span><span id="prestige-info-container" style="display: none;"> | Prestige Points: <span id="prestige-points-display">0</span></span><span id="reset-boost-info-container" style="display: none;"> | Reset Boost: <span id="reset-boost-display">1.0</span></span></p>
+        <p>Income: <span id="income-per-second-display">1</span> /s</p>
+    </div>
 
     <!-- Buy Amount Selector Section -->
     <div id="buy-amount-selector">
@@ -18,12 +25,6 @@
         <input type="radio" id="buy10" name="buyAmount" value="10"> <label for="buy10">10x</label>
         <input type="radio" id="buy100" name="buyAmount" value="100"> <label for="buy100">100x</label>
         <input type="radio" id="buyMAX" name="buyAmount" value="MAX"> <label for="buyMAX">MAX</label>
-    </div>
-
-    <!-- Stats Display Section -->
-    <div id="stats">
-        <p>Cash: <span id="cash">0</span><span id="prestige-info-container" style="display: none;"> | Prestige Points: <span id="prestige-points-display">0</span></span><span id="reset-boost-info-container" style="display: none;"> | Reset Boost: <span id="reset-boost-display">1.0</span></span></p>
-        <p>Income: <span id="income-per-second-display">1</span> /s</p>
     </div>
 
     <!-- Reset/Prestige Section (conditionally visible) -->
