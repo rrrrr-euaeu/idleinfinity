@@ -466,6 +466,16 @@ function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncrea
 function updateDisplay() {
     cashDisplay.textContent = formatNumber(cash);
 
+    // (A) Calculate actualCashPerSecond FIRST
+    let combinedGeneratorBoostForIncome = 1.0;
+    generatorsData.forEach(g => { combinedGeneratorBoostForIncome *= g.boostRate; });
+    let actualCashPerSecond = 0;
+    if (generatorsData[0] && generatorsData[0].totalCount > 0) {
+        actualCashPerSecond = generatorsData[0].totalCount * combinedGeneratorBoostForIncome * resetBoostRate;
+    }
+    // The old incomePerSecondDisplay update is already commented out, so no action needed on that here.
+
+    // (B) NOW prepare the display strings using the calculated actualCashPerSecond
     // Update Total Boost Formula Display
     if (totalBoostFormulaDisplay) {
         const boostFormulaParts = [];
@@ -483,7 +493,6 @@ function updateDisplay() {
         }
 
         let formulaString = boostFormulaParts.join(" × ");
-        // actualCashPerSecond is calculated before this block in updateDisplay
         let incomeString = `<br><span class="income-display-in-boost-area">Income: ${formatNumber(actualCashPerSecond)} /s</span>`;
 
         totalBoostFormulaDisplay.innerHTML = formulaString + incomeString;
@@ -511,16 +520,9 @@ function updateDisplay() {
         }
     }
 
-    // Update Income Per Second Display
-    let combinedGeneratorBoostForIncome = 1.0;
-    generatorsData.forEach(g => { combinedGeneratorBoostForIncome *= g.boostRate; });
-    let actualCashPerSecond = 0;
-    if (generatorsData[0] && generatorsData[0].totalCount > 0) {
-        actualCashPerSecond = generatorsData[0].totalCount * combinedGeneratorBoostForIncome * resetBoostRate;
-    }
-    // if (incomePerSecondDisplay) { // Old income display - commented out
-    //     incomePerSecondDisplay.textContent = formatNumber(actualCashPerSecond);
-    // }
+    // Update Income Per Second Display block is now moved above the totalBoostFormulaDisplay update.
+    // The old commented-out lines for incomePerSecondDisplay are fine where they are (or were, if part of the moved block).
+    // No need to search for this block again as it's been effectively relocated.
 
     generatorsData.forEach((gen, index) => {
         // Visibility Control
