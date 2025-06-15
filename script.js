@@ -3,7 +3,6 @@
 
 const FIRST_GOAL_CASH = 2147483647; // Math.pow(2, 31) - 1
 const GENERATOR_UNLOCK_THRESHOLD = 5;
-// const INITIAL_CASH = 10; // This will be updated or removed
 const MAX_BUY_SAFETY_LIMIT = 10000;
 let prestigePoints = 0;
 let gameHasReachedFirstGoal = false; // Flag to manage goal state
@@ -175,7 +174,7 @@ const generatorsData = [
     }
 ];
 
-const INITIAL_CASH = generatorsData[0].currentCost; // Set initial cash to afford the first available Gen1 purchase
+const INITIAL_CASH = 0; // Game starts with 0 cash.
 let selectedBuyAmount = 1; // Default buy amount
 let cash = INITIAL_CASH;
 // Old individual generator state variables (genXTotalCount, genXPurchasedCount, genXCost) removed.
@@ -735,7 +734,7 @@ setInterval(() => {
     // Update generator boost rates
     generatorsData.forEach(gen => {
         if (gen.totalCount > 0) {
-            gen.boostRate += 0.001;
+            gen.boostRate += 0.01; // Changed increment from 0.001 to 0.01
             // Optional: Cap boostRate if needed, e.g., gen.boostRate = Math.min(gen.boostRate, MAX_BOOST_RATE);
             // For now, no cap as per current plan.
         }
