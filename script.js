@@ -409,12 +409,19 @@ function formatHex(num) {
 }
 
 function formatScientific(num) {
-    if (num === undefined || num === null) return '0';
-    if (num === 0) return '0.00e0'; // Or just '0' if preferred for zero
+    if (num === undefined || num === null) {
+        return "0"; // Consistent with other formatters' handling of undefined/null
+    }
+    // No explicit isNaN check here, assuming inputs are numbers or will be handled by formatStandardSignificant.
 
-    // toExponential(2) gives two digits after the decimal point.
-    // Replace 'e+' with 'e' for a cleaner look if desired, or keep 'e+'.
-    return num.toExponential(2).replace('e+', 'e');
+    const absNum = Math.abs(num);
+
+    if (absNum < 10) { // This condition also correctly routes num = 0 to formatStandardSignificant
+        return formatStandardSignificant(num); // formatStandardSignificant handles 0 and negative numbers correctly
+    } else {
+        // absNum >= 10
+        return num.toExponential(2).replace('e+', 'e');
+    }
 }
 
 function formatTimeToBuy(totalSeconds) {
