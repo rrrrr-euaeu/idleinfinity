@@ -79,7 +79,8 @@ body {
     margin-bottom: 15px;
     background-color: #e9e9e9;
     border-radius: 5px;
-    width: fit-content;
+    width: fit-content; /* Will respect max-width if content is wider */
+    max-width: 600px; /* Default max-width similar to other blocks */
     margin-left: auto;
     margin-right: auto;
 }
@@ -400,4 +401,36 @@ button.can-buy:hover {
 #win-message { /* This ID is no longer used, milestone-message is */
     color: green;
     font-weight: bold;
+}
+
+/* Responsive max-widths for key content blocks */
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    #stats,
+    #total-boost-formula-display,
+    #buy-amount-selector,
+    #reset-container {
+        max-width: 720px;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    #stats,
+    #total-boost-formula-display,
+    #buy-amount-selector,
+    #reset-container {
+        max-width: 960px;
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    #stats,
+    #total-boost-formula-display,
+    #buy-amount-selector,
+    #reset-container {
+        max-width: 1140px;
+    }
 }
