@@ -20,6 +20,21 @@ body {
     box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
+#total-boost-formula-display {
+    font-size: 1.1em;
+    margin: 15px auto; /* Added more top/bottom margin, auto for horizontal centering */
+    padding: 10px;
+    text-align: center;
+    background-color: #fff; /* Similar to stats */
+    border: 1px solid #ccc; /* Similar to stats */
+    border-radius: 5px;   /* Similar to stats */
+    max-width: 600px;     /* Consistent with stats */
+    box-sizing: border-box;
+    overflow-wrap: break-word; /* Allow wrapping if the formula gets very long */
+    min-height: 1.5em; /* Ensure it has some height even when empty initially */
+    line-height: 1.4;  /* Improve readability of multi-line formula */
+}
+
 #stats p {
     margin: 8px 0;
     text-align: center; /* Explicitly center the paragraph content */
@@ -349,12 +364,33 @@ button { /* This is the general rule for generator buy buttons */
 }
 
 button.can-buy {
-    background-color: #007bff;
+    background-color: var(--gen-button-bg-color, #007bff); /* Use CSS custom property with a fallback */
     opacity: 1;
 }
 
 button.can-buy:hover {
-    background-color: #0056b3;
+    /* For hover, we might want to darken the custom property.
+       However, CSS doesn't have a standard way to darken a var() color directly.
+       A common approach is to use a semi-transparent black overlay or define a separate hover color property.
+       For now, let's keep it simple and use a fixed darker shade or remove the specific hover background change
+       if the themeColor itself should be the primary source of color.
+       Given the existing structure, we'll use a slightly darker version of the fallback for now,
+       or ideally, this would also be handled by a second CSS variable if per-generator hover colors are desired.
+       Let's assume for now that a generic darken effect on hover is acceptable or that the theme color doesn't change on hover.
+       To keep it consistent with the previous behavior of a specific hover color, let's use a fixed one.
+       A better long-term solution might involve JavaScript to calculate and set a --gen-button-hover-bg-color.
+       For this step, we'll just ensure the var is used for the base state.
+       If we want the hover to be a darker version of the theme color, that's a more complex change.
+       Let's make it slightly darker than the fallback, similar to original behavior.
+       Or, more simply, let the hover state not change the background-color if it's themed.
+       Let's try removing the specific background-color change on hover for themed buttons,
+       allowing the theme color to persist, and only applying a filter or transform for feedback.
+       For now, to match the task, only the base `can-buy` state is the focus for `var()`.
+       The hover effect can be a generic one or removed if it conflicts with theming.
+       Let's try using filter for hover to not override the themeColor.
+    */
+    filter: brightness(85%); /* Example: darken the button on hover */
+    /* background-color: #0056b3; */ /* Remove direct color setting if theme is applied */
 }
 
 #win-message { /* This ID is no longer used, milestone-message is */

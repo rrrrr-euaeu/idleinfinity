@@ -20,6 +20,7 @@ const generatorsData = [
         totalCount: 1,   // Starts with 1 generator
         purchasedCount: 1, // Assumed this one was 'purchased' at start
         boostRate: 1.0,
+        themeColor: '#FF6B6B', // Coral Red
         nameDisplayId: 'gen1-name-display',
         levelDisplayId: 'gen1-level-display',
         buttonId: 'buy-gen1',
@@ -37,6 +38,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
+        themeColor: '#FFD166', // Sunglow Yellow
         nameDisplayId: 'gen2-name-display',
         levelDisplayId: 'gen2-level-display',
         buttonId: 'buy-gen2',
@@ -54,6 +56,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
+        themeColor: '#06D6A0', // Caribbean Green
         nameDisplayId: 'gen3-name-display',
         levelDisplayId: 'gen3-level-display',
         buttonId: 'buy-gen3',
@@ -71,6 +74,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
+        themeColor: '#118AB2', // Blue Sapphire
         nameDisplayId: 'gen4-name-display',
         levelDisplayId: 'gen4-level-display',
         buttonId: 'buy-gen4',
@@ -88,6 +92,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
+        themeColor: '#073B4C', // Midnight Blue
         nameDisplayId: 'gen5-name-display',
         levelDisplayId: 'gen5-level-display',
         buttonId: 'buy-gen5',
@@ -105,6 +110,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
+        themeColor: '#E76F51', // Burnt Sienna
         nameDisplayId: 'gen6-name-display',
         levelDisplayId: 'gen6-level-display',
         buttonId: 'buy-gen6',
@@ -122,6 +128,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
+        themeColor: '#F4A261', // Sandy Brown
         nameDisplayId: 'gen7-name-display',
         levelDisplayId: 'gen7-level-display',
         buttonId: 'buy-gen7',
@@ -139,6 +146,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
+        themeColor: '#2A9D8F', // Jungle Green
         nameDisplayId: 'gen8-name-display',
         levelDisplayId: 'gen8-level-display',
         buttonId: 'buy-gen8',
@@ -156,6 +164,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
+        themeColor: '#9B5DE5', // Lavender Indigo
         nameDisplayId: 'gen9-name-display',
         levelDisplayId: 'gen9-level-display',
         buttonId: 'buy-gen9',
@@ -188,6 +197,7 @@ const numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]
 const incomePerSecondDisplay = document.getElementById('income-per-second-display');
 const resetBoostInfoContainer = document.getElementById('reset-boost-info-container'); // Already exists, but good to confirm
 const resetBoostDisplay = document.getElementById('reset-boost-display');
+const totalBoostFormulaDisplay = document.getElementById('total-boost-formula-display');
 
 
 generatorsData.forEach(gen => {
@@ -195,6 +205,7 @@ generatorsData.forEach(gen => {
     gen.levelDisplayElement = document.getElementById(gen.levelDisplayId);
     gen.buttonElement = document.getElementById(gen.buttonId);
     if (gen.buttonElement) { // Ensure buttonElement was found before trying to use it
+        gen.buttonElement.style.setProperty('--gen-button-bg-color', gen.themeColor); // Set CSS custom property
         gen.actionRowElement = gen.buttonElement.closest('.generator-action-row');
         if (gen.actionRowElement) { // Ensure actionRowElement exists before querying inside it
             gen.boostDisplayElement = gen.actionRowElement.querySelector('.generator-boost-display');
@@ -453,6 +464,23 @@ function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncrea
 
 function updateDisplay() {
     cashDisplay.textContent = formatNumber(cash);
+
+    // Update Total Boost Formula Display
+    if (totalBoostFormulaDisplay) {
+        const boostFormulaParts = [];
+        generatorsData.forEach(gen => {
+            // Always include all generators in the formula display
+            const formattedBoostRate = gen.boostRate.toFixed(3);
+            boostFormulaParts.push(`<span style="color: ${gen.themeColor}; font-weight: bold;">${formattedBoostRate}</span>`);
+        });
+
+        const formattedResetBoost = resetBoostRate.toFixed(1);
+        let resetBoostStyle = prestigePoints > 0 ? 'color: grey;' : '';
+        // Ensure "Reset()" is part of the text, and apply style if prestigePoints > 0
+        boostFormulaParts.push(`<span class="reset-boost-value" style="${resetBoostStyle}">Reset(${formattedResetBoost})</span>`);
+
+        totalBoostFormulaDisplay.innerHTML = boostFormulaParts.join(" × ");
+    }
 
     // Update Prestige Points and Reset Boost Display
     if (prestigeInfoContainer) {
