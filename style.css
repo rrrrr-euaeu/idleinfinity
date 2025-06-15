@@ -10,10 +10,10 @@ body {
 
 #stats {
     margin-bottom: 20px;
-    padding: 15px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    border-radius: 5px;
+    /* padding: 15px; */ /* Removed padding */
+    /* border: 1px solid #ccc; */ /* Removed border */
+    /* background-color: #fff; */ /* Removed background-color */
+    /* border-radius: 5px; */ /* Removed border-radius */
     min-height: 40px;
     width: 100%; /* Make stats bar take more width */
     max-width: 600px; /* But not too wide */
@@ -33,6 +33,14 @@ body {
     overflow-wrap: break-word; /* Allow wrapping if the formula gets very long */
     min-height: 1.5em; /* Ensure it has some height even when empty initially */
     line-height: 1.4;  /* Improve readability of multi-line formula */
+}
+
+.income-display-in-boost-area {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.9em;
+    font-weight: bold; /* Carried over from #income-per-second-display */
+    color: #264653;    /* Carried over from #income-per-second-display */
 }
 
 #stats p {

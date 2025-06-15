@@ -474,12 +474,18 @@ function updateDisplay() {
             boostFormulaParts.push(`<span style="color: ${gen.themeColor}; font-weight: bold;">${formattedBoostRate}</span>`);
         });
 
-        const formattedResetBoost = resetBoostRate.toFixed(1);
-        let resetBoostStyle = prestigePoints > 0 ? 'color: grey;' : '';
-        // Ensure "Reset()" is part of the text, and apply style if prestigePoints > 0
-        boostFormulaParts.push(`<span class="reset-boost-value" style="${resetBoostStyle}">Reset(${formattedResetBoost})</span>`);
+        if (prestigePoints > 0) {
+            const formattedResetBoost = resetBoostRate.toFixed(1);
+            // Style for grey color and bold font weight, similar to other boost numbers.
+            const resetBoostSpan = `<span style="color: grey; font-weight: bold;">${formattedResetBoost}</span>`;
+            boostFormulaParts.push(resetBoostSpan);
+        }
 
-        totalBoostFormulaDisplay.innerHTML = boostFormulaParts.join(" × ");
+        let formulaString = boostFormulaParts.join(" × ");
+        // actualCashPerSecond is calculated before this block in updateDisplay
+        let incomeString = `<br><span class="income-display-in-boost-area">Income: ${formatNumber(actualCashPerSecond)} /s</span>`;
+
+        totalBoostFormulaDisplay.innerHTML = formulaString + incomeString;
     }
 
     // Update Prestige Points and Reset Boost Display
@@ -511,9 +517,9 @@ function updateDisplay() {
     if (generatorsData[0] && generatorsData[0].totalCount > 0) {
         actualCashPerSecond = generatorsData[0].totalCount * combinedGeneratorBoostForIncome * resetBoostRate;
     }
-    if (incomePerSecondDisplay) {
-        incomePerSecondDisplay.textContent = formatNumber(actualCashPerSecond);
-    }
+    // if (incomePerSecondDisplay) { // Old income display - commented out
+    //     incomePerSecondDisplay.textContent = formatNumber(actualCashPerSecond);
+    // }
 
     generatorsData.forEach((gen, index) => {
         // Visibility Control
