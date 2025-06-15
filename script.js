@@ -556,7 +556,7 @@ function updateDisplay() {
         }
         // Generator-Specific Boost Display
         if (gen.boostDisplayElement) {
-            gen.boostDisplayElement.textContent = "Boost: " + gen.boostRate.toFixed(3);
+            // gen.boostDisplayElement.textContent = "Boost: " + gen.boostRate.toFixed(3); // Removed as per subtask
         }
 
         // Update Buy Button

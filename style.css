@@ -341,12 +341,7 @@ body {
     color: #555;
 }
 
-.generator-boost-display {
-    display: block; /* To appear on a new line below level */
-    font-size: 0.85em;
-    color: #2a9d8f; /* A teal/greenish color for boost */
-    margin-top: 3px; /* Little space from the level display */
-}
+/* Removed .generator-boost-display rule as the element is no longer in HTML */
 
 .time-to-buy {
     color: grey;
