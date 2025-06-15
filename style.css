@@ -8,81 +8,97 @@ body {
     background-color: #f0f0f0;
 }
 
+.info-panel-card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 4px 8px rgba(0,0,0,0.05);
+    margin-bottom: 20px; /* Space below the card */
+    /* width: 100%; /* This will be constrained by the parent's max-width in media queries */
+    /* max-width will be applied to this card element via media queries later */
+    box-sizing: border-box;
+    /* Default max-width for the card, will be overridden by media queries */
+    max-width: 600px;
+    /* Ensure the card itself is centered if it's not a direct child of a flex container that centers it */
+    margin-left: auto;
+    margin-right: auto;
+}
+
 #stats {
-    margin-bottom: 20px;
-    /* padding: 15px; */ /* Removed padding */
-    /* border: 1px solid #ccc; */ /* Removed border */
-    /* background-color: #fff; */ /* Removed background-color */
-    /* border-radius: 5px; */ /* Removed border-radius */
-    min-height: 40px;
-    width: 100%; /* Make stats bar take more width */
-    max-width: 600px; /* But not too wide */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    margin-bottom: 10px; /* Reduced margin for spacing within card */
+    /* padding: 15px; */ /* Removed, card handles padding */
+    /* border: 1px solid #ccc; */ /* Removed, card handles border */
+    /* background-color: #fff; */ /* Removed, card handles background */
+    /* border-radius: 5px; */ /* Removed, card handles radius */
+    min-height: 40px; /* Keep for structure if needed */
+    width: 100%;
+    /* max-width: 600px; */ /* Removed, card will have max-width */
+    box-sizing: border-box;
 }
 
 #total-boost-formula-display {
     font-size: 1.1em;
-    margin: 15px auto; /* Added more top/bottom margin, auto for horizontal centering */
-    padding: 10px;
+    margin: 10px 0; /* Adjusted for spacing within card */
+    /* padding: 10px; */      /* Removed, card handles padding */
     text-align: center;
-    background-color: #fff; /* Similar to stats */
-    border: 1px solid #ccc; /* Similar to stats */
-    border-radius: 5px;   /* Similar to stats */
-    max-width: 600px;     /* Consistent with stats */
+    /* background-color: #fff; */ /* Removed */
+    /* border: 1px solid #ccc; */ /* Removed */
+    /* border-radius: 5px; */   /* Removed */
+    /* max-width: 600px; */     /* Removed, card will have max-width */
     box-sizing: border-box;
-    overflow-wrap: break-word; /* Allow wrapping if the formula gets very long */
-    min-height: 1.5em; /* Ensure it has some height even when empty initially */
-    line-height: 1.4;  /* Improve readability of multi-line formula */
+    overflow-wrap: break-word;
+    min-height: 1.5em;
+    line-height: 1.4;
 }
 
 .income-display-in-boost-area {
     display: inline-block;
     margin-top: 5px;
     font-size: 0.9em;
-    font-weight: bold; /* Carried over from #income-per-second-display */
-    color: #264653;    /* Carried over from #income-per-second-display */
+    font-weight: bold;
+    color: #264653;
 }
 
 #stats p {
     margin: 8px 0;
-    text-align: center; /* Explicitly center the paragraph content */
+    text-align: center;
 }
 
 #cash {
-    font-weight: bold;
-    color: #2c3e50; /* Example: Dark blue/grey for cash */
+    font-weight: bold;   /* Ensured bold */
+    font-size: 1.3em;    /* Increased font size */
+    color: #2c3e50;
 }
 
 #prestige-points-display {
     font-weight: bold;
-    color: #e67e22; /* Example: Carrot color */
-    margin-left: 10px; /* Space after the pipe separator */
+    color: #e67e22;
+    margin-left: 10px;
 }
 
-#reset-boost-display {
+#reset-boost-display { /* This ID is no longer used in HTML for stats bar */
     font-weight: bold;
-    color: #f4a261; /* An orange/sandy color for reset boost */
+    color: #f4a261;
     margin-left: 5px;
 }
 
-#income-per-second-display {
+#income-per-second-display { /* This ID is no longer used in HTML for stats bar */
     font-weight: bold;
-    color: #264653; /* A dark blue/cyan for income rate */
+    color: #264653;
 }
 
 #buy-amount-selector {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px 0;
-    margin-top: 15px; /* Added for consistent spacing */
-    margin-bottom: 15px;
-    background-color: #e9e9e9;
-    border-radius: 5px;
-    width: fit-content; /* Will respect max-width if content is wider */
-    max-width: 600px; /* Default max-width similar to other blocks */
-    margin-left: auto;
-    margin-right: auto;
+    padding: 10px 0; /* Kept vertical padding */
+    margin: 15px 0; /* Adjusted for spacing within card, no auto horizontal margin needed if card centers content or if it's display:flex */
+    /* background-color: #e9e9e9; */ /* Removed */
+    /* border-radius: 5px; */ /* Removed */
+    width: fit-content;
+    /* max-width: 600px; */ /* Removed, card will have max-width */
+    /* margin-left: auto; */ /* Removed, assuming card or body centers it */
+    /* margin-right: auto; */ /* Removed */
 }
 #buy-amount-selector span {
     margin-left: 15px;
@@ -144,12 +160,12 @@ body {
     overflow: hidden;
     transition: height 0.5s ease-in-out;
     text-align: center;
-    padding: 0px 20px;
-    margin-top: 15px;
-    margin-bottom: 15px;
+    padding: 0px 20px; /* Keep padding for content inside */
+    margin-top: 15px; /* This will be relative to the card if it's inside */
+    margin-bottom: 15px; /* This will be relative to the card if it's inside */
     box-sizing: border-box;
     width: 100%;
-    max-width: 600px;
+    /* max-width: 600px; */ /* Removed, card will have max-width */
 }
 #milestone-message h2 {
     color: #27ae60;
@@ -407,10 +423,13 @@ button.can-buy:hover {
 
 /* Medium devices (tablets, 768px and up) */
 @media (min-width: 768px) {
-    #stats,
+    #stats, /* These will be wrapped by .info-panel-card which will get responsive max-width */
     #total-boost-formula-display,
     #buy-amount-selector,
     #reset-container {
+        /* max-width: 720px; */ /* Max-width control will shift to .info-panel-card */
+    }
+    .info-panel-card { /* Add this if #info-card-wrapper is not used, or target the wrapper ID */
         max-width: 720px;
     }
 }
@@ -421,6 +440,9 @@ button.can-buy:hover {
     #total-boost-formula-display,
     #buy-amount-selector,
     #reset-container {
+        /* max-width: 960px; */
+    }
+    .info-panel-card {
         max-width: 960px;
     }
 }
@@ -431,6 +453,9 @@ button.can-buy:hover {
     #total-boost-formula-display,
     #buy-amount-selector,
     #reset-container {
+        /* max-width: 1140px; */
+    }
+    .info-panel-card {
         max-width: 1140px;
     }
 }
