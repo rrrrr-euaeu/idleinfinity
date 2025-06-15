@@ -333,6 +333,63 @@ function formatStandard(num) {
     return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
 
+// New function for standard formatting with significant digits logic
+function formatStandardSignificant(num) {
+    if (num === undefined || num === null) return '0';
+    if (num === 0) return "0";
+    if (num < 0) return '-' + formatStandardSignificant(Math.abs(num));
+
+    // Handle numbers less than 100 with specific decimal places
+    if (num < 0.00001 && num > 0) return "0"; // Or a very small indicator like "<0.00001"
+    if (num < 0.01) return parseFloat(num.toFixed(4)).toString(); // e.g., 0.001234 -> "0.0012"
+    if (num < 1) return parseFloat(num.toFixed(3)).toString();    // e.g., 0.1234 -> "0.123"
+    if (num < 10) return parseFloat(num.toFixed(2)).toString();   // e.g., 1.234 -> "1.23"
+    if (num < 100) return parseFloat(num.toFixed(1)).toString();  // e.g., 12.34 -> "12.3"
+
+    // Handle numbers from 100 up to 1e9 (exclusive of 1e9)
+    if (num < 1e9) {
+        return num.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+    }
+
+    // Handle numbers 1e9 and above (Billions, Trillions, etc.)
+    // This logic is adapted from the original formatStandard function
+    if (num >= 1e18) { // Scientific notation for numbers >= 1e18 (1京)
+        return num.toExponential(2).replace('e+', 'e');
+    }
+    if (num >= 1e15) { // Suffix notation for Qa (1千兆 = 1e15) for numbers in [1e15, 1e18)
+        let value = num / 1e15;
+        if (value < 10) return value.toFixed(2) + 'Qa';
+        if (value < 100) return value.toFixed(1) + 'Qa';
+        return Math.floor(value).toFixed(0) + 'Qa';
+    }
+    if (num >= 1e12) { // Suffix notation for T (1兆 = 1e12) for numbers in [1e12, 1e15)
+        let value = num / 1e12;
+        if (value < 10) return value.toFixed(2) + 'T';
+        if (value < 100) return value.toFixed(1) + 'T';
+        return Math.floor(value).toFixed(0) + 'T';
+    }
+    // This part already handles num >= 1e9 from the condition above.
+    // So, we are in the B range if we reach here.
+    let value = num / 1e9;
+    if (value < 10) return value.toFixed(2) + 'B';
+    if (value < 100) return value.toFixed(1) + 'B';
+    return Math.floor(value).toFixed(0) + 'B';
+}
+
+// New main number formatting router function
+function formatNumberSignificant(num, formatType = selectedNumberFormat) { // Pass formatType or use global
+    switch (formatType) {
+        case 'standard':
+            return formatStandardSignificant(num);
+        case 'hex':
+            return formatHex(num); // Call original formatHex
+        case 'scientific':
+            return formatScientific(num); // Call original formatScientific
+        default:
+            return formatStandardSignificant(num);
+    }
+}
+
 function formatHex(num) {
     if (num === undefined || num === null) return '0';
     if (num === 0) return '0';
@@ -414,17 +471,10 @@ function formatTimeToBuy(totalSeconds) {
 }
 
 function formatNumber(num) {
-    switch (selectedNumberFormat) {
-        case 'standard':
-            return formatStandard(num);
-        case 'hex':
-            return formatHex(num);
-        case 'scientific':
-            return formatScientific(num);
-        default:
-            // Fallback to standard or a simple toString if something goes wrong
-            return formatStandard(num); // Or num.toString();
-    }
+    // This function is now superseded by formatNumberSignificant.
+    // It can be kept for compatibility or removed if all calls are updated.
+    // For now, let it call the new function with the global selectedNumberFormat.
+    return formatNumberSignificant(num, selectedNumberFormat);
 }
 
 // Calculates the total cost for buying a specific amount of a generator
@@ -481,12 +531,12 @@ function updateDisplay() {
         const boostFormulaParts = [];
         generatorsData.forEach(gen => {
             // Always include all generators in the formula display
-            const formattedBoostRate = gen.boostRate.toFixed(3);
+            const formattedBoostRate = formatNumber(gen.boostRate); // Use main formatting function
             boostFormulaParts.push(`<span style="color: ${gen.themeColor}; font-weight: bold;">${formattedBoostRate}</span>`);
         });
 
         if (prestigePoints > 0) {
-            const formattedResetBoost = resetBoostRate.toFixed(1);
+            const formattedResetBoost = formatNumber(resetBoostRate); // Use main formatting function
             // Style for grey color and bold font weight, similar to other boost numbers.
             const resetBoostSpan = `<span style="color: grey; font-weight: bold;">${formattedResetBoost}</span>`;
             boostFormulaParts.push(resetBoostSpan);
