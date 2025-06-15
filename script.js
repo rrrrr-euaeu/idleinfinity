@@ -391,21 +391,53 @@ function formatNumberSignificant(num, formatType = selectedNumberFormat) { // Pa
 }
 
 function formatHex(num) {
-    if (num === undefined || num === null) return '0';
-    if (num === 0) return '0';
-    if (num < 0) return '-' + formatHex(Math.abs(num)); // Handle negative numbers if necessary
+    if (num === undefined || num === null) return "0";
+    if (num === 0) return "0";
 
-    let hexString = Math.floor(num).toString(16).toLowerCase(); // Ensure integer, convert to hex, lowercase
+    const sign = num < 0 ? "-" : "";
+    const absNum = Math.abs(num);
 
-    // Add space every 4 characters from the right
-    let formattedHexString = '';
-    for (let i = 0; i < hexString.length; i++) {
-        if (i > 0 && (hexString.length - i) % 4 === 0) {
-            formattedHexString += ' ';
+    const integerPart = Math.floor(absNum);
+    let fractionalPart = absNum - integerPart;
+
+    let integerHex = integerPart.toString(16).toLowerCase();
+    let formattedIntegerHex = '';
+    for (let i = 0; i < integerHex.length; i++) {
+        if (i > 0 && (integerHex.length - i) % 4 === 0) {
+            formattedIntegerHex += ' ';
         }
-        formattedHexString += hexString[i];
+        formattedIntegerHex += integerHex[i];
     }
-    return formattedHexString;
+    integerHex = formattedIntegerHex || '0'; // Ensure '0' if integerHex was empty (e.g. for num=0.5)
+
+    let fractionalHex = "";
+    if (absNum < 1000 && fractionalPart > 1e-7) { // Threshold for showing fraction and avoid tiny fractions
+        for (let i = 0; i < 3; i++) { // Max 3 hex decimal places
+            fractionalPart *= 16;
+            const digit = Math.floor(fractionalPart);
+            fractionalHex += digit.toString(16).toLowerCase();
+            fractionalPart -= digit;
+            if (fractionalPart < 1e-7) break; // Stop if remainder is negligible
+        }
+        // Remove trailing zeros from fractionalHex
+        while (fractionalHex.length > 0 && fractionalHex.endsWith('0')) {
+            fractionalHex = fractionalHex.slice(0, -1);
+        }
+    }
+
+    if (integerPart === 0 && fractionalHex === "") {
+        return "0"; // Handles cases like 0.000001 which don't produce fractional hex digits
+    }
+
+    let finalResult = integerHex;
+    if (fractionalHex !== "") {
+        finalResult += "." + fractionalHex;
+    }
+
+    // Avoid "-0" if the number was negative but rounded/formatted to "0" (e.g. -0.0000001)
+    if (finalResult === "0") return "0";
+
+    return sign + finalResult;
 }
 
 function formatScientific(num) {
