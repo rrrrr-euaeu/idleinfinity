@@ -195,9 +195,9 @@ const optionsButton = document.getElementById('options-button');
 const optionsPanel = document.getElementById('options-panel');
 // const closeOptionsButton = document.getElementById('close-options-button'); // Removed
 const numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
-const incomePerSecondDisplay = document.getElementById('income-per-second-display');
-const resetBoostInfoContainer = document.getElementById('reset-boost-info-container'); // Already exists, but good to confirm
-const resetBoostDisplay = document.getElementById('reset-boost-display');
+// const incomePerSecondDisplay = document.getElementById('income-per-second-display'); // Element removed from HTML
+// const resetBoostInfoContainer = document.getElementById('reset-boost-info-container'); // Element removed from HTML
+// const resetBoostDisplay = document.getElementById('reset-boost-display'); // Element removed from HTML
 const totalBoostFormulaDisplay = document.getElementById('total-boost-formula-display');
 
 
@@ -566,16 +566,16 @@ function updateDisplay() {
             prestigeInfoContainer.style.display = 'none';
         }
     }
-    if (resetBoostInfoContainer) {
-        if (prestigePoints > 0) {
-            resetBoostInfoContainer.style.display = 'inline';
-            if (resetBoostDisplay) {
-                resetBoostDisplay.textContent = resetBoostRate.toFixed(1);
-            }
-        } else {
-            resetBoostInfoContainer.style.display = 'none';
-        }
-    }
+    // if (resetBoostInfoContainer) { // Logic for old reset boost display in #stats - REMOVED
+    //     if (prestigePoints > 0) {
+    //         resetBoostInfoContainer.style.display = 'inline';
+    //         if (resetBoostDisplay) {
+    //             resetBoostDisplay.textContent = resetBoostRate.toFixed(1);
+    //         }
+    //     } else {
+    //         resetBoostInfoContainer.style.display = 'none';
+    //     }
+    // }
 
     // Update Income Per Second Display block is now moved above the totalBoostFormulaDisplay update.
     // The old commented-out lines for incomePerSecondDisplay are fine where they are (or were, if part of the moved block).
