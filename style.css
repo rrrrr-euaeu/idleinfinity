@@ -162,12 +162,14 @@ body {
     overflow: hidden;
     transition: height 0.5s ease-in-out;
     text-align: center;
-    padding: 0px 20px; /* Keep padding for content inside */
-    margin-top: 15px; /* This will be relative to the card if it's inside */
-    margin-bottom: 15px; /* This will be relative to the card if it's inside */
+    padding: 0px 20px;
+    margin-top: 20px;    /* Changed from 15px */
+    margin-bottom: 20px; /* Changed from 15px */
+    margin-left: auto;   /* Added for centering */
+    margin-right: auto;  /* Added for centering */
     box-sizing: border-box;
     width: 100%;
-    /* max-width: 600px; */ /* Removed, card will have max-width */
+    max-width: 600px; /* Base max-width */
 }
 #milestone-message h2 {
     color: #27ae60;
@@ -426,7 +428,8 @@ button.can-buy:hover {
 /* Medium devices (tablets, 768px and up) */
 @media (min-width: 768px) {
     .info-panel-card,
-    #buy-amount-selector {
+    #buy-amount-selector,
+    #reset-container {
         max-width: 720px;
     }
 }
@@ -434,7 +437,8 @@ button.can-buy:hover {
 /* Large devices (desktops, 992px and up) */
 @media (min-width: 992px) {
     .info-panel-card,
-    #buy-amount-selector {
+    #buy-amount-selector,
+    #reset-container {
         max-width: 960px;
     }
 }
@@ -442,7 +446,8 @@ button.can-buy:hover {
 /* Extra large devices (large desktops, 1200px and up) */
 @media (min-width: 1200px) {
     .info-panel-card,
-    #buy-amount-selector {
+    #buy-amount-selector,
+    #reset-container {
         max-width: 1140px;
     }
 }
