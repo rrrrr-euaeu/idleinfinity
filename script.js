@@ -23,31 +23,74 @@ const initialGeneratorsData = [
         id: 1, namePrefix: "Generator", initialCost: 10, currentCost: 12, costIncreaseRate: 1.15,
         totalCount: 1, purchasedCount: 1, boostRate: 1.0,
         nameDisplayId: 'gen1-name-display', levelDisplayId: 'gen1-level-display', buttonId: 'buy-gen1',
-        themeColor: '#E63946'
+        themeColor: '#E63946' // Red
     },
-    // ... (rest of initialGeneratorsData as in previous versions) ...
+    {
+        id: 2, namePrefix: "Generator", initialCost: 100, currentCost: 100, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen2-name-display', levelDisplayId: 'gen2-level-display', buttonId: 'buy-gen2',
+        themeColor: '#F4A261' // Orange
+    },
+    {
+        id: 3, namePrefix: "Generator", initialCost: 1000, currentCost: 1000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen3-name-display', levelDisplayId: 'gen3-level-display', buttonId: 'buy-gen3',
+        themeColor: '#E9C46A' // Yellow
+    },
+    {
+        id: 4, namePrefix: "Generator", initialCost: 10000, currentCost: 10000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen4-name-display', levelDisplayId: 'gen4-level-display', buttonId: 'buy-gen4',
+        themeColor: '#A7C957' // Yellow-Green
+    },
+    {
+        id: 5, namePrefix: "Generator", initialCost: 100000, currentCost: 100000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen5-name-display', levelDisplayId: 'gen5-level-display', buttonId: 'buy-gen5',
+        themeColor: '#2A9D8F' // Green/Teal
+    },
+    {
+        id: 6, namePrefix: "Generator", initialCost: 1000000, currentCost: 1000000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen6-name-display', levelDisplayId: 'gen6-level-display', buttonId: 'buy-gen6',
+        themeColor: '#57A7C9' // Light Blue
+    },
+    {
+        id: 7, namePrefix: "Generator", initialCost: 10000000, currentCost: 10000000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen7-name-display', levelDisplayId: 'gen7-level-display', buttonId: 'buy-gen7',
+        themeColor: '#118AB2' // Blue
+    },
+    {
+        id: 8, namePrefix: "Generator", initialCost: 100000000, currentCost: 100000000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen8-name-display', levelDisplayId: 'gen8-level-display', buttonId: 'buy-gen8',
+        themeColor: '#9B5DE5' // Purple
+    },
     {
         id: 9, namePrefix: "Generator", initialCost: 1000000000, currentCost: 1000000000, costIncreaseRate: 1.20,
         totalCount: 0, purchasedCount: 0, boostRate: 1.0,
         nameDisplayId: 'gen9-name-display', levelDisplayId: 'gen9-level-display', buttonId: 'buy-gen9',
-        themeColor: '#F789A8'
+        themeColor: '#F789A8' // Pink
     }
 ];
 
-// const INITIAL_CASH = 0; // Replaced by gameSettings
+// const INITIAL_CASH = 0; // Replaced by gameSettings.initialCash
 let selectedBuyAmount = 1;
-let cash = gameSettings.initialCash; // Use gameSettings
+let cash = gameSettings.initialCash;
 
 // --- GeneratorManager Object ---
 const GeneratorManager = {
     generators: JSON.parse(JSON.stringify(initialGeneratorsData)),
 
     initDOMReferences: function() {
-        // ... (previous implementation)
+        // console.log("GeneratorManager: Initializing DOM references for its generators...");
+        if (!this.generators || this.generators.length === 0) {
+            // console.error("GeneratorManager: 'this.generators' is empty or not initialized. Cannot set DOM references.");
+            return;
+        }
         this.generators.forEach(gen => {
-            if (!gen.nameDisplayId || !gen.levelDisplayId || !gen.buttonId) {
-                return;
-            }
+            // DOM element references are null in initialGeneratorsData, set them here
             gen.nameDisplayElement = document.getElementById(gen.nameDisplayId);
             gen.levelDisplayElement = document.getElementById(gen.levelDisplayId);
             gen.buttonElement = document.getElementById(gen.buttonId);
@@ -55,10 +98,17 @@ const GeneratorManager = {
             if (gen.buttonElement) {
                 gen.buttonElement.style.setProperty('--gen-button-bg-color', gen.themeColor);
                 gen.actionRowElement = gen.buttonElement.closest('.generator-action-row');
+                if (!gen.actionRowElement) {
+                    // console.warn(`GeneratorManager: Action row not found for generator id: ${gen.id} via button ${gen.buttonId}`);
+                }
             } else {
+                // console.warn(`GeneratorManager: Button element not found for generator id: ${gen.id} with buttonId: ${gen.buttonId}`);
                 gen.actionRowElement = null;
             }
+            // if (!gen.nameDisplayElement) console.warn(`GeneratorManager: Name display element not found for gen id: ${gen.id} using ID ${gen.nameDisplayId}`);
+            // if (!gen.levelDisplayElement) console.warn(`GeneratorManager: Level display element not found for gen id: ${gen.id} using ID ${gen.levelDisplayId}`);
         });
+        // console.log("GeneratorManager: DOM references initialization attempt complete.");
     },
 
     getAllGenerators: function() {
@@ -90,7 +140,7 @@ const GeneratorManager = {
             totalSpent += costOfNextItem;
             itemsBought++;
             costOfNextItem = Math.ceil(costOfNextItem * gen.costIncreaseRate);
-            if (itemsBought >= gameSettings.maxBuySafetyLimit) { // Use gameSettings
+            if (itemsBought >= gameSettings.maxBuySafetyLimit) {
                 break;
             }
         }
@@ -109,7 +159,7 @@ const GeneratorManager = {
     updateBoostRates: function() {
         this.generators.forEach(gen => {
             if (gen.totalCount > 0) {
-                gen.boostRate += gameSettings.baseBoostIncrementPerSecond; // Use gameSettings
+                gen.boostRate += gameSettings.baseBoostIncrementPerSecond;
             }
         });
     },
@@ -127,44 +177,20 @@ const GeneratorManager = {
         this.generators.forEach(gen => {
             const pristineGen = initialGeneratorsData.find(pGen => pGen.id === gen.id);
 
-            if (gen.id === 1) {
-                gen.totalCount = 1;
-                gen.purchasedCount = 1;
-                gen.currentCost = Math.ceil(pristineGen.initialCost * pristineGen.costIncreaseRate);
+            if (pristineGen) { // Check if pristineGen was found
+                gen.totalCount = pristineGen.totalCount;
+                gen.purchasedCount = pristineGen.purchasedCount;
+                gen.currentCost = pristineGen.currentCost;
+                gen.boostRate = pristineGen.boostRate;
             } else {
-                gen.totalCount = 0;
-                gen.purchasedCount = 0;
-                gen.currentCost = pristineGen ? pristineGen.initialCost : gen.initialCost;
-            }
-            gen.boostRate = 1.0;
-        });
-    },
-
-    setupGeneratorButtonListeners: function() {
-        this.generators.forEach(gen => {
-            if (gen.buttonElement) {
-                gen.buttonElement.addEventListener('click', () => {
-                    let effectiveBuyAmount;
-                    let purchaseDetails;
-
-                    if (selectedBuyAmount === 'MAX') {
-                        purchaseDetails = this.calculateMaxBuyableAmount(gen, cash);
-                        effectiveBuyAmount = purchaseDetails.count;
-                    } else {
-                        effectiveBuyAmount = selectedBuyAmount;
-                        purchaseDetails = this.calculateCostForAmount(gen, effectiveBuyAmount);
-                    }
-
-                    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
-                        cash -= purchaseDetails.totalCost;
-                        this.purchaseGenerator(
-                            gen.id,
-                            effectiveBuyAmount,
-                            purchaseDetails.costForNextSingleItemAfterMax || purchaseDetails.costForNextSingleItem
-                        );
-                        updateDisplay();
-                    }
-                });
+                // Fallback or error if pristine data for a gen is missing (should not happen)
+                gen.totalCount = (gen.id === 1) ? 1 : 0;
+                gen.purchasedCount = (gen.id === 1) ? 1 : 0;
+                gen.currentCost = gen.initialCost; // May not be accurate if initialCost was not on pristineGen
+                if (gen.id === 1) { // Recalculate Gen1 currentCost based on its own initialCost and rate
+                    gen.currentCost = Math.ceil(gen.initialCost * gen.costIncreaseRate);
+                }
+                gen.boostRate = 1.0;
             }
         });
     }
@@ -225,8 +251,8 @@ function handleOptionsButtonClick() {
 
 function handleResetButtonClick() {
     prestigePoints++;
-    resetBoostRate += gameSettings.resetBoostIncrement; // Use gameSettings
-    cash = gameSettings.initialCash; // Use gameSettings to reset to 0
+    resetBoostRate += gameSettings.resetBoostIncrement;
+    cash = gameSettings.initialCash;
 
     GeneratorManager.resetGeneratorStates();
 
@@ -433,7 +459,7 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
             gen.actionRowElement.style.visibility = 'visible';
         } else {
             const prevGen = GeneratorManager.getAllGenerators()[index - 1];
-            if (prevGen && prevGen.totalCount >= gameSettings.generatorUnlockThreshold) { // Use gameSettings
+            if (prevGen && prevGen.totalCount >= gameSettings.generatorUnlockThreshold) {
                 gen.actionRowElement.style.visibility = 'visible';
             } else {
                 gen.actionRowElement.style.visibility = 'hidden';
@@ -497,7 +523,7 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
 }
 
 function updateResetContainerVisibility(currentCash) {
-    if (!gameHasReachedFirstGoal && currentCash >= gameSettings.firstGoalCash) { // Use gameSettings
+    if (!gameHasReachedFirstGoal && currentCash >= gameSettings.firstGoalCash) {
         if (domElements.milestoneMessageHeader) {
             domElements.milestoneMessageHeader.textContent = 'First Critical Point Reached!';
         }
