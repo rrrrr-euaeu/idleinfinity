@@ -6,7 +6,7 @@ const GENERATOR_UNLOCK_THRESHOLD = 5;
 const MAX_BUY_SAFETY_LIMIT = 10000;
 let prestigePoints = 0;
 let gameHasReachedFirstGoal = false; // Flag to manage goal state
-let selectedNumberFormat = 'standard'; // Default number format
+// let selectedNumberFormat = 'standard'; // REMOVED - Now managed by NumberFormatter
 let resetBoostRate = 1.0;
 
 const generatorsData = [
@@ -174,8 +174,8 @@ const generatorsData = [
     }
 ];
 
-const INITIAL_CASH = 0; // Game starts with 0 cash.
-let selectedBuyAmount = 1; // Default buy amount
+const INITIAL_CASH = 0;
+let selectedBuyAmount = 1;
 let cash = INITIAL_CASH;
 
 const cashDisplay = document.getElementById('cash');
@@ -189,9 +189,6 @@ const prestigeInfoContainer = document.getElementById('prestige-info-container')
 const optionsButton = document.getElementById('options-button');
 const optionsPanel = document.getElementById('options-panel');
 const numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
-// const incomePerSecondDisplay = document.getElementById('income-per-second-display'); // Element removed from HTML
-// const resetBoostInfoContainer = document.getElementById('reset-boost-info-container'); // Element removed from HTML
-// const resetBoostDisplay = document.getElementById('reset-boost-display'); // Element removed from HTML
 const totalBoostFormulaDisplay = document.getElementById('total-boost-formula-display');
 
 
@@ -264,11 +261,133 @@ if (optionsButton && optionsPanel) {
     });
 }
 
+// --- Number Formatter Object ---
+const NumberFormatter = {
+    selectedFormat: 'standard', // Default format
+
+    setSelectedFormat: function(formatType) {
+        this.selectedFormat = formatType;
+    },
+
+    standard: function(num) {
+        if (num === undefined || num === null) return '0';
+        if (num === 0) return "0";
+        if (num < 0) return '-' + this.standard(Math.abs(num));
+
+        if (num < 0.00001 && num > 0) return "0";
+        if (num < 0.01) return parseFloat(num.toFixed(4)).toString();
+        if (num < 1) return parseFloat(num.toFixed(3)).toString();
+        if (num < 10) return parseFloat(num.toFixed(2)).toString();
+        if (num < 100) return parseFloat(num.toFixed(1)).toString();
+
+        if (num < 1e9) {
+            return num.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+        }
+
+        if (num >= 1e18) {
+            return num.toExponential(2).replace('e+', 'e');
+        }
+        if (num >= 1e15) {
+            let value = num / 1e15;
+            if (value < 10) return parseFloat(value.toFixed(2)).toString() + 'Qa';
+            if (value < 100) return parseFloat(value.toFixed(1)).toString() + 'Qa';
+            return Math.floor(value).toString() + 'Qa';
+        }
+        if (num >= 1e12) {
+            let value = num / 1e12;
+            if (value < 10) return parseFloat(value.toFixed(2)).toString() + 'T';
+            if (value < 100) return parseFloat(value.toFixed(1)).toString() + 'T';
+            return Math.floor(value).toString() + 'T';
+        }
+
+        let value = num / 1e9; // Handles num >= 1e9
+        if (value < 10) return parseFloat(value.toFixed(2)).toString() + 'B';
+        if (value < 100) return parseFloat(value.toFixed(1)).toString() + 'B';
+        return Math.floor(value).toString() + 'B';
+    },
+
+    hex: function(num) {
+        if (num === undefined || num === null) return "0";
+        if (num === 0) return "0";
+
+        const sign = num < 0 ? "-" : "";
+        const absNum = Math.abs(num);
+
+        const integerPart = Math.floor(absNum);
+        let fractionalPart = absNum - integerPart;
+
+        let integerHex = integerPart.toString(16).toLowerCase();
+        let formattedIntegerHex = '';
+        for (let i = 0; i < integerHex.length; i++) {
+            if (i > 0 && (integerHex.length - i) % 4 === 0) {
+                formattedIntegerHex += ' ';
+            }
+            formattedIntegerHex += integerHex[i];
+        }
+        integerHex = formattedIntegerHex || '0';
+
+        let fractionalHex = "";
+        if (absNum < 1000 && fractionalPart > 1e-7) {
+            for (let i = 0; i < 3; i++) {
+                fractionalPart *= 16;
+                const digit = Math.floor(fractionalPart);
+                fractionalHex += digit.toString(16).toLowerCase();
+                fractionalPart -= digit;
+                if (fractionalPart < 1e-7) break;
+            }
+            while (fractionalHex.length > 0 && fractionalHex.endsWith('0')) {
+                fractionalHex = fractionalHex.slice(0, -1);
+            }
+        }
+
+        if (integerPart === 0 && fractionalHex === "") {
+            return "0";
+        }
+
+        let finalResult = integerHex;
+        if (fractionalHex !== "") {
+            finalResult += "." + fractionalHex;
+        }
+
+        if (finalResult === "0") return "0";
+
+        return sign + finalResult;
+    },
+
+    scientific: function(num) {
+        if (num === undefined || num === null) {
+            return "0";
+        }
+        const absNum = Math.abs(num);
+
+        if (absNum < 10) {
+            return this.standard(num);
+        } else {
+            return num.toExponential(2).replace('e+', 'e');
+        }
+    },
+
+    format: function(num) {
+        if (num === undefined || num === null) return "0";
+
+        switch (this.selectedFormat) {
+            case 'standard':
+                return this.standard(num);
+            case 'hex':
+                return this.hex(num);
+            case 'scientific':
+                return this.scientific(num);
+            default:
+                return this.standard(num);
+        }
+    }
+};
+
 if (numberFormatRadios) {
     numberFormatRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             if (radio.checked) {
-                selectedNumberFormat = radio.value;
+                NumberFormatter.setSelectedFormat(radio.value);
                 updateDisplay();
             }
         });
@@ -278,23 +397,23 @@ if (numberFormatRadios) {
 // --- New UI Update Helper Functions ---
 
 function updateGlobalStatsDisplay(currentCash, currentPrestigePoints, currentResetBoostRate, currentActualCashPerSecond) {
-    cashDisplay.textContent = formatNumber(currentCash);
+    cashDisplay.textContent = NumberFormatter.format(currentCash);
 
     if (totalBoostFormulaDisplay) {
         const boostFormulaParts = [];
         generatorsData.forEach(gen => {
-            const formattedBoostRate = formatNumber(gen.boostRate);
+            const formattedBoostRate = NumberFormatter.format(gen.boostRate);
             boostFormulaParts.push(`<span style="color: ${gen.themeColor}; font-weight: bold;">${formattedBoostRate}</span>`);
         });
 
         if (currentPrestigePoints > 0) {
-            const formattedResetBoost = formatNumber(currentResetBoostRate);
+            const formattedResetBoost = NumberFormatter.format(currentResetBoostRate);
             const resetBoostSpan = `<span style="color: grey; font-weight: bold;">${formattedResetBoost}</span>`;
             boostFormulaParts.push(resetBoostSpan);
         }
 
         let formulaString = boostFormulaParts.join(" × ");
-        let incomeString = `<br><span class="income-display-in-boost-area">Income: ${formatNumber(currentActualCashPerSecond)} /s</span>`;
+        let incomeString = `<br><span class="income-display-in-boost-area">Income: ${NumberFormatter.format(currentActualCashPerSecond)} /s</span>`;
         totalBoostFormulaDisplay.innerHTML = formulaString + incomeString;
     }
 
@@ -302,7 +421,7 @@ function updateGlobalStatsDisplay(currentCash, currentPrestigePoints, currentRes
         if (currentPrestigePoints > 0) {
             prestigeInfoContainer.style.display = 'inline';
             if (prestigePointsDisplay) {
-                prestigePointsDisplay.textContent = formatNumber(currentPrestigePoints);
+                prestigePointsDisplay.textContent = NumberFormatter.format(currentPrestigePoints);
             }
         } else {
             prestigeInfoContainer.style.display = 'none';
@@ -332,9 +451,9 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
         let producedCount = gen.totalCount - gen.purchasedCount;
         if (producedCount < 0) producedCount = 0;
         if (producedCount <= 0) {
-            gen.levelDisplayElement.textContent = "lv " + formatNumber(gen.purchasedCount);
+            gen.levelDisplayElement.textContent = "lv " + NumberFormatter.format(gen.purchasedCount);
         } else {
-            gen.levelDisplayElement.textContent = "lv " + formatNumber(gen.purchasedCount) + " + " + formatNumber(producedCount);
+            gen.levelDisplayElement.textContent = "lv " + NumberFormatter.format(gen.purchasedCount) + " + " + NumberFormatter.format(producedCount);
         }
     }
 
@@ -370,9 +489,9 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
         }
 
         gen.buttonElement.innerHTML =
-            "Buy " + formatNumber(displayAmount) +
+            "Buy " + NumberFormatter.format(displayAmount) +
             "<br><span class='time-to-buy'>" + timeToBuyString + "</span>" +
-            "<br>Cost: " + formatNumber(currentTotalCost);
+            "<br>Cost: " + NumberFormatter.format(currentTotalCost);
 
         let canAfford = currentCash >= currentTotalCost && displayAmount > 0;
         gen.buttonElement.classList.toggle('can-buy', canAfford);
@@ -395,143 +514,36 @@ function updateResetContainerVisibility(currentCash) {
 
 // --- End of New UI Update Helper Functions ---
 
+/*
+// Old global formatting functions - To be removed
 function formatStandard(num) {
     if (num === undefined || num === null) return '0';
     if (num === 0) return '0';
-
-    if (num >= 1e18) {
-        return num.toExponential(2).replace('e+', 'e');
-    }
-    if (num >= 1e15) {
-        let value = num / 1e15;
-        if (value < 10) return value.toFixed(2) + 'Qa';
-        if (value < 100) return value.toFixed(1) + 'Qa';
-        return Math.floor(value).toFixed(0) + 'Qa';
-    }
-    if (num >= 1e12) {
-        let value = num / 1e12;
-        if (value < 10) return value.toFixed(2) + 'T';
-        if (value < 100) return value.toFixed(1) + 'T';
-        return Math.floor(value).toFixed(0) + 'T';
-    }
-    if (num >= 1e9) {
-        let value = num / 1e9;
-        if (value < 10) return value.toFixed(2) + 'B';
-        if (value < 100) return value.toFixed(1) + 'B';
-        return Math.floor(value).toFixed(0) + 'B';
-    }
+    if (num >= 1e18) return num.toExponential(2).replace('e+', 'e');
+    if (num >= 1e15) { let v=num/1e15; return (v<10?v.toFixed(2):v<100?v.toFixed(1):Math.floor(v).toFixed(0))+'Qa'; }
+    if (num >= 1e12) { let v=num/1e12; return (v<10?v.toFixed(2):v<100?v.toFixed(1):Math.floor(v).toFixed(0))+'T'; }
+    if (num >= 1e9) { let v=num/1e9; return (v<10?v.toFixed(2):v<100?v.toFixed(1):Math.floor(v).toFixed(0))+'B'; }
     return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
-
 function formatStandardSignificant(num) {
     if (num === undefined || num === null) return '0';
     if (num === 0) return "0";
     if (num < 0) return '-' + formatStandardSignificant(Math.abs(num));
-
     if (num < 0.00001 && num > 0) return "0";
     if (num < 0.01) return parseFloat(num.toFixed(4)).toString();
     if (num < 1) return parseFloat(num.toFixed(3)).toString();
     if (num < 10) return parseFloat(num.toFixed(2)).toString();
     if (num < 100) return parseFloat(num.toFixed(1)).toString();
-
-    if (num < 1e9) {
-        return num.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
-    }
-
-    if (num >= 1e18) {
-        return num.toExponential(2).replace('e+', 'e');
-    }
-    if (num >= 1e15) {
-        let value = num / 1e15;
-        if (value < 10) return value.toFixed(2) + 'Qa';
-        if (value < 100) return value.toFixed(1) + 'Qa';
-        return Math.floor(value).toFixed(0) + 'Qa';
-    }
-    if (num >= 1e12) {
-        let value = num / 1e12;
-        if (value < 10) return value.toFixed(2) + 'T';
-        if (value < 100) return value.toFixed(1) + 'T';
-        return Math.floor(value).toFixed(0) + 'T';
-    }
-    let value = num / 1e9;
-    if (value < 10) return value.toFixed(2) + 'B';
-    if (value < 100) return value.toFixed(1) + 'B';
-    return Math.floor(value).toFixed(0) + 'B';
+    if (num < 1e9) return num.toLocaleString('en-US', {maximumFractionDigits:0, minimumFractionDigits:0});
+    if (num >= 1e18) return num.toExponential(2).replace('e+', 'e');
+    if (num >= 1e15) { let v=num/1e15; return (v<10?parseFloat(v.toFixed(2)).toString():v<100?parseFloat(v.toFixed(1)).toString():Math.floor(v).toString())+'Qa';}
+    if (num >= 1e12) { let v=num/1e12; return (v<10?parseFloat(v.toFixed(2)).toString():v<100?parseFloat(v.toFixed(1)).toString():Math.floor(v).toString())+'T';}
+    let v=num/1e9; return (v<10?parseFloat(v.toFixed(2)).toString():v<100?parseFloat(v.toFixed(1)).toString():Math.floor(v).toString())+'B';
 }
-
-function formatNumberSignificant(num, formatType = selectedNumberFormat) {
-    switch (formatType) {
-        case 'standard':
-            return formatStandardSignificant(num);
-        case 'hex':
-            return formatHex(num);
-        case 'scientific':
-            return formatScientific(num);
-        default:
-            return formatStandardSignificant(num);
-    }
-}
-
-function formatHex(num) {
-    if (num === undefined || num === null) return "0";
-    if (num === 0) return "0";
-
-    const sign = num < 0 ? "-" : "";
-    const absNum = Math.abs(num);
-
-    const integerPart = Math.floor(absNum);
-    let fractionalPart = absNum - integerPart;
-
-    let integerHex = integerPart.toString(16).toLowerCase();
-    let formattedIntegerHex = '';
-    for (let i = 0; i < integerHex.length; i++) {
-        if (i > 0 && (integerHex.length - i) % 4 === 0) {
-            formattedIntegerHex += ' ';
-        }
-        formattedIntegerHex += integerHex[i];
-    }
-    integerHex = formattedIntegerHex || '0';
-
-    let fractionalHex = "";
-    if (absNum < 1000 && fractionalPart > 1e-7) {
-        for (let i = 0; i < 3; i++) {
-            fractionalPart *= 16;
-            const digit = Math.floor(fractionalPart);
-            fractionalHex += digit.toString(16).toLowerCase();
-            fractionalPart -= digit;
-            if (fractionalPart < 1e-7) break;
-        }
-        while (fractionalHex.length > 0 && fractionalHex.endsWith('0')) {
-            fractionalHex = fractionalHex.slice(0, -1);
-        }
-    }
-
-    if (integerPart === 0 && fractionalHex === "") {
-        return "0";
-    }
-
-    let finalResult = integerHex;
-    if (fractionalHex !== "") {
-        finalResult += "." + fractionalHex;
-    }
-
-    if (finalResult === "0") return "0";
-
-    return sign + finalResult;
-}
-
-function formatScientific(num) {
-    if (num === undefined || num === null) {
-        return "0";
-    }
-    const absNum = Math.abs(num);
-
-    if (absNum < 10) {
-        return formatStandardSignificant(num);
-    } else {
-        return num.toExponential(2).replace('e+', 'e');
-    }
-}
+function formatNumberSignificant(num, formatType = selectedNumberFormat) { return "TEMP"; } // Old global router
+function formatHex(num) { return "TEMP_HEX"; } // Old global hex
+function formatScientific(num) { return "TEMP_SCI"; } // Old global scientific
+*/
 
 function formatTimeToBuy(totalSeconds) {
     if (!isFinite(totalSeconds) || totalSeconds < 0) {
@@ -582,8 +594,9 @@ function formatTimeToBuy(totalSeconds) {
     return parts.join(" ");
 }
 
+// Global formatNumber function now delegates to NumberFormatter
 function formatNumber(num) {
-    return formatNumberSignificant(num, selectedNumberFormat);
+    return NumberFormatter.format(num);
 }
 
 function calculateTotalCostForAmount(currentGeneratorCost, numberOfItems, costIncreaseRate) {
@@ -618,7 +631,6 @@ function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncrea
 }
 
 function updateDisplay() {
-    // (A) Calculate actualCashPerSecond FIRST
     let combinedGeneratorBoostForIncome = 1.0;
     generatorsData.forEach(g => { combinedGeneratorBoostForIncome *= g.boostRate; });
     let actualCashPerSecond = 0;
@@ -626,7 +638,6 @@ function updateDisplay() {
         actualCashPerSecond = generatorsData[0].totalCount * combinedGeneratorBoostForIncome * resetBoostRate;
     }
 
-    // (B) Call Helper Functions
     updateGlobalStatsDisplay(cash, prestigePoints, resetBoostRate, actualCashPerSecond);
 
     generatorsData.forEach((gen, index) => {
@@ -672,20 +683,17 @@ generatorsData.forEach(gen => {
 
 // Game loop - called every second
 setInterval(() => {
-    // Update generator boost rates
     generatorsData.forEach(gen => {
         if (gen.totalCount > 0) {
             gen.boostRate += 0.01;
         }
     });
 
-    // Calculate effective total boost from all generators for cash production
     let combinedGeneratorBoost = 1.0;
     generatorsData.forEach(gen => {
         combinedGeneratorBoost *= gen.boostRate;
     });
 
-    // Calculate cash produced this tick
     let cashProducedThisTick = 0;
     if (generatorsData[0] && generatorsData[0].totalCount > 0) {
         cashProducedThisTick = generatorsData[0].totalCount * combinedGeneratorBoost * resetBoostRate;
@@ -693,7 +701,6 @@ setInterval(() => {
 
     cash += cashProducedThisTick;
 
-    // Generator production (e.g., Gen9 produces Gen8, ..., Gen2 produces Gen1)
     for (let i = generatorsData.length - 1; i > 0; i--) {
         if (generatorsData[i].totalCount > 0) {
             generatorsData[i-1].totalCount += generatorsData[i].totalCount;
