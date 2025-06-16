@@ -19,7 +19,7 @@ const generatorsData = [
         totalCount: 1,   // Starts with 1 generator
         purchasedCount: 1, // Assumed this one was 'purchased' at start
         boostRate: 1.0,
-        themeColor: '#FF6B6B', // Coral Red
+        themeColor: '#E63946', // New Red
         nameDisplayId: 'gen1-name-display',
         levelDisplayId: 'gen1-level-display',
         buttonId: 'buy-gen1',
@@ -37,7 +37,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#FFD166', // Sunglow Yellow
+        themeColor: '#F4A261', // New Orange
         nameDisplayId: 'gen2-name-display',
         levelDisplayId: 'gen2-level-display',
         buttonId: 'buy-gen2',
@@ -55,7 +55,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#06D6A0', // Caribbean Green
+        themeColor: '#E9C46A', // New Yellow
         nameDisplayId: 'gen3-name-display',
         levelDisplayId: 'gen3-level-display',
         buttonId: 'buy-gen3',
@@ -73,7 +73,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#118AB2', // Blue Sapphire
+        themeColor: '#A7C957', // New Yellow-Green
         nameDisplayId: 'gen4-name-display',
         levelDisplayId: 'gen4-level-display',
         buttonId: 'buy-gen4',
@@ -91,7 +91,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#073B4C', // Midnight Blue
+        themeColor: '#2A9D8F', // New Green/Teal
         nameDisplayId: 'gen5-name-display',
         levelDisplayId: 'gen5-level-display',
         buttonId: 'buy-gen5',
@@ -109,7 +109,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#E76F51', // Burnt Sienna
+        themeColor: '#57A7C9', // New Light Blue/Sky Blue
         nameDisplayId: 'gen6-name-display',
         levelDisplayId: 'gen6-level-display',
         buttonId: 'buy-gen6',
@@ -127,7 +127,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#F4A261', // Sandy Brown
+        themeColor: '#118AB2', // New Blue
         nameDisplayId: 'gen7-name-display',
         levelDisplayId: 'gen7-level-display',
         buttonId: 'buy-gen7',
@@ -145,7 +145,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#2A9D8F', // Jungle Green
+        themeColor: '#9B5DE5', // New Purple/Lavender
         nameDisplayId: 'gen8-name-display',
         levelDisplayId: 'gen8-level-display',
         buttonId: 'buy-gen8',
@@ -163,7 +163,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#9B5DE5', // Lavender Indigo
+        themeColor: '#F789A8', // New Pink/Rose
         nameDisplayId: 'gen9-name-display',
         levelDisplayId: 'gen9-level-display',
         buttonId: 'buy-gen9',
