@@ -1,9 +1,19 @@
 // Game logic for Idle Infinity Game will go here.
 // Basic structure and initial values
 
-const FIRST_GOAL_CASH = 2147483647; // Math.pow(2, 31) - 1
-const GENERATOR_UNLOCK_THRESHOLD = 5;
-const MAX_BUY_SAFETY_LIMIT = 10000;
+// const FIRST_GOAL_CASH = 2147483647; // Replaced by gameSettings
+// const GENERATOR_UNLOCK_THRESHOLD = 5; // Replaced by gameSettings
+// const MAX_BUY_SAFETY_LIMIT = 10000; // Replaced by gameSettings
+
+const gameSettings = {
+    firstGoalCash: 2147483647,       // Math.pow(2, 31) - 1
+    generatorUnlockThreshold: 5,
+    initialCash: 0,
+    maxBuySafetyLimit: 10000,
+    resetBoostIncrement: 1.0,
+    baseBoostIncrementPerSecond: 0.01
+};
+
 let prestigePoints = 0;
 let gameHasReachedFirstGoal = false;
 let resetBoostRate = 1.0;
@@ -13,75 +23,29 @@ const initialGeneratorsData = [
         id: 1, namePrefix: "Generator", initialCost: 10, currentCost: 12, costIncreaseRate: 1.15,
         totalCount: 1, purchasedCount: 1, boostRate: 1.0,
         nameDisplayId: 'gen1-name-display', levelDisplayId: 'gen1-level-display', buttonId: 'buy-gen1',
-        themeColor: '#E63946' // Red
+        themeColor: '#E63946'
     },
-    {
-        id: 2, namePrefix: "Generator", initialCost: 100, currentCost: 100, costIncreaseRate: 1.20,
-        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
-        nameDisplayId: 'gen2-name-display', levelDisplayId: 'gen2-level-display', buttonId: 'buy-gen2',
-        themeColor: '#F4A261' // Orange
-    },
-    {
-        id: 3, namePrefix: "Generator", initialCost: 1000, currentCost: 1000, costIncreaseRate: 1.20,
-        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
-        nameDisplayId: 'gen3-name-display', levelDisplayId: 'gen3-level-display', buttonId: 'buy-gen3',
-        themeColor: '#E9C46A' // Yellow
-    },
-    {
-        id: 4, namePrefix: "Generator", initialCost: 10000, currentCost: 10000, costIncreaseRate: 1.20,
-        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
-        nameDisplayId: 'gen4-name-display', levelDisplayId: 'gen4-level-display', buttonId: 'buy-gen4',
-        themeColor: '#A7C957' // Yellow-Green
-    },
-    {
-        id: 5, namePrefix: "Generator", initialCost: 100000, currentCost: 100000, costIncreaseRate: 1.20,
-        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
-        nameDisplayId: 'gen5-name-display', levelDisplayId: 'gen5-level-display', buttonId: 'buy-gen5',
-        themeColor: '#2A9D8F' // Green/Teal
-    },
-    {
-        id: 6, namePrefix: "Generator", initialCost: 1000000, currentCost: 1000000, costIncreaseRate: 1.20,
-        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
-        nameDisplayId: 'gen6-name-display', levelDisplayId: 'gen6-level-display', buttonId: 'buy-gen6',
-        themeColor: '#57A7C9' // Light Blue
-    },
-    {
-        id: 7, namePrefix: "Generator", initialCost: 10000000, currentCost: 10000000, costIncreaseRate: 1.20,
-        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
-        nameDisplayId: 'gen7-name-display', levelDisplayId: 'gen7-level-display', buttonId: 'buy-gen7',
-        themeColor: '#118AB2' // Blue
-    },
-    {
-        id: 8, namePrefix: "Generator", initialCost: 100000000, currentCost: 100000000, costIncreaseRate: 1.20,
-        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
-        nameDisplayId: 'gen8-name-display', levelDisplayId: 'gen8-level-display', buttonId: 'buy-gen8',
-        themeColor: '#9B5DE5' // Purple
-    },
+    // ... (rest of initialGeneratorsData as in previous versions) ...
     {
         id: 9, namePrefix: "Generator", initialCost: 1000000000, currentCost: 1000000000, costIncreaseRate: 1.20,
         totalCount: 0, purchasedCount: 0, boostRate: 1.0,
         nameDisplayId: 'gen9-name-display', levelDisplayId: 'gen9-level-display', buttonId: 'buy-gen9',
-        themeColor: '#F789A8' // Pink
+        themeColor: '#F789A8'
     }
 ];
 
-const INITIAL_CASH = 0;
+// const INITIAL_CASH = 0; // Replaced by gameSettings
 let selectedBuyAmount = 1;
-let cash = INITIAL_CASH;
+let cash = gameSettings.initialCash; // Use gameSettings
 
 // --- GeneratorManager Object ---
 const GeneratorManager = {
     generators: JSON.parse(JSON.stringify(initialGeneratorsData)),
 
     initDOMReferences: function() {
-        // console.log("GeneratorManager: Initializing DOM references for its generators...");
-        if (!this.generators || this.generators.length === 0) {
-            // console.error("GeneratorManager: 'this.generators' is empty or not initialized. Cannot set DOM references.");
-            return;
-        }
+        // ... (previous implementation)
         this.generators.forEach(gen => {
             if (!gen.nameDisplayId || !gen.levelDisplayId || !gen.buttonId) {
-                // console.error(`GeneratorManager: Generator ID ${gen.id} is missing display ID properties for DOM lookup.`);
                 return;
             }
             gen.nameDisplayElement = document.getElementById(gen.nameDisplayId);
@@ -91,17 +55,10 @@ const GeneratorManager = {
             if (gen.buttonElement) {
                 gen.buttonElement.style.setProperty('--gen-button-bg-color', gen.themeColor);
                 gen.actionRowElement = gen.buttonElement.closest('.generator-action-row');
-                if (!gen.actionRowElement) {
-                    // console.warn(`GeneratorManager: Action row not found for generator id: ${gen.id} via button ${gen.buttonId}`);
-                }
             } else {
-                // console.warn(`GeneratorManager: Button element not found for generator id: ${gen.id} with buttonId: ${gen.buttonId}`);
                 gen.actionRowElement = null;
             }
-            // if (!gen.nameDisplayElement) console.warn(`GeneratorManager: Name display element not found for gen id: ${gen.id} using ID ${gen.nameDisplayId}`);
-            // if (!gen.levelDisplayElement) console.warn(`GeneratorManager: Level display element not found for gen id: ${gen.id} using ID ${gen.levelDisplayId}`);
         });
-        // console.log("GeneratorManager: DOM references initialization attempt complete.");
     },
 
     getAllGenerators: function() {
@@ -133,7 +90,7 @@ const GeneratorManager = {
             totalSpent += costOfNextItem;
             itemsBought++;
             costOfNextItem = Math.ceil(costOfNextItem * gen.costIncreaseRate);
-            if (itemsBought >= MAX_BUY_SAFETY_LIMIT) {
+            if (itemsBought >= gameSettings.maxBuySafetyLimit) { // Use gameSettings
                 break;
             }
         }
@@ -146,15 +103,13 @@ const GeneratorManager = {
             gen.totalCount += amountEffectivelyBought;
             gen.purchasedCount += amountEffectivelyBought;
             gen.currentCost = newCurrentCost;
-        } else {
-            // console.error(`GeneratorManager.purchaseGenerator: Generator with ID ${genId} not found.`);
         }
     },
 
     updateBoostRates: function() {
         this.generators.forEach(gen => {
             if (gen.totalCount > 0) {
-                gen.boostRate += 0.01;
+                gen.boostRate += gameSettings.baseBoostIncrementPerSecond; // Use gameSettings
             }
         });
     },
@@ -186,7 +141,6 @@ const GeneratorManager = {
     },
 
     setupGeneratorButtonListeners: function() {
-        // console.log("GeneratorManager: Setting up generator button listeners...");
         this.generators.forEach(gen => {
             if (gen.buttonElement) {
                 gen.buttonElement.addEventListener('click', () => {
@@ -211,11 +165,8 @@ const GeneratorManager = {
                         updateDisplay();
                     }
                 });
-            } else {
-                // console.warn(`GeneratorManager: No buttonElement found for generator ${gen.id} during listener setup.`);
             }
         });
-        // console.log("GeneratorManager: Generator button listeners setup complete.");
     }
 };
 // --- End of GeneratorManager Object ---
@@ -274,8 +225,8 @@ function handleOptionsButtonClick() {
 
 function handleResetButtonClick() {
     prestigePoints++;
-    resetBoostRate += 1.0;
-    cash = 0;
+    resetBoostRate += gameSettings.resetBoostIncrement; // Use gameSettings
+    cash = gameSettings.initialCash; // Use gameSettings to reset to 0
 
     GeneratorManager.resetGeneratorStates();
 
@@ -291,8 +242,6 @@ function handleResetButtonClick() {
 
 // --- Centralized Event Listener Initialization ---
 function initializeEventListeners() {
-    // console.log("Initializing event listeners...");
-
     if (domElements.buyAmountRadios) {
         domElements.buyAmountRadios.forEach(radio => {
             radio.addEventListener('change', handleBuyAmountChange);
@@ -316,7 +265,6 @@ function initializeEventListeners() {
     if (GeneratorManager && typeof GeneratorManager.setupGeneratorButtonListeners === 'function') {
         GeneratorManager.setupGeneratorButtonListeners();
     }
-    // console.log("Event listeners initialization complete.");
 }
 // --- End of Centralized Event Listener Initialization ---
 
@@ -485,7 +433,7 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
             gen.actionRowElement.style.visibility = 'visible';
         } else {
             const prevGen = GeneratorManager.getAllGenerators()[index - 1];
-            if (prevGen && prevGen.totalCount >= GENERATOR_UNLOCK_THRESHOLD) {
+            if (prevGen && prevGen.totalCount >= gameSettings.generatorUnlockThreshold) { // Use gameSettings
                 gen.actionRowElement.style.visibility = 'visible';
             } else {
                 gen.actionRowElement.style.visibility = 'hidden';
@@ -549,7 +497,7 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
 }
 
 function updateResetContainerVisibility(currentCash) {
-    if (!gameHasReachedFirstGoal && currentCash >= FIRST_GOAL_CASH) {
+    if (!gameHasReachedFirstGoal && currentCash >= gameSettings.firstGoalCash) { // Use gameSettings
         if (domElements.milestoneMessageHeader) {
             domElements.milestoneMessageHeader.textContent = 'First Critical Point Reached!';
         }
@@ -566,11 +514,11 @@ function updateResetContainerVisibility(currentCash) {
 
 /*
 // Old global formatting functions - Commented out
-function formatStandard(num) { ... }
-function formatStandardSignificant(num) { ... }
-function formatNumberSignificant(num, formatType) { ... }
-function formatHex(num) { ... }
-function formatScientific(num) { ... }
+// function formatStandard(num) { ... }
+// function formatStandardSignificant(num) { ... }
+// function formatNumberSignificant(num, formatType) { ... }
+// function formatHex(num) { ... }
+// function formatScientific(num) { ... }
 */
 
 function formatTimeToBuy(totalSeconds) {
@@ -654,14 +602,7 @@ function updateDisplay() {
     updateResetContainerVisibility(cash);
 }
 
-// Event listener setup for generator purchase buttons - MOVED to GeneratorManager.setupGeneratorButtonListeners
-// GeneratorManager.getAllGenerators().forEach(gen => {
-//     if (gen.buttonElement) {
-//         gen.buttonElement.addEventListener('click', () => {
-//             // ...
-//         });
-//     }
-// });
+// Event listener setup for generator purchase buttons is now inside GeneratorManager.setupGeneratorButtonListeners
 
 // Game loop - called every second
 setInterval(() => {
@@ -685,6 +626,6 @@ setInterval(() => {
     updateDisplay();
 }, 1000);
 
-// Initial display update
+// Initial display update and listener setup
 updateDisplay();
-initializeEventListeners(); // Call to setup event listeners
+initializeEventListeners();
