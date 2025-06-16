@@ -259,6 +259,8 @@ if (resetButton) { // Check if resetButton was successfully found
         // 3. Reset UI states related to goal achievement
         if (resetContainer) {
             resetContainer.style.height = '0px'; // Hide reset container
+            resetContainer.style.marginTop = '0px';     // Reset margin
+            resetContainer.style.marginBottom = '0px';  // Reset margin
         }
         gameHasReachedFirstGoal = false; // Reset goal flag
 
@@ -778,6 +780,8 @@ setInterval(() => {
             // A more robust way is to temporarily set height to auto, get scrollHeight, then set to that.
             // For this subtask, let's use a fixed height:
             resetContainer.style.height = '130px'; // Example height, adjust based on actual content
+            resetContainer.style.marginTop = '20px';    // Add margin when shown
+            resetContainer.style.marginBottom = '20px'; // Add margin when shown
         }
         gameHasReachedFirstGoal = true;
         // Optional: Code to disable further generator purchases could go here

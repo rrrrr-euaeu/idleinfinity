@@ -169,9 +169,9 @@ body {
     overflow: hidden;
     transition: height 0.5s ease-in-out;
     text-align: center;
-    padding: 20px;       /* Changed from 0px 20px to 20px all around */
-    margin-top: 0;       /* Changed from 20px */
-    margin-bottom: 0;    /* Changed from 20px */
+    padding: 0 20px;    /* Vertical padding 0, horizontal 20px */
+    margin-top: 0;
+    margin-bottom: 0;
     margin-left: auto;
     margin-right: auto;
     box-sizing: border-box;
