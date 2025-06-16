@@ -13,21 +13,147 @@ const initialGeneratorsData = [
         id: 1,
         namePrefix: "Generator",
         initialCost: 10,
-        currentCost: 12,
+        currentCost: 12, // Cost for the 2nd unit, as it starts with 1 purchased
         costIncreaseRate: 1.15,
         totalCount: 1,
         purchasedCount: 1,
         boostRate: 1.0,
-        themeColor: '#E63946',
+        themeColor: '#E63946', // Red
         nameDisplayId: 'gen1-name-display',
         levelDisplayId: 'gen1-level-display',
         buttonId: 'buy-gen1',
+        // DOM elements will be populated by GeneratorManager.initDOMReferences
         nameDisplayElement: null,
         levelDisplayElement: null,
         buttonElement: null,
         actionRowElement: null
     },
-    // ... (rest of initial generator data objects as in previous step) ...
+    {
+        id: 2,
+        namePrefix: "Generator",
+        initialCost: 100,
+        currentCost: 100,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        boostRate: 1.0,
+        themeColor: '#F4A261', // Orange
+        nameDisplayId: 'gen2-name-display',
+        levelDisplayId: 'gen2-level-display',
+        buttonId: 'buy-gen2',
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 3,
+        namePrefix: "Generator",
+        initialCost: 1000,
+        currentCost: 1000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        boostRate: 1.0,
+        nameDisplayId: 'gen3-name-display',
+        levelDisplayId: 'gen3-level-display',
+        buttonId: 'buy-gen3',
+        themeColor: '#E9C46A', // Yellow
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 4,
+        namePrefix: "Generator",
+        initialCost: 10000,
+        currentCost: 10000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        boostRate: 1.0,
+        nameDisplayId: 'gen4-name-display',
+        levelDisplayId: 'gen4-level-display',
+        buttonId: 'buy-gen4',
+        themeColor: '#A7C957', // Yellow-Green
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 5,
+        namePrefix: "Generator",
+        initialCost: 100000,
+        currentCost: 100000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        boostRate: 1.0,
+        nameDisplayId: 'gen5-name-display',
+        levelDisplayId: 'gen5-level-display',
+        buttonId: 'buy-gen5',
+        themeColor: '#2A9D8F', // Green/Teal
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 6,
+        namePrefix: "Generator",
+        initialCost: 1000000,
+        currentCost: 1000000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        boostRate: 1.0,
+        nameDisplayId: 'gen6-name-display',
+        levelDisplayId: 'gen6-level-display',
+        buttonId: 'buy-gen6',
+        themeColor: '#57A7C9', // Light Blue
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 7,
+        namePrefix: "Generator",
+        initialCost: 10000000,
+        currentCost: 10000000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        boostRate: 1.0,
+        nameDisplayId: 'gen7-name-display',
+        levelDisplayId: 'gen7-level-display',
+        buttonId: 'buy-gen7',
+        themeColor: '#118AB2', // Blue
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
+    {
+        id: 8,
+        namePrefix: "Generator",
+        initialCost: 100000000,
+        currentCost: 100000000,
+        costIncreaseRate: 1.20,
+        totalCount: 0,
+        purchasedCount: 0,
+        boostRate: 1.0,
+        nameDisplayId: 'gen8-name-display',
+        levelDisplayId: 'gen8-level-display',
+        buttonId: 'buy-gen8',
+        themeColor: '#9B5DE5', // Purple
+        nameDisplayElement: null,
+        levelDisplayElement: null,
+        buttonElement: null,
+        actionRowElement: null
+    },
     {
         id: 9,
         namePrefix: "Generator",
@@ -37,10 +163,10 @@ const initialGeneratorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#F789A8',
         nameDisplayId: 'gen9-name-display',
         levelDisplayId: 'gen9-level-display',
         buttonId: 'buy-gen9',
+        themeColor: '#F789A8', // Pink
         nameDisplayElement: null,
         levelDisplayElement: null,
         buttonElement: null,
@@ -52,37 +178,6 @@ const INITIAL_CASH = 0;
 let selectedBuyAmount = 1;
 let cash = INITIAL_CASH;
 
-const domElements = {};
-
-function initGlobalDOMElements() {
-    domElements.cashDisplay = document.getElementById('cash');
-    domElements.prestigePointsDisplay = document.getElementById('prestige-points-display');
-    domElements.prestigeInfoContainer = document.getElementById('prestige-info-container');
-    domElements.totalBoostFormulaDisplay = document.getElementById('total-boost-formula-display');
-
-    domElements.optionsButton = document.getElementById('options-button');
-    domElements.optionsPanel = document.getElementById('options-panel');
-    domElements.numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
-
-    domElements.buyAmountRadios = document.querySelectorAll('input[name="buyAmount"]');
-
-    domElements.resetContainer = document.getElementById('reset-container');
-    domElements.milestoneMessage = document.getElementById('milestone-message');
-    domElements.milestoneMessageHeader = document.querySelector('#milestone-message h2');
-
-    domElements.resetButton = document.getElementById('reset-button');
-
-    // domElements.winMessage = document.getElementById('win-message'); // This ID is not used in HTML
-
-    // For logging if elements are not found (optional but good for debugging)
-    // for (const key in domElements) {
-    //     if (domElements[key] === null || (domElements[key] instanceof NodeList && domElements[key].length === 0)) {
-    //         // console.warn(`DOM element for '${key}' not found or is an empty NodeList.`);
-    //     }
-    // }
-    // console.log("Global DOM elements initialized:", domElements);
-}
-
 // --- GeneratorManager Object ---
 const GeneratorManager = {
     generators: JSON.parse(JSON.stringify(initialGeneratorsData)),
@@ -90,12 +185,12 @@ const GeneratorManager = {
     initDOMReferences: function() {
         // console.log("GeneratorManager: Initializing DOM references for its generators...");
         if (!this.generators || this.generators.length === 0) {
-            console.error("GeneratorManager: 'this.generators' is empty or not initialized. Cannot set DOM references.");
+            // console.error("GeneratorManager: 'this.generators' is empty or not initialized. Cannot set DOM references.");
             return;
         }
         this.generators.forEach(gen => {
             if (!gen.nameDisplayId || !gen.levelDisplayId || !gen.buttonId) {
-                console.error(`GeneratorManager: Generator ID ${gen.id} is missing display ID properties for DOM lookup.`);
+                // console.error(`GeneratorManager: Generator ID ${gen.id} is missing display ID properties for DOM lookup.`);
                 return;
             }
             gen.nameDisplayElement = document.getElementById(gen.nameDisplayId);
@@ -201,24 +296,29 @@ const GeneratorManager = {
 };
 // --- End of GeneratorManager Object ---
 
-// Old global DOM constants - COMMENTED OUT
-// const cashDisplay = document.getElementById('cash');
-// const winMessage = document.getElementById('win-message'); // Not in domElements as ID 'win-message' is not used in HTML
-// const buyAmountRadios = document.querySelectorAll('input[name="buyAmount"]');
-// const prestigePointsDisplay = document.getElementById('prestige-points-display');
-// const resetContainer = document.getElementById('reset-container');
-// const milestoneMessage = document.getElementById('milestone-message');
-// const resetButton = document.getElementById('reset-button');
-// const prestigeInfoContainer = document.getElementById('prestige-info-container');
-// const optionsButton = document.getElementById('options-button');
-// const optionsPanel = document.getElementById('options-panel');
-// const numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
-// const totalBoostFormulaDisplay = document.getElementById('total-boost-formula-display');
+const domElements = {};
 
+function initGlobalDOMElements() {
+    domElements.cashDisplay = document.getElementById('cash');
+    domElements.prestigePointsDisplay = document.getElementById('prestige-points-display');
+    domElements.prestigeInfoContainer = document.getElementById('prestige-info-container');
+    domElements.totalBoostFormulaDisplay = document.getElementById('total-boost-formula-display');
+
+    domElements.optionsButton = document.getElementById('options-button');
+    domElements.optionsPanel = document.getElementById('options-panel');
+    domElements.numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
+
+    domElements.buyAmountRadios = document.querySelectorAll('input[name="buyAmount"]');
+
+    domElements.resetContainer = document.getElementById('reset-container');
+    domElements.milestoneMessage = document.getElementById('milestone-message');
+    domElements.milestoneMessageHeader = document.querySelector('#milestone-message h2');
+
+    domElements.resetButton = document.getElementById('reset-button');
+}
 
 GeneratorManager.initDOMReferences();
 initGlobalDOMElements();
-
 
 domElements.buyAmountRadios.forEach(radio => {
     radio.addEventListener('change', () => {
@@ -382,7 +482,7 @@ const NumberFormatter = {
     }
 };
 
-if (domElements.numberFormatRadios) { // Use domElements
+if (domElements.numberFormatRadios) {
     domElements.numberFormatRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             if (radio.checked) {
