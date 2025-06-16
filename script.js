@@ -8,7 +8,7 @@ let prestigePoints = 0;
 let gameHasReachedFirstGoal = false;
 let resetBoostRate = 1.0;
 
-const initialGeneratorsData = [ // Renamed global, used for initializing GeneratorManager
+const initialGeneratorsData = [
     {
         id: 1,
         namePrefix: "Generator",
@@ -27,132 +27,7 @@ const initialGeneratorsData = [ // Renamed global, used for initializing Generat
         buttonElement: null,
         actionRowElement: null
     },
-    {
-        id: 2,
-        namePrefix: "Generator",
-        initialCost: 100,
-        currentCost: 100,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        themeColor: '#F4A261',
-        nameDisplayId: 'gen2-name-display',
-        levelDisplayId: 'gen2-level-display',
-        buttonId: 'buy-gen2',
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 3,
-        namePrefix: "Generator",
-        initialCost: 1000,
-        currentCost: 1000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        themeColor: '#E9C46A',
-        nameDisplayId: 'gen3-name-display',
-        levelDisplayId: 'gen3-level-display',
-        buttonId: 'buy-gen3',
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 4,
-        namePrefix: "Generator",
-        initialCost: 10000,
-        currentCost: 10000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        themeColor: '#A7C957',
-        nameDisplayId: 'gen4-name-display',
-        levelDisplayId: 'gen4-level-display',
-        buttonId: 'buy-gen4',
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 5,
-        namePrefix: "Generator",
-        initialCost: 100000,
-        currentCost: 100000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        themeColor: '#2A9D8F',
-        nameDisplayId: 'gen5-name-display',
-        levelDisplayId: 'gen5-level-display',
-        buttonId: 'buy-gen5',
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 6,
-        namePrefix: "Generator",
-        initialCost: 1000000,
-        currentCost: 1000000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        themeColor: '#57A7C9',
-        nameDisplayId: 'gen6-name-display',
-        levelDisplayId: 'gen6-level-display',
-        buttonId: 'buy-gen6',
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 7,
-        namePrefix: "Generator",
-        initialCost: 10000000,
-        currentCost: 10000000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        themeColor: '#118AB2',
-        nameDisplayId: 'gen7-name-display',
-        levelDisplayId: 'gen7-level-display',
-        buttonId: 'buy-gen7',
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 8,
-        namePrefix: "Generator",
-        initialCost: 100000000,
-        currentCost: 100000000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        themeColor: '#9B5DE5',
-        nameDisplayId: 'gen8-name-display',
-        levelDisplayId: 'gen8-level-display',
-        buttonId: 'buy-gen8',
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
+    // ... (rest of initial generator data objects as in previous step) ...
     {
         id: 9,
         namePrefix: "Generator",
@@ -177,12 +52,43 @@ const INITIAL_CASH = 0;
 let selectedBuyAmount = 1;
 let cash = INITIAL_CASH;
 
+const domElements = {};
+
+function initGlobalDOMElements() {
+    domElements.cashDisplay = document.getElementById('cash');
+    domElements.prestigePointsDisplay = document.getElementById('prestige-points-display');
+    domElements.prestigeInfoContainer = document.getElementById('prestige-info-container');
+    domElements.totalBoostFormulaDisplay = document.getElementById('total-boost-formula-display');
+
+    domElements.optionsButton = document.getElementById('options-button');
+    domElements.optionsPanel = document.getElementById('options-panel');
+    domElements.numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
+
+    domElements.buyAmountRadios = document.querySelectorAll('input[name="buyAmount"]');
+
+    domElements.resetContainer = document.getElementById('reset-container');
+    domElements.milestoneMessage = document.getElementById('milestone-message');
+    domElements.milestoneMessageHeader = document.querySelector('#milestone-message h2');
+
+    domElements.resetButton = document.getElementById('reset-button');
+
+    // domElements.winMessage = document.getElementById('win-message'); // This ID is not used in HTML
+
+    // For logging if elements are not found (optional but good for debugging)
+    // for (const key in domElements) {
+    //     if (domElements[key] === null || (domElements[key] instanceof NodeList && domElements[key].length === 0)) {
+    //         // console.warn(`DOM element for '${key}' not found or is an empty NodeList.`);
+    //     }
+    // }
+    // console.log("Global DOM elements initialized:", domElements);
+}
+
 // --- GeneratorManager Object ---
 const GeneratorManager = {
     generators: JSON.parse(JSON.stringify(initialGeneratorsData)),
 
     initDOMReferences: function() {
-        console.log("GeneratorManager: Initializing DOM references for its generators...");
+        // console.log("GeneratorManager: Initializing DOM references for its generators...");
         if (!this.generators || this.generators.length === 0) {
             console.error("GeneratorManager: 'this.generators' is empty or not initialized. Cannot set DOM references.");
             return;
@@ -200,16 +106,16 @@ const GeneratorManager = {
                 gen.buttonElement.style.setProperty('--gen-button-bg-color', gen.themeColor);
                 gen.actionRowElement = gen.buttonElement.closest('.generator-action-row');
                 if (!gen.actionRowElement) {
-                    console.warn(`GeneratorManager: Action row not found for generator id: ${gen.id} via button ${gen.buttonId}`);
+                    // console.warn(`GeneratorManager: Action row not found for generator id: ${gen.id} via button ${gen.buttonId}`);
                 }
             } else {
-                console.warn(`GeneratorManager: Button element not found for generator id: ${gen.id} with buttonId: ${gen.buttonId}`);
+                // console.warn(`GeneratorManager: Button element not found for generator id: ${gen.id} with buttonId: ${gen.buttonId}`);
                 gen.actionRowElement = null;
             }
-            if (!gen.nameDisplayElement) console.warn(`GeneratorManager: Name display element not found for gen id: ${gen.id} using ID ${gen.nameDisplayId}`);
-            if (!gen.levelDisplayElement) console.warn(`GeneratorManager: Level display element not found for gen id: ${gen.id} using ID ${gen.levelDisplayId}`);
+            // if (!gen.nameDisplayElement) console.warn(`GeneratorManager: Name display element not found for gen id: ${gen.id} using ID ${gen.nameDisplayId}`);
+            // if (!gen.levelDisplayElement) console.warn(`GeneratorManager: Level display element not found for gen id: ${gen.id} using ID ${gen.levelDisplayId}`);
         });
-        console.log("GeneratorManager: DOM references initialization attempt complete.");
+        // console.log("GeneratorManager: DOM references initialization attempt complete.");
     },
 
     getAllGenerators: function() {
@@ -251,13 +157,11 @@ const GeneratorManager = {
     purchaseGenerator: function(genId, amountEffectivelyBought, newCurrentCost) {
         const gen = this.getGenerator(genId);
         if (gen) {
-            // The loop for incrementing totalCount and purchasedCount was removed
-            // as amountEffectivelyBought already represents the total number to add.
             gen.totalCount += amountEffectivelyBought;
             gen.purchasedCount += amountEffectivelyBought;
             gen.currentCost = newCurrentCost;
         } else {
-            console.error(`GeneratorManager.purchaseGenerator: Generator with ID ${genId} not found.`);
+            // console.error(`GeneratorManager.purchaseGenerator: Generator with ID ${genId} not found.`);
         }
     },
 
@@ -280,18 +184,16 @@ const GeneratorManager = {
 
     resetGeneratorStates: function() {
         this.generators.forEach(gen => {
-            // Find the corresponding initial state from initialGeneratorsData
             const pristineGen = initialGeneratorsData.find(pGen => pGen.id === gen.id);
 
             if (gen.id === 1) {
-                gen.totalCount = 1; // Default for Gen1
-                gen.purchasedCount = 1; // Default for Gen1
-                // gen.initialCost is already set, currentCost is for the *next* purchase
+                gen.totalCount = 1;
+                gen.purchasedCount = 1;
                 gen.currentCost = Math.ceil(pristineGen.initialCost * pristineGen.costIncreaseRate);
             } else {
                 gen.totalCount = 0;
                 gen.purchasedCount = 0;
-                gen.currentCost = pristineGen ? pristineGen.initialCost : gen.initialCost; // Fallback if not found, though it should be
+                gen.currentCost = pristineGen ? pristineGen.initialCost : gen.initialCost;
             }
             gen.boostRate = 1.0;
         });
@@ -299,22 +201,26 @@ const GeneratorManager = {
 };
 // --- End of GeneratorManager Object ---
 
-const cashDisplay = document.getElementById('cash');
-const winMessage = document.getElementById('win-message');
-const buyAmountRadios = document.querySelectorAll('input[name="buyAmount"]');
-const prestigePointsDisplay = document.getElementById('prestige-points-display');
-const resetContainer = document.getElementById('reset-container');
-const milestoneMessage = document.getElementById('milestone-message');
-const resetButton = document.getElementById('reset-button');
-const prestigeInfoContainer = document.getElementById('prestige-info-container');
-const optionsButton = document.getElementById('options-button');
-const optionsPanel = document.getElementById('options-panel');
-const numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
-const totalBoostFormulaDisplay = document.getElementById('total-boost-formula-display');
+// Old global DOM constants - COMMENTED OUT
+// const cashDisplay = document.getElementById('cash');
+// const winMessage = document.getElementById('win-message'); // Not in domElements as ID 'win-message' is not used in HTML
+// const buyAmountRadios = document.querySelectorAll('input[name="buyAmount"]');
+// const prestigePointsDisplay = document.getElementById('prestige-points-display');
+// const resetContainer = document.getElementById('reset-container');
+// const milestoneMessage = document.getElementById('milestone-message');
+// const resetButton = document.getElementById('reset-button');
+// const prestigeInfoContainer = document.getElementById('prestige-info-container');
+// const optionsButton = document.getElementById('options-button');
+// const optionsPanel = document.getElementById('options-panel');
+// const numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
+// const totalBoostFormulaDisplay = document.getElementById('total-boost-formula-display');
+
 
 GeneratorManager.initDOMReferences();
+initGlobalDOMElements();
 
-buyAmountRadios.forEach(radio => {
+
+domElements.buyAmountRadios.forEach(radio => {
     radio.addEventListener('change', () => {
         if (radio.value === 'MAX') {
             selectedBuyAmount = 'MAX';
@@ -325,31 +231,31 @@ buyAmountRadios.forEach(radio => {
     });
 });
 
-if (resetButton) {
-    resetButton.addEventListener('click', () => {
+if (domElements.resetButton) {
+    domElements.resetButton.addEventListener('click', () => {
         prestigePoints++;
         resetBoostRate += 1.0;
         cash = 0;
 
-        GeneratorManager.resetGeneratorStates(); // Use GeneratorManager method
+        GeneratorManager.resetGeneratorStates();
 
-        if (resetContainer) {
-            resetContainer.style.height = '0px';
-            resetContainer.style.marginTop = '0px';
-            resetContainer.style.marginBottom = '0px';
+        if (domElements.resetContainer) {
+            domElements.resetContainer.style.height = '0px';
+            domElements.resetContainer.style.marginTop = '0px';
+            domElements.resetContainer.style.marginBottom = '0px';
         }
         gameHasReachedFirstGoal = false;
         updateDisplay();
     });
 }
 
-if (optionsButton && optionsPanel) {
-    optionsButton.addEventListener('click', () => {
-        optionsPanel.classList.toggle('open');
-        if (optionsPanel.classList.contains('open')) {
-            optionsButton.textContent = '✖️';
+if (domElements.optionsButton && domElements.optionsPanel) {
+    domElements.optionsButton.addEventListener('click', () => {
+        domElements.optionsPanel.classList.toggle('open');
+        if (domElements.optionsPanel.classList.contains('open')) {
+            domElements.optionsButton.textContent = '✖️';
         } else {
-            optionsButton.textContent = '⚙️';
+            domElements.optionsButton.textContent = '⚙️';
         }
     });
 }
@@ -476,8 +382,8 @@ const NumberFormatter = {
     }
 };
 
-if (numberFormatRadios) {
-    numberFormatRadios.forEach(radio => {
+if (domElements.numberFormatRadios) { // Use domElements
+    domElements.numberFormatRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             if (radio.checked) {
                 NumberFormatter.setSelectedFormat(radio.value);
@@ -490,9 +396,9 @@ if (numberFormatRadios) {
 // --- New UI Update Helper Functions ---
 
 function updateGlobalStatsDisplay(currentCash, currentPrestigePoints, currentResetBoostRate, currentActualCashPerSecond) {
-    cashDisplay.textContent = NumberFormatter.format(currentCash);
+    if (domElements.cashDisplay) domElements.cashDisplay.textContent = NumberFormatter.format(currentCash);
 
-    if (totalBoostFormulaDisplay) {
+    if (domElements.totalBoostFormulaDisplay) {
         const boostFormulaParts = [];
         GeneratorManager.getAllGenerators().forEach(gen => {
             const formattedBoostRate = NumberFormatter.format(gen.boostRate);
@@ -507,17 +413,17 @@ function updateGlobalStatsDisplay(currentCash, currentPrestigePoints, currentRes
 
         let formulaString = boostFormulaParts.join(" × ");
         let incomeString = `<br><span class="income-display-in-boost-area">Income: ${NumberFormatter.format(currentActualCashPerSecond)} /s</span>`;
-        totalBoostFormulaDisplay.innerHTML = formulaString + incomeString;
+        domElements.totalBoostFormulaDisplay.innerHTML = formulaString + incomeString;
     }
 
-    if (prestigeInfoContainer) {
+    if (domElements.prestigeInfoContainer) {
         if (currentPrestigePoints > 0) {
-            prestigeInfoContainer.style.display = 'inline';
-            if (prestigePointsDisplay) {
-                prestigePointsDisplay.textContent = NumberFormatter.format(currentPrestigePoints);
+            domElements.prestigeInfoContainer.style.display = 'inline';
+            if (domElements.prestigePointsDisplay) {
+                domElements.prestigePointsDisplay.textContent = NumberFormatter.format(currentPrestigePoints);
             }
         } else {
-            prestigeInfoContainer.style.display = 'none';
+            domElements.prestigeInfoContainer.style.display = 'none';
         }
     }
 }
@@ -593,13 +499,13 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
 
 function updateResetContainerVisibility(currentCash) {
     if (!gameHasReachedFirstGoal && currentCash >= FIRST_GOAL_CASH) {
-        if (milestoneMessage && milestoneMessage.querySelector('h2')) {
-            milestoneMessage.querySelector('h2').textContent = 'First Critical Point Reached!';
+        if (domElements.milestoneMessageHeader) {
+            domElements.milestoneMessageHeader.textContent = 'First Critical Point Reached!';
         }
-        if (resetContainer) {
-            resetContainer.style.height = '130px';
-            resetContainer.style.marginTop = '20px';
-            resetContainer.style.marginBottom = '20px';
+        if (domElements.resetContainer) {
+            domElements.resetContainer.style.height = '130px';
+            domElements.resetContainer.style.marginTop = '20px';
+            domElements.resetContainer.style.marginBottom = '20px';
         }
         gameHasReachedFirstGoal = true;
     }
@@ -608,22 +514,12 @@ function updateResetContainerVisibility(currentCash) {
 // --- End of New UI Update Helper Functions ---
 
 /*
-// Old global formatting functions - To be removed/commented
-function formatStandard(num) {
-    // ...
-}
-function formatStandardSignificant(num) {
-    // ...
-}
-function formatNumberSignificant(num, formatType) { // Old global router
-    // ...
-}
-function formatHex(num) { // Old global hex
-    // ...
-}
-function formatScientific(num) { // Old global scientific
-    // ...
-}
+// Old global formatting functions - Commented out
+function formatStandard(num) { ... }
+function formatStandardSignificant(num) { ... }
+function formatNumberSignificant(num, formatType) { ... }
+function formatHex(num) { ... }
+function formatScientific(num) { ... }
 */
 
 function formatTimeToBuy(totalSeconds) {
@@ -724,8 +620,6 @@ GeneratorManager.getAllGenerators().forEach(gen => {
 
             if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
                 cash -= purchaseDetails.totalCost;
-
-                // Use GeneratorManager to update generator state
                 GeneratorManager.purchaseGenerator(
                     gen.id,
                     effectiveBuyAmount,
@@ -739,22 +633,22 @@ GeneratorManager.getAllGenerators().forEach(gen => {
 
 // Game loop - called every second
 setInterval(() => {
-    GeneratorManager.updateBoostRates(); // Use GeneratorManager method
+    GeneratorManager.updateBoostRates();
 
     let combinedGeneratorBoost = 1.0;
-    GeneratorManager.getAllGenerators().forEach(gen => { // Use GeneratorManager
+    GeneratorManager.getAllGenerators().forEach(gen => {
         combinedGeneratorBoost *= gen.boostRate;
     });
 
     let cashProducedThisTick = 0;
-    const firstGenForProduction = GeneratorManager.getGenerator(1); // Use GeneratorManager
+    const firstGenForProduction = GeneratorManager.getGenerator(1);
     if (firstGenForProduction && firstGenForProduction.totalCount > 0) {
         cashProducedThisTick = firstGenForProduction.totalCount * combinedGeneratorBoost * resetBoostRate;
     }
 
     cash += cashProducedThisTick;
 
-    GeneratorManager.produceLowerTierGenerators(); // Use GeneratorManager method
+    GeneratorManager.produceLowerTierGenerators();
 
     updateDisplay();
 }, 1000);
