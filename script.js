@@ -177,22 +177,17 @@ const generatorsData = [
 const INITIAL_CASH = 0; // Game starts with 0 cash.
 let selectedBuyAmount = 1; // Default buy amount
 let cash = INITIAL_CASH;
-// Old individual generator state variables (genXTotalCount, genXPurchasedCount, genXCost) removed.
-// This data is now managed within the objects in the generatorsData array.
 
 const cashDisplay = document.getElementById('cash');
-// Obsolete generator-specific DOM constants removed.
-// Their references are now populated within generatorsData array.
-const winMessage = document.getElementById('win-message'); // This is actually milestoneMessage, but keeping as-is if not specified to change this specific line. The HTML has milestone-message.
+const winMessage = document.getElementById('win-message');
 const buyAmountRadios = document.querySelectorAll('input[name="buyAmount"]');
 const prestigePointsDisplay = document.getElementById('prestige-points-display');
 const resetContainer = document.getElementById('reset-container');
-const milestoneMessage = document.getElementById('milestone-message'); // This was #win-message
+const milestoneMessage = document.getElementById('milestone-message');
 const resetButton = document.getElementById('reset-button');
 const prestigeInfoContainer = document.getElementById('prestige-info-container');
 const optionsButton = document.getElementById('options-button');
 const optionsPanel = document.getElementById('options-panel');
-// const closeOptionsButton = document.getElementById('close-options-button'); // Removed
 const numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
 // const incomePerSecondDisplay = document.getElementById('income-per-second-display'); // Element removed from HTML
 // const resetBoostInfoContainer = document.getElementById('reset-boost-info-container'); // Element removed from HTML
@@ -204,16 +199,15 @@ generatorsData.forEach(gen => {
     gen.nameDisplayElement = document.getElementById(gen.nameDisplayId);
     gen.levelDisplayElement = document.getElementById(gen.levelDisplayId);
     gen.buttonElement = document.getElementById(gen.buttonId);
-    if (gen.buttonElement) { // Ensure buttonElement was found before trying to use it
-        gen.buttonElement.style.setProperty('--gen-button-bg-color', gen.themeColor); // Set CSS custom property
+    if (gen.buttonElement) {
+        gen.buttonElement.style.setProperty('--gen-button-bg-color', gen.themeColor);
         gen.actionRowElement = gen.buttonElement.closest('.generator-action-row');
-        if (gen.actionRowElement) { // Ensure actionRowElement exists before querying inside it
-            gen.boostDisplayElement = gen.actionRowElement.querySelector('.generator-boost-display');
+        if (gen.actionRowElement) {
+            gen.boostDisplayElement = gen.actionRowElement.querySelector('.generator-boost-display'); // This will be null as span was removed
         } else {
             gen.boostDisplayElement = null;
         }
     } else {
-        // console.error("Button not found for generator:", gen.id); // Optional error logging
         gen.actionRowElement = null;
         gen.boostDisplayElement = null;
     }
@@ -226,166 +220,262 @@ buyAmountRadios.forEach(radio => {
         } else {
             selectedBuyAmount = parseInt(radio.value);
         }
-        updateDisplay(); // Call updateDisplay to refresh UI based on new selection
+        updateDisplay();
     });
 });
 
-if (resetButton) { // Check if resetButton was successfully found
+if (resetButton) {
     resetButton.addEventListener('click', () => {
-        // 1. Increment prestige points and reset boost
         prestigePoints++;
         resetBoostRate += 1.0;
+        cash = 0;
 
-        // 2. Reset game progress variables
-        cash = 0; // Corrected: Reset cash to 0
-
-        // Reset generator states using generatorsData array
         generatorsData.forEach(gen => {
             if (gen.id === 1) {
                 gen.totalCount = 1;
                 gen.purchasedCount = 1;
-                // gen.initialCost is 10, gen.costIncreaseRate is 1.15
-                gen.currentCost = Math.ceil(gen.initialCost * gen.costIncreaseRate); // Should be 12
+                gen.currentCost = Math.ceil(gen.initialCost * gen.costIncreaseRate);
             } else {
                 gen.totalCount = 0;
                 gen.purchasedCount = 0;
                 gen.currentCost = gen.initialCost;
             }
-            gen.boostRate = 1.0; // Reset boost rate for ALL generators
+            gen.boostRate = 1.0;
         });
 
-        // Buy amount selector is NOT reset
-
-        // 3. Reset UI states related to goal achievement
         if (resetContainer) {
-            resetContainer.style.height = '0px'; // Hide reset container
-            resetContainer.style.marginTop = '0px';     // Reset margin
-            resetContainer.style.marginBottom = '0px';  // Reset margin
+            resetContainer.style.height = '0px';
+            resetContainer.style.marginTop = '0px';
+            resetContainer.style.marginBottom = '0px';
         }
-        gameHasReachedFirstGoal = false; // Reset goal flag
-
-        // 4. Update the display
+        gameHasReachedFirstGoal = false;
         updateDisplay();
     });
 }
 
-// Listener for the main "Options" button to toggle the panel and change icon
 if (optionsButton && optionsPanel) {
     optionsButton.addEventListener('click', () => {
         optionsPanel.classList.toggle('open');
         if (optionsPanel.classList.contains('open')) {
-            optionsButton.textContent = '✖️'; // Or '✕', '✖'
+            optionsButton.textContent = '✖️';
         } else {
             optionsButton.textContent = '⚙️';
         }
     });
 }
 
-// Listener for the "Close" button inside the options panel - REMOVED
-
-// Listeners for number format radio buttons
 if (numberFormatRadios) {
     numberFormatRadios.forEach(radio => {
         radio.addEventListener('change', () => {
-            if (radio.checked) { // Ensure the event is for the selected radio
+            if (radio.checked) {
                 selectedNumberFormat = radio.value;
-                updateDisplay(); // Update all numbers based on new format
+                updateDisplay();
             }
         });
     });
 }
 
+// --- New UI Update Helper Functions ---
+
+function updateGlobalStatsDisplay(currentCash, currentPrestigePoints, currentResetBoostRate, currentActualCashPerSecond) {
+    cashDisplay.textContent = formatNumber(currentCash);
+
+    if (totalBoostFormulaDisplay) {
+        const boostFormulaParts = [];
+        generatorsData.forEach(gen => {
+            const formattedBoostRate = formatNumber(gen.boostRate);
+            boostFormulaParts.push(`<span style="color: ${gen.themeColor}; font-weight: bold;">${formattedBoostRate}</span>`);
+        });
+
+        if (currentPrestigePoints > 0) {
+            const formattedResetBoost = formatNumber(currentResetBoostRate);
+            const resetBoostSpan = `<span style="color: grey; font-weight: bold;">${formattedResetBoost}</span>`;
+            boostFormulaParts.push(resetBoostSpan);
+        }
+
+        let formulaString = boostFormulaParts.join(" × ");
+        let incomeString = `<br><span class="income-display-in-boost-area">Income: ${formatNumber(currentActualCashPerSecond)} /s</span>`;
+        totalBoostFormulaDisplay.innerHTML = formulaString + incomeString;
+    }
+
+    if (prestigeInfoContainer) {
+        if (currentPrestigePoints > 0) {
+            prestigeInfoContainer.style.display = 'inline';
+            if (prestigePointsDisplay) {
+                prestigePointsDisplay.textContent = formatNumber(currentPrestigePoints);
+            }
+        } else {
+            prestigeInfoContainer.style.display = 'none';
+        }
+    }
+    // Logic for resetBoostInfoContainer and resetBoostDisplay (old stats bar display) was removed previously.
+}
+
+function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmount, currentActualCashPerSecond) {
+    // Visibility Control
+    if (gen.actionRowElement) {
+        if (gen.id === 1) {
+            gen.actionRowElement.style.visibility = 'visible';
+        } else {
+            const prevGen = generatorsData[index - 1]; // Assumes generatorsData is accessible globally
+            if (prevGen && prevGen.totalCount >= GENERATOR_UNLOCK_THRESHOLD) {
+                gen.actionRowElement.style.visibility = 'visible';
+            } else {
+                gen.actionRowElement.style.visibility = 'hidden';
+            }
+        }
+    }
+
+    // Update Name Display
+    if (gen.nameDisplayElement) {
+        gen.nameDisplayElement.textContent = gen.namePrefix + gen.id;
+    }
+
+    // Update Level Display
+    if (gen.levelDisplayElement) {
+        let producedCount = gen.totalCount - gen.purchasedCount;
+        if (producedCount < 0) producedCount = 0;
+        if (producedCount <= 0) {
+            gen.levelDisplayElement.textContent = "lv " + formatNumber(gen.purchasedCount);
+        } else {
+            gen.levelDisplayElement.textContent = "lv " + formatNumber(gen.purchasedCount) + " + " + formatNumber(producedCount);
+        }
+    }
+
+    // Individual boost display on row was removed (gen.boostDisplayElement.textContent = ...)
+
+    // Update Buy Button
+    if (gen.buttonElement) {
+        let displayAmount;
+        let currentTotalCost;
+
+        if (currentSelectedBuyAmount === 'MAX') {
+            const maxInfo = calculateMaxBuyableAmount(currentCash, gen.currentCost, gen.costIncreaseRate);
+            if (maxInfo.count === 0) { // If cannot afford even one, show cost for 1
+                displayAmount = 1;
+                currentTotalCost = gen.currentCost;
+            } else {
+                displayAmount = maxInfo.count;
+                currentTotalCost = maxInfo.totalCost;
+            }
+        } else {
+            displayAmount = currentSelectedBuyAmount;
+            const costInfo = calculateTotalCostForAmount(gen.currentCost, displayAmount, gen.costIncreaseRate);
+            currentTotalCost = costInfo.totalCost;
+        }
+
+        let timeToBuyString;
+        const cashNeeded = currentTotalCost - currentCash;
+
+        if (cashNeeded <= 0) {
+            timeToBuyString = "";
+        } else if (currentActualCashPerSecond === 0) {
+            timeToBuyString = "No income";
+        } else {
+            const secondsToAfford = Math.ceil(cashNeeded / currentActualCashPerSecond);
+            timeToBuyString = formatTimeToBuy(secondsToAfford);
+        }
+
+        gen.buttonElement.innerHTML =
+            "Buy " + formatNumber(displayAmount) +
+            "<br><span class='time-to-buy'>" + timeToBuyString + "</span>" +
+            "<br>Cost: " + formatNumber(currentTotalCost);
+
+        let canAfford = currentCash >= currentTotalCost && displayAmount > 0;
+        gen.buttonElement.classList.toggle('can-buy', canAfford);
+    }
+}
+
+function updateResetContainerVisibility(currentCash) {
+    if (!gameHasReachedFirstGoal && currentCash >= FIRST_GOAL_CASH) {
+        if (milestoneMessage && milestoneMessage.querySelector('h2')) {
+            milestoneMessage.querySelector('h2').textContent = 'First Critical Point Reached!';
+        }
+        if (resetContainer) {
+            resetContainer.style.height = '130px';
+            resetContainer.style.marginTop = '20px';
+            resetContainer.style.marginBottom = '20px';
+        }
+        gameHasReachedFirstGoal = true;
+    }
+    // Note: Hiding the reset container (setting height and margins to 0) is handled
+    // in the resetButton click event listener, as it's a direct consequence of that action.
+}
+
+// --- End of New UI Update Helper Functions ---
+
 function formatStandard(num) {
     if (num === undefined || num === null) return '0';
     if (num === 0) return '0';
 
-    // Scientific notation for numbers >= 1e18 (1京)
     if (num >= 1e18) {
         return num.toExponential(2).replace('e+', 'e');
     }
-
-    // Suffix notation for Qa (1千兆 = 1e15) for numbers in [1e15, 1e18)
     if (num >= 1e15) {
         let value = num / 1e15;
-        if (value < 10) return value.toFixed(2) + 'Qa'; // e.g., 1.23Qa
-        if (value < 100) return value.toFixed(1) + 'Qa';// e.g., 12.3Qa
-        return Math.floor(value).toFixed(0) + 'Qa'; // e.g., 123Qa
+        if (value < 10) return value.toFixed(2) + 'Qa';
+        if (value < 100) return value.toFixed(1) + 'Qa';
+        return Math.floor(value).toFixed(0) + 'Qa';
     }
-
-    // Suffix notation for T (1兆 = 1e12) for numbers in [1e12, 1e15)
     if (num >= 1e12) {
         let value = num / 1e12;
         if (value < 10) return value.toFixed(2) + 'T';
         if (value < 100) return value.toFixed(1) + 'T';
         return Math.floor(value).toFixed(0) + 'T';
     }
-
-    // Suffix notation for B (10億 = 1e9) for numbers in [1e9, 1e12)
     if (num >= 1e9) {
         let value = num / 1e9;
         if (value < 10) return value.toFixed(2) + 'B';
         if (value < 100) return value.toFixed(1) + 'B';
         return Math.floor(value).toFixed(0) + 'B';
     }
-
-    // Standard comma formatting for numbers < 1e9
-    // Ensure no decimal places for these smaller numbers unless they are inherently fractional.
-    // Given game context, cash and costs are likely integers until they become very large.
     return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
 
-// New function for standard formatting with significant digits logic
 function formatStandardSignificant(num) {
     if (num === undefined || num === null) return '0';
     if (num === 0) return "0";
     if (num < 0) return '-' + formatStandardSignificant(Math.abs(num));
 
-    // Handle numbers less than 100 with specific decimal places
-    if (num < 0.00001 && num > 0) return "0"; // Or a very small indicator like "<0.00001"
-    if (num < 0.01) return parseFloat(num.toFixed(4)).toString(); // e.g., 0.001234 -> "0.0012"
-    if (num < 1) return parseFloat(num.toFixed(3)).toString();    // e.g., 0.1234 -> "0.123"
-    if (num < 10) return parseFloat(num.toFixed(2)).toString();   // e.g., 1.234 -> "1.23"
-    if (num < 100) return parseFloat(num.toFixed(1)).toString();  // e.g., 12.34 -> "12.3"
+    if (num < 0.00001 && num > 0) return "0";
+    if (num < 0.01) return parseFloat(num.toFixed(4)).toString();
+    if (num < 1) return parseFloat(num.toFixed(3)).toString();
+    if (num < 10) return parseFloat(num.toFixed(2)).toString();
+    if (num < 100) return parseFloat(num.toFixed(1)).toString();
 
-    // Handle numbers from 100 up to 1e9 (exclusive of 1e9)
     if (num < 1e9) {
         return num.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
     }
 
-    // Handle numbers 1e9 and above (Billions, Trillions, etc.)
-    // This logic is adapted from the original formatStandard function
-    if (num >= 1e18) { // Scientific notation for numbers >= 1e18 (1京)
+    if (num >= 1e18) {
         return num.toExponential(2).replace('e+', 'e');
     }
-    if (num >= 1e15) { // Suffix notation for Qa (1千兆 = 1e15) for numbers in [1e15, 1e18)
+    if (num >= 1e15) {
         let value = num / 1e15;
         if (value < 10) return value.toFixed(2) + 'Qa';
         if (value < 100) return value.toFixed(1) + 'Qa';
         return Math.floor(value).toFixed(0) + 'Qa';
     }
-    if (num >= 1e12) { // Suffix notation for T (1兆 = 1e12) for numbers in [1e12, 1e15)
+    if (num >= 1e12) {
         let value = num / 1e12;
         if (value < 10) return value.toFixed(2) + 'T';
         if (value < 100) return value.toFixed(1) + 'T';
         return Math.floor(value).toFixed(0) + 'T';
     }
-    // This part already handles num >= 1e9 from the condition above.
-    // So, we are in the B range if we reach here.
     let value = num / 1e9;
     if (value < 10) return value.toFixed(2) + 'B';
     if (value < 100) return value.toFixed(1) + 'B';
     return Math.floor(value).toFixed(0) + 'B';
 }
 
-// New main number formatting router function
-function formatNumberSignificant(num, formatType = selectedNumberFormat) { // Pass formatType or use global
+function formatNumberSignificant(num, formatType = selectedNumberFormat) {
     switch (formatType) {
         case 'standard':
             return formatStandardSignificant(num);
         case 'hex':
-            return formatHex(num); // Call original formatHex
+            return formatHex(num);
         case 'scientific':
-            return formatScientific(num); // Call original formatScientific
+            return formatScientific(num);
         default:
             return formatStandardSignificant(num);
     }
@@ -409,25 +499,24 @@ function formatHex(num) {
         }
         formattedIntegerHex += integerHex[i];
     }
-    integerHex = formattedIntegerHex || '0'; // Ensure '0' if integerHex was empty (e.g. for num=0.5)
+    integerHex = formattedIntegerHex || '0';
 
     let fractionalHex = "";
-    if (absNum < 1000 && fractionalPart > 1e-7) { // Threshold for showing fraction and avoid tiny fractions
-        for (let i = 0; i < 3; i++) { // Max 3 hex decimal places
+    if (absNum < 1000 && fractionalPart > 1e-7) {
+        for (let i = 0; i < 3; i++) {
             fractionalPart *= 16;
             const digit = Math.floor(fractionalPart);
             fractionalHex += digit.toString(16).toLowerCase();
             fractionalPart -= digit;
-            if (fractionalPart < 1e-7) break; // Stop if remainder is negligible
+            if (fractionalPart < 1e-7) break;
         }
-        // Remove trailing zeros from fractionalHex
         while (fractionalHex.length > 0 && fractionalHex.endsWith('0')) {
             fractionalHex = fractionalHex.slice(0, -1);
         }
     }
 
     if (integerPart === 0 && fractionalHex === "") {
-        return "0"; // Handles cases like 0.000001 which don't produce fractional hex digits
+        return "0";
     }
 
     let finalResult = integerHex;
@@ -435,7 +524,6 @@ function formatHex(num) {
         finalResult += "." + fractionalHex;
     }
 
-    // Avoid "-0" if the number was negative but rounded/formatted to "0" (e.g. -0.0000001)
     if (finalResult === "0") return "0";
 
     return sign + finalResult;
@@ -443,25 +531,21 @@ function formatHex(num) {
 
 function formatScientific(num) {
     if (num === undefined || num === null) {
-        return "0"; // Consistent with other formatters' handling of undefined/null
+        return "0";
     }
-    // No explicit isNaN check here, assuming inputs are numbers or will be handled by formatStandardSignificant.
-
     const absNum = Math.abs(num);
 
-    if (absNum < 10) { // This condition also correctly routes num = 0 to formatStandardSignificant
-        return formatStandardSignificant(num); // formatStandardSignificant handles 0 and negative numbers correctly
+    if (absNum < 10) {
+        return formatStandardSignificant(num);
     } else {
-        // absNum >= 10
         return num.toExponential(2).replace('e+', 'e');
     }
 }
 
 function formatTimeToBuy(totalSeconds) {
     if (!isFinite(totalSeconds) || totalSeconds < 0) {
-        return "way too much"; // Handles Infinity or negative seconds
+        return "way too much";
     }
-    // Correctly handle 0 seconds or very small positive numbers that would floor to 0s
     if (totalSeconds < 1 && totalSeconds >= 0) {
         return "0s";
     }
@@ -469,9 +553,8 @@ function formatTimeToBuy(totalSeconds) {
         return Math.floor(totalSeconds) + "s";
     }
 
-    // Check for "way too much" (999 years or more)
     const secondsInDay = 24 * 60 * 60;
-    const secondsInYear = 365 * secondsInDay; // Approximate for display
+    const secondsInYear = 365 * secondsInDay;
     if (totalSeconds >= 999 * secondsInYear) {
         return "way too much";
     }
@@ -498,8 +581,6 @@ function formatTimeToBuy(totalSeconds) {
         parts.push(days + "d");
     }
 
-    // Always format HH:MM:SS part since totalSeconds >= 60
-    // and we want it even if years/days are 0 but hours/minutes/seconds are not.
     let timeStr =
         hours.toString().padStart(2, '0') + ":" +
         minutes.toString().padStart(2, '0') + ":" +
@@ -511,14 +592,9 @@ function formatTimeToBuy(totalSeconds) {
 }
 
 function formatNumber(num) {
-    // This function is now superseded by formatNumberSignificant.
-    // It can be kept for compatibility or removed if all calls are updated.
-    // For now, let it call the new function with the global selectedNumberFormat.
     return formatNumberSignificant(num, selectedNumberFormat);
 }
 
-// Calculates the total cost for buying a specific amount of a generator
-// and the cost of the very next single purchase after these 'amount' purchases.
 function calculateTotalCostForAmount(currentGeneratorCost, numberOfItems, costIncreaseRate) {
     let calculatedTotalCost = 0;
     let nextCostAfterLoop = currentGeneratorCost;
@@ -531,12 +607,9 @@ function calculateTotalCostForAmount(currentGeneratorCost, numberOfItems, costIn
         calculatedTotalCost += nextCostAfterLoop;
         nextCostAfterLoop = Math.ceil(nextCostAfterLoop * costIncreaseRate);
     }
-    // nextCostAfterLoop now holds the cost for the item AFTER the 'numberOfItems' have been purchased.
     return { totalCost: calculatedTotalCost, costForNextSingleItem: nextCostAfterLoop };
 }
 
-// Calculates the maximum number of items that can be bought with currentCash,
-// considering the increasing cost, and the total cost for that maximum number.
 function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncreaseRate) {
     let itemsBought = 0;
     let totalSpent = 0;
@@ -546,7 +619,7 @@ function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncrea
         totalSpent += costOfNextItem;
         itemsBought++;
         costOfNextItem = Math.ceil(costOfNextItem * costIncreaseRate);
-        if (itemsBought >= MAX_BUY_SAFETY_LIMIT) { // Safety break for very large MAX buys, adjust if needed
+        if (itemsBought >= MAX_BUY_SAFETY_LIMIT) {
             break;
         }
     }
@@ -554,8 +627,6 @@ function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncrea
 }
 
 function updateDisplay() {
-    cashDisplay.textContent = formatNumber(cash);
-
     // (A) Calculate actualCashPerSecond FIRST
     let combinedGeneratorBoostForIncome = 1.0;
     generatorsData.forEach(g => { combinedGeneratorBoostForIncome *= g.boostRate; });
@@ -563,145 +634,23 @@ function updateDisplay() {
     if (generatorsData[0] && generatorsData[0].totalCount > 0) {
         actualCashPerSecond = generatorsData[0].totalCount * combinedGeneratorBoostForIncome * resetBoostRate;
     }
-    // The old incomePerSecondDisplay update is already commented out, so no action needed on that here.
 
-    // (B) NOW prepare the display strings using the calculated actualCashPerSecond
-    // Update Total Boost Formula Display
-    if (totalBoostFormulaDisplay) {
-        const boostFormulaParts = [];
-        generatorsData.forEach(gen => {
-            // Always include all generators in the formula display
-            const formattedBoostRate = formatNumber(gen.boostRate); // Use main formatting function
-            boostFormulaParts.push(`<span style="color: ${gen.themeColor}; font-weight: bold;">${formattedBoostRate}</span>`);
-        });
-
-        if (prestigePoints > 0) {
-            const formattedResetBoost = formatNumber(resetBoostRate); // Use main formatting function
-            // Style for grey color and bold font weight, similar to other boost numbers.
-            const resetBoostSpan = `<span style="color: grey; font-weight: bold;">${formattedResetBoost}</span>`;
-            boostFormulaParts.push(resetBoostSpan);
-        }
-
-        let formulaString = boostFormulaParts.join(" × ");
-        let incomeString = `<br><span class="income-display-in-boost-area">Income: ${formatNumber(actualCashPerSecond)} /s</span>`;
-
-        totalBoostFormulaDisplay.innerHTML = formulaString + incomeString;
-    }
-
-    // Update Prestige Points and Reset Boost Display
-    if (prestigeInfoContainer) {
-        if (prestigePoints > 0) {
-            prestigeInfoContainer.style.display = 'inline';
-            if (prestigePointsDisplay) {
-                prestigePointsDisplay.textContent = formatNumber(prestigePoints);
-            }
-        } else {
-            prestigeInfoContainer.style.display = 'none';
-        }
-    }
-    // if (resetBoostInfoContainer) { // Logic for old reset boost display in #stats - REMOVED
-    //     if (prestigePoints > 0) {
-    //         resetBoostInfoContainer.style.display = 'inline';
-    //         if (resetBoostDisplay) {
-    //             resetBoostDisplay.textContent = resetBoostRate.toFixed(1);
-    //         }
-    //     } else {
-    //         resetBoostInfoContainer.style.display = 'none';
-    //     }
-    // }
-
-    // Update Income Per Second Display block is now moved above the totalBoostFormulaDisplay update.
-    // The old commented-out lines for incomePerSecondDisplay are fine where they are (or were, if part of the moved block).
-    // No need to search for this block again as it's been effectively relocated.
+    // (B) Call Helper Functions
+    updateGlobalStatsDisplay(cash, prestigePoints, resetBoostRate, actualCashPerSecond);
 
     generatorsData.forEach((gen, index) => {
-        // Visibility Control
-        if (gen.actionRowElement) {
-            if (gen.id === 1) {
-                gen.actionRowElement.style.visibility = 'visible';
-            } else {
-                const prevGen = generatorsData[index - 1];
-                if (prevGen && prevGen.totalCount >= GENERATOR_UNLOCK_THRESHOLD) {
-                    gen.actionRowElement.style.visibility = 'visible';
-                } else {
-                    gen.actionRowElement.style.visibility = 'hidden';
-                }
-            }
-        }
-
-        // Update Name Display
-        if (gen.nameDisplayElement) {
-            gen.nameDisplayElement.textContent = gen.namePrefix + gen.id;
-        }
-
-        // Update Level Display
-        if (gen.levelDisplayElement) {
-            let producedCount = gen.totalCount - gen.purchasedCount;
-            if (producedCount < 0) producedCount = 0; // Ensure producedCount isn't negative
-            if (producedCount <= 0) {
-                gen.levelDisplayElement.textContent = "lv " + formatNumber(gen.purchasedCount);
-            } else {
-                gen.levelDisplayElement.textContent = "lv " + formatNumber(gen.purchasedCount) + " + " + formatNumber(producedCount);
-            }
-        }
-        // Generator-Specific Boost Display
-        if (gen.boostDisplayElement) {
-            // gen.boostDisplayElement.textContent = "Boost: " + gen.boostRate.toFixed(3); // Removed as per subtask
-        }
-
-        // Update Buy Button
-        if (gen.buttonElement) {
-            let displayAmount;
-            let currentTotalCost;
-
-            if (selectedBuyAmount === 'MAX') {
-                const maxInfo = calculateMaxBuyableAmount(cash, gen.currentCost, gen.costIncreaseRate);
-                if (maxInfo.count === 0) {
-                    displayAmount = 1;
-                    currentTotalCost = gen.currentCost;
-                } else {
-                    displayAmount = maxInfo.count;
-                    currentTotalCost = maxInfo.totalCost;
-                }
-            } else {
-                displayAmount = selectedBuyAmount;
-                const costInfo = calculateTotalCostForAmount(gen.currentCost, displayAmount, gen.costIncreaseRate);
-                currentTotalCost = costInfo.totalCost;
-            }
-
-            // New logic for timeToBuyString
-            let timeToBuyString;
-            const cashNeeded = currentTotalCost - cash;
-            // Ensure generatorsData[0] exists and its totalCount is valid for cashPerSecond calculation
-            const cashPerSecond = (generatorsData[0] && generatorsData[0].totalCount > 0) ? generatorsData[0].totalCount : 0;
-
-            if (cashNeeded <= 0) {
-                timeToBuyString = ""; // Affordable or already have enough
-            } else if (cashPerSecond === 0) {
-                timeToBuyString = "No income"; // Cannot afford if no income and cashNeeded > 0
-            } else {
-                const secondsToAfford = Math.ceil(cashNeeded / cashPerSecond); // Apply Math.ceil()
-                timeToBuyString = formatTimeToBuy(secondsToAfford);
-            }
-
-            gen.buttonElement.innerHTML =
-                "Buy " + formatNumber(displayAmount) +
-                "<br><span class='time-to-buy'>" + timeToBuyString + "</span>" +
-                "<br>Cost: " + formatNumber(currentTotalCost);
-
-            let canAfford = cash >= currentTotalCost && displayAmount > 0;
-            gen.buttonElement.classList.toggle('can-buy', canAfford);
-        }
+        updateSingleGeneratorRow(gen, index, cash, selectedBuyAmount, actualCashPerSecond);
     });
+
+    updateResetContainerVisibility(cash); // This was previously in setInterval
 }
 
-// New loop-based event listener setup
+
 generatorsData.forEach(gen => {
-    if (gen.buttonElement) { // Ensure the button element exists
+    if (gen.buttonElement) {
         gen.buttonElement.addEventListener('click', () => {
-            // Purchase logic for 'gen'
             let effectiveBuyAmount;
-            let purchaseDetails; // To store result from helper functions
+            let purchaseDetails;
 
             if (selectedBuyAmount === 'MAX') {
                 purchaseDetails = calculateMaxBuyableAmount(cash, gen.currentCost, gen.costIncreaseRate);
@@ -719,7 +668,6 @@ generatorsData.forEach(gen => {
                     gen.purchasedCount++;
                 }
 
-                // Update currentCost to the cost of the very next item
                 if (selectedBuyAmount === 'MAX') {
                     gen.currentCost = purchaseDetails.costForNextSingleItemAfterMax;
                 } else {
@@ -736,14 +684,12 @@ setInterval(() => {
     // Update generator boost rates
     generatorsData.forEach(gen => {
         if (gen.totalCount > 0) {
-            gen.boostRate += 0.01; // Changed increment from 0.001 to 0.01
-            // Optional: Cap boostRate if needed, e.g., gen.boostRate = Math.min(gen.boostRate, MAX_BOOST_RATE);
-            // For now, no cap as per current plan.
+            gen.boostRate += 0.01;
         }
     });
 
-    // Calculate effective total boost from all generators
-    let combinedGeneratorBoost = 1.0;
+    // Calculate effective total boost from all generators for cash production
+    let combinedGeneratorBoost = 1.0; // Renamed to avoid conflict with combinedGeneratorBoostForIncome scope
     generatorsData.forEach(gen => {
         combinedGeneratorBoost *= gen.boostRate;
     });
@@ -758,38 +704,18 @@ setInterval(() => {
 
     // Generator production (e.g., Gen9 produces Gen8, ..., Gen2 produces Gen1)
     for (let i = generatorsData.length - 1; i > 0; i--) {
-        // generatorsData[i] is the producing generator (e.g., Gen9 if i=8)
-        // generatorsData[i-1] is the generator being produced (e.g., Gen8 if i=8)
-        if (generatorsData[i].totalCount > 0) { // Only produce if the producing generator exists
+        if (generatorsData[i].totalCount > 0) {
             generatorsData[i-1].totalCount += generatorsData[i].totalCount;
         }
     }
 
-    // First Goal Achievement Check
-    if (!gameHasReachedFirstGoal && cash >= FIRST_GOAL_CASH) {
-        if (milestoneMessage && milestoneMessage.querySelector('h2')) {
-            milestoneMessage.querySelector('h2').textContent = 'First Critical Point Reached!';
-        }
-        if (resetContainer) {
-            // To make the height transition work, the container needs to be block/flex etc.
-            // It's currently height:0, overflow:hidden.
-            // Setting a specific target height or using scrollHeight.
-            // Let's try a fixed estimated height first for simplicity, can be refined.
-            // Estimate based on h2 font size (1.8em ~30px) + button padding/size (~50px) + margins.
-            // Say, roughly 120px to 150px. Let's use 130px as an example.
-            // A more robust way is to temporarily set height to auto, get scrollHeight, then set to that.
-            // For this subtask, let's use a fixed height:
-            resetContainer.style.height = '130px'; // Example height, adjust based on actual content
-            resetContainer.style.marginTop = '20px';    // Add margin when shown
-            resetContainer.style.marginBottom = '20px'; // Add margin when shown
-        }
-        gameHasReachedFirstGoal = true;
-        // Optional: Code to disable further generator purchases could go here
-        // For example, by adding a class to all buy buttons or setting a global flag.
-    }
+    // First Goal Achievement Check - This logic is now inside updateResetContainerVisibility
+    // and will be called as part of updateDisplay.
 
     updateDisplay();
 }, 1000);
 
 // Initial display update
 updateDisplay();
+
+[end of script.js]
