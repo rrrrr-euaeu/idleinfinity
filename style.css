@@ -1,0 +1,445 @@
+:root {
+    --main-bg-color: #f0f0f0;
+    --card-bg-color: #ffffff;
+    --text-primary-color: #333333;
+    --text-secondary-color: #555555;
+    --text-on-accent-bg-color: #ffffff; /* For text on dark/colored backgrounds */
+    --accent-color-primary: #007bff;    /* General purpose accent, e.g., links, some button highlights */
+    --accent-color-secondary: #e67e22;  /* For prestige points, special highlights */
+    --button-reset-bg-color: #dc3545;   /* Red for reset/danger actions */
+    --button-reset-text-color: #ffffff; /* Text color for reset button */
+    --button-disabled-bg-color: #cccccc; /* For disabled/default generator buttons */
+    --border-color: #dddddd;            /* Subtle borders */
+    --gen-button-bg-color-fallback: #007bff; /* Fallback for generator theme button */
+}
+
+/* Basic styling for the Idle Infinity Game */
+body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+    background-color: var(--main-bg-color);
+    color: var(--text-primary-color);
+}
+
+.info-panel-card {
+    background-color: var(--card-bg-color);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 4px 8px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+#stats {
+    margin-bottom: 10px;
+    min-height: 40px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#total-boost-formula-display {
+    font-size: 1.1em;
+    margin: 10px 0;
+    text-align: center;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    min-height: 1.5em;
+    line-height: 1.4;
+}
+
+.income-display-in-boost-area {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #264653;    /* Kept distinct color for now */
+}
+
+#stats p {
+    margin: 8px 0;
+    text-align: center;
+}
+
+#cash {
+    font-weight: bold;
+    font-size: 1.3em;
+    color: #2c3e50;      /* Kept distinct color for now */
+}
+
+#prestige-points-display {
+    font-weight: bold;
+    color: var(--accent-color-secondary);
+    margin-left: 10px;
+}
+
+#reset-boost-display { /* This ID is no longer used in HTML for stats bar */
+    font-weight: bold;
+    color: #f4a261;
+    margin-left: 5px;
+}
+
+#income-per-second-display { /* This ID is no longer used in HTML for stats bar */
+    font-weight: bold;
+    color: #264653;
+}
+
+#buy-amount-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--card-bg-color);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 4px 8px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 600px;
+    box-sizing: border-box;
+}
+#buy-amount-selector span {
+    margin-left: 15px;
+    margin-right: 10px;
+    font-weight: bold;
+    color: var(--text-primary-color);
+}
+#buy-amount-selector input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    position: absolute;
+    left: -9999px;
+}
+#buy-amount-selector label {
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-right-width: 0;
+    border-radius: 0;
+    background-color: var(--main-bg-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    display: inline-block;
+    font-size: 0.9em;
+    color: var(--text-primary-color);
+}
+#buy-amount-selector label[for="buy1"] {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    margin-left: 0;
+}
+#buy-amount-selector label[for="buyMAX"] {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-right-width: 1px; /* Keep this border */
+    margin-right: 15px;
+}
+#buy-amount-selector label:hover {
+    background-color: #e0e0e0; /* Slightly darker than main-bg for hover */
+    border-color: #b0b0b0; /* Slightly darker border for hover */
+}
+#buy-amount-selector label[for="buyMAX"]:hover {
+    border-right-color: #b0b0b0;
+}
+#buy-amount-selector input[type="radio"]:checked + label {
+    background-color: var(--accent-color-primary);
+    color: var(--text-on-accent-bg-color);
+    border-color: color-mix(in srgb, var(--accent-color-primary) 70%, black);
+}
+#buy-amount-selector input[type="radio"]#buyMAX:checked + label[for="buyMAX"] {
+    border-right-color: color-mix(in srgb, var(--accent-color-primary) 70%, black);
+}
+#buy-amount-selector input[type="radio"]:checked + label:not([for="buyMAX"]) {
+    border-right-width: 0;
+}
+
+#reset-container {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.5s ease-in-out;
+    text-align: center;
+    padding: 0 20px;    /* Vertical padding 0, horizontal 20px */
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 600px;
+}
+#milestone-message h2 {
+    color: #27ae60; /* Consider making this a variable if other success messages appear */
+    font-size: 1.8em;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+#reset-button {
+    padding: 12px 25px;
+    font-size: 1.1em;
+    color: var(--button-reset-text-color);
+    background-color: var(--button-reset-bg-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    margin-bottom: 10px;
+}
+#reset-button:hover {
+    background-color: color-mix(in srgb, var(--button-reset-bg-color) 85%, black);
+}
+
+/* Options UI Styles */
+#options-button {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: var(--text-secondary-color);
+    color: var(--main-bg-color); /* Better contrast with dark bg */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1001;
+
+    padding: 0;
+    font-size: 1.8em;
+    width: 44px;
+    height: 44px;
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out;
+}
+#options-button:hover {
+    background-color: var(--text-primary-color);
+}
+
+#options-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 480px;
+    max-width: 80vw;
+    background-color: var(--main-bg-color);
+    padding: 20px;
+    z-index: 1000;
+    display: block;
+    box-sizing: border-box;
+    overflow-y: auto;
+
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+
+    border: none;
+    border-left: 1px solid var(--border-color);
+    border-radius: 0;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    box-shadow: -3px 0 8px rgba(0,0,0,0.15);
+}
+#options-panel.open {
+    transform: translateX(0%);
+}
+#options-panel h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--text-primary-color);
+}
+
+#number-format-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+#number-format-selector span {
+    margin-right: 10px;
+    font-weight: bold;
+    color: var(--text-primary-color);
+}
+#number-format-selector input[type="radio"] {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    position: absolute; left: -9999px;
+}
+#number-format-selector label {
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-right-width: 0;
+    border-radius: 0;
+    background-color: var(--card-bg-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    display: inline-block;
+    font-size: 0.9em;
+    color: var(--text-primary-color);
+}
+#number-format-selector label:hover {
+    background-color: #e0e0e0;
+    border-color: #b0b0b0;
+}
+#number-format-selector label[for="formatStandard"] {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+#number-format-selector label[for="formatScientific"] {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-right-width: 1px;
+}
+#number-format-selector label[for="formatScientific"]:hover {
+     border-right-color: #b0b0b0;
+}
+#number-format-selector input[type="radio"]:checked + label {
+    background-color: var(--accent-color-primary);
+    color: var(--text-on-accent-bg-color);
+    border-color: color-mix(in srgb, var(--accent-color-primary) 70%, black);
+}
+#number-format-selector input[type="radio"]#formatScientific:checked + label[for="formatScientific"] {
+    border-right-color: color-mix(in srgb, var(--accent-color-primary) 70%, black);
+}
+#number-format-selector input[type="radio"]:checked + label:not([for="formatScientific"]) {
+    border-right-width: 0;
+}
+
+#close-options-button {
+    display: block;
+    padding: 10px 20px;
+    background-color: var(--text-secondary-color);
+    color: var(--text-on-accent-bg-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 20px auto 0 auto;
+    transition: background-color 0.2s ease-in-out;
+}
+#close-options-button:hover {
+    background-color: var(--text-primary-color);
+}
+
+/* End of Options UI Styles */
+
+
+#actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 10px;
+    max-width: 1260px;
+    margin: 0 auto;
+}
+
+.generator-action-row {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    flex: 0 0 380px;
+    margin: 10px;
+    background-color: var(--card-bg-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    visibility: hidden;
+}
+
+.generator-info {
+    flex-basis: 60%;
+    padding-right: 10px;
+}
+
+.generator-name {
+    display: block;
+    font-weight: bold;
+    color: var(--text-primary-color);
+}
+
+.generator-level {
+    display: block;
+    font-size: 0.9em;
+    color: var(--text-secondary-color);
+}
+
+/* Removed .generator-boost-display rule as the element is no longer in HTML */
+
+.time-to-buy {
+    color: var(--text-secondary-color);
+    font-size: 0.8em;
+    display: inline-block;
+    min-height: 1em;
+    line-height: 1.2;
+}
+
+button { /* This is the general rule for generator buy buttons */
+    padding: 10px;
+    margin: 0;
+    border: none;
+    border-radius: 5px;
+    color: var(--text-secondary-color); /* Default text for disabled state */
+    cursor: pointer;
+    height: auto;
+    line-height: 1.3;
+    text-align: center;
+    flex-basis: 40%;
+    background-color: var(--button-disabled-bg-color);
+    opacity: 0.7;
+    transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out, outline 0.1s ease-in-out;
+}
+
+button.can-buy {
+    background-color: var(--gen-button-bg-color, var(--gen-button-bg-color-fallback));
+    color: var(--text-on-accent-bg-color); /* Assuming themed buttons are dark enough for white text */
+    opacity: 1;
+}
+
+button.can-buy:hover {
+    filter: brightness(85%);
+    outline: 1px solid var(--accent-color-primary); /* Subtle outline on hover */
+}
+
+#win-message {
+    color: green; /* Consider a variable if used elsewhere */
+    font-weight: bold;
+}
+
+/* Responsive max-widths for key content blocks */
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    .info-panel-card,
+    #buy-amount-selector,
+    #reset-container {
+        max-width: 720px;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .info-panel-card,
+    #buy-amount-selector,
+    #reset-container {
+        max-width: 960px;
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .info-panel-card,
+    #buy-amount-selector,
+    #reset-container {
+        max-width: 1140px;
+    }
+}
