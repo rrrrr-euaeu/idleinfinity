@@ -203,7 +203,7 @@ generatorsData.forEach(gen => {
         gen.buttonElement.style.setProperty('--gen-button-bg-color', gen.themeColor);
         gen.actionRowElement = gen.buttonElement.closest('.generator-action-row');
         if (gen.actionRowElement) {
-            gen.boostDisplayElement = gen.actionRowElement.querySelector('.generator-boost-display'); // This will be null as span was removed
+            gen.boostDisplayElement = gen.actionRowElement.querySelector('.generator-boost-display');
         } else {
             gen.boostDisplayElement = null;
         }
@@ -308,16 +308,14 @@ function updateGlobalStatsDisplay(currentCash, currentPrestigePoints, currentRes
             prestigeInfoContainer.style.display = 'none';
         }
     }
-    // Logic for resetBoostInfoContainer and resetBoostDisplay (old stats bar display) was removed previously.
 }
 
 function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmount, currentActualCashPerSecond) {
-    // Visibility Control
     if (gen.actionRowElement) {
         if (gen.id === 1) {
             gen.actionRowElement.style.visibility = 'visible';
         } else {
-            const prevGen = generatorsData[index - 1]; // Assumes generatorsData is accessible globally
+            const prevGen = generatorsData[index - 1];
             if (prevGen && prevGen.totalCount >= GENERATOR_UNLOCK_THRESHOLD) {
                 gen.actionRowElement.style.visibility = 'visible';
             } else {
@@ -326,12 +324,10 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
         }
     }
 
-    // Update Name Display
     if (gen.nameDisplayElement) {
         gen.nameDisplayElement.textContent = gen.namePrefix + gen.id;
     }
 
-    // Update Level Display
     if (gen.levelDisplayElement) {
         let producedCount = gen.totalCount - gen.purchasedCount;
         if (producedCount < 0) producedCount = 0;
@@ -342,16 +338,13 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
         }
     }
 
-    // Individual boost display on row was removed (gen.boostDisplayElement.textContent = ...)
-
-    // Update Buy Button
     if (gen.buttonElement) {
         let displayAmount;
         let currentTotalCost;
 
         if (currentSelectedBuyAmount === 'MAX') {
             const maxInfo = calculateMaxBuyableAmount(currentCash, gen.currentCost, gen.costIncreaseRate);
-            if (maxInfo.count === 0) { // If cannot afford even one, show cost for 1
+            if (maxInfo.count === 0) {
                 displayAmount = 1;
                 currentTotalCost = gen.currentCost;
             } else {
@@ -398,8 +391,6 @@ function updateResetContainerVisibility(currentCash) {
         }
         gameHasReachedFirstGoal = true;
     }
-    // Note: Hiding the reset container (setting height and margins to 0) is handled
-    // in the resetButton click event listener, as it's a direct consequence of that action.
 }
 
 // --- End of New UI Update Helper Functions ---
@@ -642,10 +633,10 @@ function updateDisplay() {
         updateSingleGeneratorRow(gen, index, cash, selectedBuyAmount, actualCashPerSecond);
     });
 
-    updateResetContainerVisibility(cash); // This was previously in setInterval
+    updateResetContainerVisibility(cash);
 }
 
-
+// Event listener setup for generator purchase buttons
 generatorsData.forEach(gen => {
     if (gen.buttonElement) {
         gen.buttonElement.addEventListener('click', () => {
@@ -689,7 +680,7 @@ setInterval(() => {
     });
 
     // Calculate effective total boost from all generators for cash production
-    let combinedGeneratorBoost = 1.0; // Renamed to avoid conflict with combinedGeneratorBoostForIncome scope
+    let combinedGeneratorBoost = 1.0;
     generatorsData.forEach(gen => {
         combinedGeneratorBoost *= gen.boostRate;
     });
@@ -709,13 +700,8 @@ setInterval(() => {
         }
     }
 
-    // First Goal Achievement Check - This logic is now inside updateResetContainerVisibility
-    // and will be called as part of updateDisplay.
-
     updateDisplay();
 }, 1000);
 
 // Initial display update
 updateDisplay();
-
-[end of script.js]
