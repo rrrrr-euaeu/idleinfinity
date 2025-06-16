@@ -10,41 +10,58 @@ let resetBoostRate = 1.0;
 
 const initialGeneratorsData = [
     {
-        id: 1,
-        namePrefix: "Generator",
-        initialCost: 10,
-        currentCost: 12,
-        costIncreaseRate: 1.15,
-        totalCount: 1,
-        purchasedCount: 1,
-        boostRate: 1.0,
-        themeColor: '#E63946',
-        nameDisplayId: 'gen1-name-display',
-        levelDisplayId: 'gen1-level-display',
-        buttonId: 'buy-gen1',
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
+        id: 1, namePrefix: "Generator", initialCost: 10, currentCost: 12, costIncreaseRate: 1.15,
+        totalCount: 1, purchasedCount: 1, boostRate: 1.0,
+        nameDisplayId: 'gen1-name-display', levelDisplayId: 'gen1-level-display', buttonId: 'buy-gen1',
+        themeColor: '#E63946' // Red
     },
-    // ... (rest of initialGeneratorsData) ...
     {
-        id: 9,
-        namePrefix: "Generator",
-        initialCost: 1000000000,
-        currentCost: 1000000000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        nameDisplayId: 'gen9-name-display',
-        levelDisplayId: 'gen9-level-display',
-        buttonId: 'buy-gen9',
-        themeColor: '#F789A8',
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
+        id: 2, namePrefix: "Generator", initialCost: 100, currentCost: 100, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen2-name-display', levelDisplayId: 'gen2-level-display', buttonId: 'buy-gen2',
+        themeColor: '#F4A261' // Orange
+    },
+    {
+        id: 3, namePrefix: "Generator", initialCost: 1000, currentCost: 1000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen3-name-display', levelDisplayId: 'gen3-level-display', buttonId: 'buy-gen3',
+        themeColor: '#E9C46A' // Yellow
+    },
+    {
+        id: 4, namePrefix: "Generator", initialCost: 10000, currentCost: 10000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen4-name-display', levelDisplayId: 'gen4-level-display', buttonId: 'buy-gen4',
+        themeColor: '#A7C957' // Yellow-Green
+    },
+    {
+        id: 5, namePrefix: "Generator", initialCost: 100000, currentCost: 100000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen5-name-display', levelDisplayId: 'gen5-level-display', buttonId: 'buy-gen5',
+        themeColor: '#2A9D8F' // Green/Teal
+    },
+    {
+        id: 6, namePrefix: "Generator", initialCost: 1000000, currentCost: 1000000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen6-name-display', levelDisplayId: 'gen6-level-display', buttonId: 'buy-gen6',
+        themeColor: '#57A7C9' // Light Blue
+    },
+    {
+        id: 7, namePrefix: "Generator", initialCost: 10000000, currentCost: 10000000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen7-name-display', levelDisplayId: 'gen7-level-display', buttonId: 'buy-gen7',
+        themeColor: '#118AB2' // Blue
+    },
+    {
+        id: 8, namePrefix: "Generator", initialCost: 100000000, currentCost: 100000000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen8-name-display', levelDisplayId: 'gen8-level-display', buttonId: 'buy-gen8',
+        themeColor: '#9B5DE5' // Purple
+    },
+    {
+        id: 9, namePrefix: "Generator", initialCost: 1000000000, currentCost: 1000000000, costIncreaseRate: 1.20,
+        totalCount: 0, purchasedCount: 0, boostRate: 1.0,
+        nameDisplayId: 'gen9-name-display', levelDisplayId: 'gen9-level-display', buttonId: 'buy-gen9',
+        themeColor: '#F789A8' // Pink
     }
 ];
 
@@ -176,22 +193,22 @@ const GeneratorManager = {
                     let effectiveBuyAmount;
                     let purchaseDetails;
 
-                    if (selectedBuyAmount === 'MAX') { // Access global selectedBuyAmount
-                        purchaseDetails = this.calculateMaxBuyableAmount(gen, cash); // Use this. for manager's method, global cash
+                    if (selectedBuyAmount === 'MAX') {
+                        purchaseDetails = this.calculateMaxBuyableAmount(gen, cash);
                         effectiveBuyAmount = purchaseDetails.count;
                     } else {
-                        effectiveBuyAmount = selectedBuyAmount; // Access global selectedBuyAmount
-                        purchaseDetails = this.calculateCostForAmount(gen, effectiveBuyAmount); // Use this. for manager's method
+                        effectiveBuyAmount = selectedBuyAmount;
+                        purchaseDetails = this.calculateCostForAmount(gen, effectiveBuyAmount);
                     }
 
-                    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) { // Access global cash
-                        cash -= purchaseDetails.totalCost; // Modify global cash
-                        this.purchaseGenerator( // Use this. for manager's method
+                    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
+                        cash -= purchaseDetails.totalCost;
+                        this.purchaseGenerator(
                             gen.id,
                             effectiveBuyAmount,
                             purchaseDetails.costForNextSingleItemAfterMax || purchaseDetails.costForNextSingleItem
                         );
-                        updateDisplay(); // Call global updateDisplay
+                        updateDisplay();
                     }
                 });
             } else {
