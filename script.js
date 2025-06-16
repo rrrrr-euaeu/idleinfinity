@@ -5,28 +5,27 @@ const FIRST_GOAL_CASH = 2147483647; // Math.pow(2, 31) - 1
 const GENERATOR_UNLOCK_THRESHOLD = 5;
 const MAX_BUY_SAFETY_LIMIT = 10000;
 let prestigePoints = 0;
-let gameHasReachedFirstGoal = false; // Flag to manage goal state
-// let selectedNumberFormat = 'standard'; // REMOVED - Now managed by NumberFormatter
+let gameHasReachedFirstGoal = false;
 let resetBoostRate = 1.0;
 
-const generatorsData = [
+const initialGeneratorsData = [ // Renamed global, used for initializing GeneratorManager
     {
         id: 1,
         namePrefix: "Generator",
-        initialCost: 10, // Stays 10 for reset purposes
-        currentCost: 12, // Cost for the *next* purchase (effectively the 2nd generator)
+        initialCost: 10,
+        currentCost: 12,
         costIncreaseRate: 1.15,
-        totalCount: 1,   // Starts with 1 generator
-        purchasedCount: 1, // Assumed this one was 'purchased' at start
+        totalCount: 1,
+        purchasedCount: 1,
         boostRate: 1.0,
-        themeColor: '#E63946', // New Red
+        themeColor: '#E63946',
         nameDisplayId: 'gen1-name-display',
         levelDisplayId: 'gen1-level-display',
         buttonId: 'buy-gen1',
         nameDisplayElement: null,
         levelDisplayElement: null,
         buttonElement: null,
-        actionRowElement: null // To be populated later
+        actionRowElement: null
     },
     {
         id: 2,
@@ -37,7 +36,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#F4A261', // New Orange
+        themeColor: '#F4A261',
         nameDisplayId: 'gen2-name-display',
         levelDisplayId: 'gen2-level-display',
         buttonId: 'buy-gen2',
@@ -55,7 +54,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#E9C46A', // New Yellow
+        themeColor: '#E9C46A',
         nameDisplayId: 'gen3-name-display',
         levelDisplayId: 'gen3-level-display',
         buttonId: 'buy-gen3',
@@ -73,7 +72,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#A7C957', // New Yellow-Green
+        themeColor: '#A7C957',
         nameDisplayId: 'gen4-name-display',
         levelDisplayId: 'gen4-level-display',
         buttonId: 'buy-gen4',
@@ -91,7 +90,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#2A9D8F', // New Green/Teal
+        themeColor: '#2A9D8F',
         nameDisplayId: 'gen5-name-display',
         levelDisplayId: 'gen5-level-display',
         buttonId: 'buy-gen5',
@@ -109,7 +108,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#57A7C9', // New Light Blue/Sky Blue
+        themeColor: '#57A7C9',
         nameDisplayId: 'gen6-name-display',
         levelDisplayId: 'gen6-level-display',
         buttonId: 'buy-gen6',
@@ -127,7 +126,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#118AB2', // New Blue
+        themeColor: '#118AB2',
         nameDisplayId: 'gen7-name-display',
         levelDisplayId: 'gen7-level-display',
         buttonId: 'buy-gen7',
@@ -145,7 +144,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#9B5DE5', // New Purple/Lavender
+        themeColor: '#9B5DE5',
         nameDisplayId: 'gen8-name-display',
         levelDisplayId: 'gen8-level-display',
         buttonId: 'buy-gen8',
@@ -163,7 +162,7 @@ const generatorsData = [
         totalCount: 0,
         purchasedCount: 0,
         boostRate: 1.0,
-        themeColor: '#F789A8', // New Pink/Rose
+        themeColor: '#F789A8',
         nameDisplayId: 'gen9-name-display',
         levelDisplayId: 'gen9-level-display',
         buttonId: 'buy-gen9',
@@ -178,6 +177,128 @@ const INITIAL_CASH = 0;
 let selectedBuyAmount = 1;
 let cash = INITIAL_CASH;
 
+// --- GeneratorManager Object ---
+const GeneratorManager = {
+    generators: JSON.parse(JSON.stringify(initialGeneratorsData)),
+
+    initDOMReferences: function() {
+        console.log("GeneratorManager: Initializing DOM references for its generators...");
+        if (!this.generators || this.generators.length === 0) {
+            console.error("GeneratorManager: 'this.generators' is empty or not initialized. Cannot set DOM references.");
+            return;
+        }
+        this.generators.forEach(gen => {
+            if (!gen.nameDisplayId || !gen.levelDisplayId || !gen.buttonId) {
+                console.error(`GeneratorManager: Generator ID ${gen.id} is missing display ID properties for DOM lookup.`);
+                return;
+            }
+            gen.nameDisplayElement = document.getElementById(gen.nameDisplayId);
+            gen.levelDisplayElement = document.getElementById(gen.levelDisplayId);
+            gen.buttonElement = document.getElementById(gen.buttonId);
+
+            if (gen.buttonElement) {
+                gen.buttonElement.style.setProperty('--gen-button-bg-color', gen.themeColor);
+                gen.actionRowElement = gen.buttonElement.closest('.generator-action-row');
+                if (!gen.actionRowElement) {
+                    console.warn(`GeneratorManager: Action row not found for generator id: ${gen.id} via button ${gen.buttonId}`);
+                }
+            } else {
+                console.warn(`GeneratorManager: Button element not found for generator id: ${gen.id} with buttonId: ${gen.buttonId}`);
+                gen.actionRowElement = null;
+            }
+            if (!gen.nameDisplayElement) console.warn(`GeneratorManager: Name display element not found for gen id: ${gen.id} using ID ${gen.nameDisplayId}`);
+            if (!gen.levelDisplayElement) console.warn(`GeneratorManager: Level display element not found for gen id: ${gen.id} using ID ${gen.levelDisplayId}`);
+        });
+        console.log("GeneratorManager: DOM references initialization attempt complete.");
+    },
+
+    getAllGenerators: function() {
+        return this.generators;
+    },
+
+    getGenerator: function(id) {
+        return this.generators.find(gen => gen.id === id);
+    },
+
+    calculateCostForAmount: function(gen, amountToBuy) {
+        let calculatedTotalCost = 0;
+        let nextCostAfterLoop = gen.currentCost;
+        if (amountToBuy <= 0) {
+            return { totalCost: 0, costForNextSingleItem: gen.currentCost };
+        }
+        for (let i = 0; i < amountToBuy; i++) {
+            calculatedTotalCost += nextCostAfterLoop;
+            nextCostAfterLoop = Math.ceil(nextCostAfterLoop * gen.costIncreaseRate);
+        }
+        return { totalCost: calculatedTotalCost, costForNextSingleItem: nextCostAfterLoop };
+    },
+
+    calculateMaxBuyableAmount: function(gen, currentCash) {
+        let itemsBought = 0;
+        let totalSpent = 0;
+        let costOfNextItem = gen.currentCost;
+        while (currentCash >= totalSpent + costOfNextItem) {
+            totalSpent += costOfNextItem;
+            itemsBought++;
+            costOfNextItem = Math.ceil(costOfNextItem * gen.costIncreaseRate);
+            if (itemsBought >= MAX_BUY_SAFETY_LIMIT) {
+                break;
+            }
+        }
+        return { count: itemsBought, totalCost: totalSpent, costForNextSingleItemAfterMax: costOfNextItem };
+    },
+
+    purchaseGenerator: function(genId, amountEffectivelyBought, newCurrentCost) {
+        const gen = this.getGenerator(genId);
+        if (gen) {
+            // The loop for incrementing totalCount and purchasedCount was removed
+            // as amountEffectivelyBought already represents the total number to add.
+            gen.totalCount += amountEffectivelyBought;
+            gen.purchasedCount += amountEffectivelyBought;
+            gen.currentCost = newCurrentCost;
+        } else {
+            console.error(`GeneratorManager.purchaseGenerator: Generator with ID ${genId} not found.`);
+        }
+    },
+
+    updateBoostRates: function() {
+        this.generators.forEach(gen => {
+            if (gen.totalCount > 0) {
+                gen.boostRate += 0.01;
+            }
+        });
+    },
+
+    produceLowerTierGenerators: function() {
+        const gens = this.getAllGenerators();
+        for (let i = gens.length - 1; i > 0; i--) {
+            if (gens[i].totalCount > 0) {
+                gens[i-1].totalCount += gens[i].totalCount;
+            }
+        }
+    },
+
+    resetGeneratorStates: function() {
+        this.generators.forEach(gen => {
+            // Find the corresponding initial state from initialGeneratorsData
+            const pristineGen = initialGeneratorsData.find(pGen => pGen.id === gen.id);
+
+            if (gen.id === 1) {
+                gen.totalCount = 1; // Default for Gen1
+                gen.purchasedCount = 1; // Default for Gen1
+                // gen.initialCost is already set, currentCost is for the *next* purchase
+                gen.currentCost = Math.ceil(pristineGen.initialCost * pristineGen.costIncreaseRate);
+            } else {
+                gen.totalCount = 0;
+                gen.purchasedCount = 0;
+                gen.currentCost = pristineGen ? pristineGen.initialCost : gen.initialCost; // Fallback if not found, though it should be
+            }
+            gen.boostRate = 1.0;
+        });
+    }
+};
+// --- End of GeneratorManager Object ---
+
 const cashDisplay = document.getElementById('cash');
 const winMessage = document.getElementById('win-message');
 const buyAmountRadios = document.querySelectorAll('input[name="buyAmount"]');
@@ -191,24 +312,7 @@ const optionsPanel = document.getElementById('options-panel');
 const numberFormatRadios = document.querySelectorAll('input[name="numberFormat"]');
 const totalBoostFormulaDisplay = document.getElementById('total-boost-formula-display');
 
-
-generatorsData.forEach(gen => {
-    gen.nameDisplayElement = document.getElementById(gen.nameDisplayId);
-    gen.levelDisplayElement = document.getElementById(gen.levelDisplayId);
-    gen.buttonElement = document.getElementById(gen.buttonId);
-    if (gen.buttonElement) {
-        gen.buttonElement.style.setProperty('--gen-button-bg-color', gen.themeColor);
-        gen.actionRowElement = gen.buttonElement.closest('.generator-action-row');
-        if (gen.actionRowElement) {
-            gen.boostDisplayElement = gen.actionRowElement.querySelector('.generator-boost-display');
-        } else {
-            gen.boostDisplayElement = null;
-        }
-    } else {
-        gen.actionRowElement = null;
-        gen.boostDisplayElement = null;
-    }
-});
+GeneratorManager.initDOMReferences();
 
 buyAmountRadios.forEach(radio => {
     radio.addEventListener('change', () => {
@@ -227,18 +331,7 @@ if (resetButton) {
         resetBoostRate += 1.0;
         cash = 0;
 
-        generatorsData.forEach(gen => {
-            if (gen.id === 1) {
-                gen.totalCount = 1;
-                gen.purchasedCount = 1;
-                gen.currentCost = Math.ceil(gen.initialCost * gen.costIncreaseRate);
-            } else {
-                gen.totalCount = 0;
-                gen.purchasedCount = 0;
-                gen.currentCost = gen.initialCost;
-            }
-            gen.boostRate = 1.0;
-        });
+        GeneratorManager.resetGeneratorStates(); // Use GeneratorManager method
 
         if (resetContainer) {
             resetContainer.style.height = '0px';
@@ -263,7 +356,7 @@ if (optionsButton && optionsPanel) {
 
 // --- Number Formatter Object ---
 const NumberFormatter = {
-    selectedFormat: 'standard', // Default format
+    selectedFormat: 'standard',
 
     setSelectedFormat: function(formatType) {
         this.selectedFormat = formatType;
@@ -300,7 +393,7 @@ const NumberFormatter = {
             return Math.floor(value).toString() + 'T';
         }
 
-        let value = num / 1e9; // Handles num >= 1e9
+        let value = num / 1e9;
         if (value < 10) return parseFloat(value.toFixed(2)).toString() + 'B';
         if (value < 100) return parseFloat(value.toFixed(1)).toString() + 'B';
         return Math.floor(value).toString() + 'B';
@@ -401,7 +494,7 @@ function updateGlobalStatsDisplay(currentCash, currentPrestigePoints, currentRes
 
     if (totalBoostFormulaDisplay) {
         const boostFormulaParts = [];
-        generatorsData.forEach(gen => {
+        GeneratorManager.getAllGenerators().forEach(gen => {
             const formattedBoostRate = NumberFormatter.format(gen.boostRate);
             boostFormulaParts.push(`<span style="color: ${gen.themeColor}; font-weight: bold;">${formattedBoostRate}</span>`);
         });
@@ -434,7 +527,7 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
         if (gen.id === 1) {
             gen.actionRowElement.style.visibility = 'visible';
         } else {
-            const prevGen = generatorsData[index - 1];
+            const prevGen = GeneratorManager.getAllGenerators()[index - 1];
             if (prevGen && prevGen.totalCount >= GENERATOR_UNLOCK_THRESHOLD) {
                 gen.actionRowElement.style.visibility = 'visible';
             } else {
@@ -462,7 +555,7 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
         let currentTotalCost;
 
         if (currentSelectedBuyAmount === 'MAX') {
-            const maxInfo = calculateMaxBuyableAmount(currentCash, gen.currentCost, gen.costIncreaseRate);
+            const maxInfo = GeneratorManager.calculateMaxBuyableAmount(gen, currentCash);
             if (maxInfo.count === 0) {
                 displayAmount = 1;
                 currentTotalCost = gen.currentCost;
@@ -472,7 +565,7 @@ function updateSingleGeneratorRow(gen, index, currentCash, currentSelectedBuyAmo
             }
         } else {
             displayAmount = currentSelectedBuyAmount;
-            const costInfo = calculateTotalCostForAmount(gen.currentCost, displayAmount, gen.costIncreaseRate);
+            const costInfo = GeneratorManager.calculateCostForAmount(gen, displayAmount);
             currentTotalCost = costInfo.totalCost;
         }
 
@@ -515,34 +608,22 @@ function updateResetContainerVisibility(currentCash) {
 // --- End of New UI Update Helper Functions ---
 
 /*
-// Old global formatting functions - To be removed
+// Old global formatting functions - To be removed/commented
 function formatStandard(num) {
-    if (num === undefined || num === null) return '0';
-    if (num === 0) return '0';
-    if (num >= 1e18) return num.toExponential(2).replace('e+', 'e');
-    if (num >= 1e15) { let v=num/1e15; return (v<10?v.toFixed(2):v<100?v.toFixed(1):Math.floor(v).toFixed(0))+'Qa'; }
-    if (num >= 1e12) { let v=num/1e12; return (v<10?v.toFixed(2):v<100?v.toFixed(1):Math.floor(v).toFixed(0))+'T'; }
-    if (num >= 1e9) { let v=num/1e9; return (v<10?v.toFixed(2):v<100?v.toFixed(1):Math.floor(v).toFixed(0))+'B'; }
-    return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    // ...
 }
 function formatStandardSignificant(num) {
-    if (num === undefined || num === null) return '0';
-    if (num === 0) return "0";
-    if (num < 0) return '-' + formatStandardSignificant(Math.abs(num));
-    if (num < 0.00001 && num > 0) return "0";
-    if (num < 0.01) return parseFloat(num.toFixed(4)).toString();
-    if (num < 1) return parseFloat(num.toFixed(3)).toString();
-    if (num < 10) return parseFloat(num.toFixed(2)).toString();
-    if (num < 100) return parseFloat(num.toFixed(1)).toString();
-    if (num < 1e9) return num.toLocaleString('en-US', {maximumFractionDigits:0, minimumFractionDigits:0});
-    if (num >= 1e18) return num.toExponential(2).replace('e+', 'e');
-    if (num >= 1e15) { let v=num/1e15; return (v<10?parseFloat(v.toFixed(2)).toString():v<100?parseFloat(v.toFixed(1)).toString():Math.floor(v).toString())+'Qa';}
-    if (num >= 1e12) { let v=num/1e12; return (v<10?parseFloat(v.toFixed(2)).toString():v<100?parseFloat(v.toFixed(1)).toString():Math.floor(v).toString())+'T';}
-    let v=num/1e9; return (v<10?parseFloat(v.toFixed(2)).toString():v<100?parseFloat(v.toFixed(1)).toString():Math.floor(v).toString())+'B';
+    // ...
 }
-function formatNumberSignificant(num, formatType = selectedNumberFormat) { return "TEMP"; } // Old global router
-function formatHex(num) { return "TEMP_HEX"; } // Old global hex
-function formatScientific(num) { return "TEMP_SCI"; } // Old global scientific
+function formatNumberSignificant(num, formatType) { // Old global router
+    // ...
+}
+function formatHex(num) { // Old global hex
+    // ...
+}
+function formatScientific(num) { // Old global scientific
+    // ...
+}
 */
 
 function formatTimeToBuy(totalSeconds) {
@@ -594,53 +675,32 @@ function formatTimeToBuy(totalSeconds) {
     return parts.join(" ");
 }
 
-// Global formatNumber function now delegates to NumberFormatter
 function formatNumber(num) {
     return NumberFormatter.format(num);
 }
 
+// Old global cost calculation functions - COMMENTED OUT
+/*
 function calculateTotalCostForAmount(currentGeneratorCost, numberOfItems, costIncreaseRate) {
-    let calculatedTotalCost = 0;
-    let nextCostAfterLoop = currentGeneratorCost;
-
-    if (numberOfItems <= 0) {
-        return { totalCost: 0, costForNextSingleItem: currentGeneratorCost };
-    }
-
-    for (let i = 0; i < numberOfItems; i++) {
-        calculatedTotalCost += nextCostAfterLoop;
-        nextCostAfterLoop = Math.ceil(nextCostAfterLoop * costIncreaseRate);
-    }
-    return { totalCost: calculatedTotalCost, costForNextSingleItem: nextCostAfterLoop };
+    // ...
 }
-
 function calculateMaxBuyableAmount(currentCash, currentGeneratorCost, costIncreaseRate) {
-    let itemsBought = 0;
-    let totalSpent = 0;
-    let costOfNextItem = currentGeneratorCost;
-
-    while (currentCash >= totalSpent + costOfNextItem) {
-        totalSpent += costOfNextItem;
-        itemsBought++;
-        costOfNextItem = Math.ceil(costOfNextItem * costIncreaseRate);
-        if (itemsBought >= MAX_BUY_SAFETY_LIMIT) {
-            break;
-        }
-    }
-    return { count: itemsBought, totalCost: totalSpent, costForNextSingleItemAfterMax: costOfNextItem };
+    // ...
 }
+*/
 
 function updateDisplay() {
     let combinedGeneratorBoostForIncome = 1.0;
-    generatorsData.forEach(g => { combinedGeneratorBoostForIncome *= g.boostRate; });
+    GeneratorManager.getAllGenerators().forEach(g => { combinedGeneratorBoostForIncome *= g.boostRate; });
     let actualCashPerSecond = 0;
-    if (generatorsData[0] && generatorsData[0].totalCount > 0) {
-        actualCashPerSecond = generatorsData[0].totalCount * combinedGeneratorBoostForIncome * resetBoostRate;
+    const firstGen = GeneratorManager.getGenerator(1);
+    if (firstGen && firstGen.totalCount > 0) {
+        actualCashPerSecond = firstGen.totalCount * combinedGeneratorBoostForIncome * resetBoostRate;
     }
 
     updateGlobalStatsDisplay(cash, prestigePoints, resetBoostRate, actualCashPerSecond);
 
-    generatorsData.forEach((gen, index) => {
+    GeneratorManager.getAllGenerators().forEach((gen, index) => {
         updateSingleGeneratorRow(gen, index, cash, selectedBuyAmount, actualCashPerSecond);
     });
 
@@ -648,33 +708,29 @@ function updateDisplay() {
 }
 
 // Event listener setup for generator purchase buttons
-generatorsData.forEach(gen => {
+GeneratorManager.getAllGenerators().forEach(gen => {
     if (gen.buttonElement) {
         gen.buttonElement.addEventListener('click', () => {
             let effectiveBuyAmount;
             let purchaseDetails;
 
             if (selectedBuyAmount === 'MAX') {
-                purchaseDetails = calculateMaxBuyableAmount(cash, gen.currentCost, gen.costIncreaseRate);
+                purchaseDetails = GeneratorManager.calculateMaxBuyableAmount(gen, cash);
                 effectiveBuyAmount = purchaseDetails.count;
             } else {
                 effectiveBuyAmount = selectedBuyAmount;
-                purchaseDetails = calculateTotalCostForAmount(gen.currentCost, effectiveBuyAmount, gen.costIncreaseRate);
+                purchaseDetails = GeneratorManager.calculateCostForAmount(gen, effectiveBuyAmount);
             }
 
             if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
                 cash -= purchaseDetails.totalCost;
 
-                for (let i = 0; i < effectiveBuyAmount; i++) {
-                    gen.totalCount++;
-                    gen.purchasedCount++;
-                }
-
-                if (selectedBuyAmount === 'MAX') {
-                    gen.currentCost = purchaseDetails.costForNextSingleItemAfterMax;
-                } else {
-                    gen.currentCost = purchaseDetails.costForNextSingleItem;
-                }
+                // Use GeneratorManager to update generator state
+                GeneratorManager.purchaseGenerator(
+                    gen.id,
+                    effectiveBuyAmount,
+                    purchaseDetails.costForNextSingleItemAfterMax || purchaseDetails.costForNextSingleItem
+                );
                 updateDisplay();
             }
         });
@@ -683,29 +739,22 @@ generatorsData.forEach(gen => {
 
 // Game loop - called every second
 setInterval(() => {
-    generatorsData.forEach(gen => {
-        if (gen.totalCount > 0) {
-            gen.boostRate += 0.01;
-        }
-    });
+    GeneratorManager.updateBoostRates(); // Use GeneratorManager method
 
     let combinedGeneratorBoost = 1.0;
-    generatorsData.forEach(gen => {
+    GeneratorManager.getAllGenerators().forEach(gen => { // Use GeneratorManager
         combinedGeneratorBoost *= gen.boostRate;
     });
 
     let cashProducedThisTick = 0;
-    if (generatorsData[0] && generatorsData[0].totalCount > 0) {
-        cashProducedThisTick = generatorsData[0].totalCount * combinedGeneratorBoost * resetBoostRate;
+    const firstGenForProduction = GeneratorManager.getGenerator(1); // Use GeneratorManager
+    if (firstGenForProduction && firstGenForProduction.totalCount > 0) {
+        cashProducedThisTick = firstGenForProduction.totalCount * combinedGeneratorBoost * resetBoostRate;
     }
 
     cash += cashProducedThisTick;
 
-    for (let i = generatorsData.length - 1; i > 0; i--) {
-        if (generatorsData[i].totalCount > 0) {
-            generatorsData[i-1].totalCount += generatorsData[i].totalCount;
-        }
-    }
+    GeneratorManager.produceLowerTierGenerators(); // Use GeneratorManager method
 
     updateDisplay();
 }, 1000);
