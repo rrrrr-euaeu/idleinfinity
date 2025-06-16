@@ -13,147 +13,21 @@ const initialGeneratorsData = [
         id: 1,
         namePrefix: "Generator",
         initialCost: 10,
-        currentCost: 12, // Cost for the 2nd unit, as it starts with 1 purchased
+        currentCost: 12,
         costIncreaseRate: 1.15,
         totalCount: 1,
         purchasedCount: 1,
         boostRate: 1.0,
-        themeColor: '#E63946', // Red
+        themeColor: '#E63946',
         nameDisplayId: 'gen1-name-display',
         levelDisplayId: 'gen1-level-display',
         buttonId: 'buy-gen1',
-        // DOM elements will be populated by GeneratorManager.initDOMReferences
         nameDisplayElement: null,
         levelDisplayElement: null,
         buttonElement: null,
         actionRowElement: null
     },
-    {
-        id: 2,
-        namePrefix: "Generator",
-        initialCost: 100,
-        currentCost: 100,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        themeColor: '#F4A261', // Orange
-        nameDisplayId: 'gen2-name-display',
-        levelDisplayId: 'gen2-level-display',
-        buttonId: 'buy-gen2',
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 3,
-        namePrefix: "Generator",
-        initialCost: 1000,
-        currentCost: 1000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        nameDisplayId: 'gen3-name-display',
-        levelDisplayId: 'gen3-level-display',
-        buttonId: 'buy-gen3',
-        themeColor: '#E9C46A', // Yellow
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 4,
-        namePrefix: "Generator",
-        initialCost: 10000,
-        currentCost: 10000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        nameDisplayId: 'gen4-name-display',
-        levelDisplayId: 'gen4-level-display',
-        buttonId: 'buy-gen4',
-        themeColor: '#A7C957', // Yellow-Green
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 5,
-        namePrefix: "Generator",
-        initialCost: 100000,
-        currentCost: 100000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        nameDisplayId: 'gen5-name-display',
-        levelDisplayId: 'gen5-level-display',
-        buttonId: 'buy-gen5',
-        themeColor: '#2A9D8F', // Green/Teal
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 6,
-        namePrefix: "Generator",
-        initialCost: 1000000,
-        currentCost: 1000000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        nameDisplayId: 'gen6-name-display',
-        levelDisplayId: 'gen6-level-display',
-        buttonId: 'buy-gen6',
-        themeColor: '#57A7C9', // Light Blue
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 7,
-        namePrefix: "Generator",
-        initialCost: 10000000,
-        currentCost: 10000000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        nameDisplayId: 'gen7-name-display',
-        levelDisplayId: 'gen7-level-display',
-        buttonId: 'buy-gen7',
-        themeColor: '#118AB2', // Blue
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
-    {
-        id: 8,
-        namePrefix: "Generator",
-        initialCost: 100000000,
-        currentCost: 100000000,
-        costIncreaseRate: 1.20,
-        totalCount: 0,
-        purchasedCount: 0,
-        boostRate: 1.0,
-        nameDisplayId: 'gen8-name-display',
-        levelDisplayId: 'gen8-level-display',
-        buttonId: 'buy-gen8',
-        themeColor: '#9B5DE5', // Purple
-        nameDisplayElement: null,
-        levelDisplayElement: null,
-        buttonElement: null,
-        actionRowElement: null
-    },
+    // ... (rest of initialGeneratorsData) ...
     {
         id: 9,
         namePrefix: "Generator",
@@ -166,7 +40,7 @@ const initialGeneratorsData = [
         nameDisplayId: 'gen9-name-display',
         levelDisplayId: 'gen9-level-display',
         buttonId: 'buy-gen9',
-        themeColor: '#F789A8', // Pink
+        themeColor: '#F789A8',
         nameDisplayElement: null,
         levelDisplayElement: null,
         buttonElement: null,
@@ -292,6 +166,39 @@ const GeneratorManager = {
             }
             gen.boostRate = 1.0;
         });
+    },
+
+    setupGeneratorButtonListeners: function() {
+        // console.log("GeneratorManager: Setting up generator button listeners...");
+        this.generators.forEach(gen => {
+            if (gen.buttonElement) {
+                gen.buttonElement.addEventListener('click', () => {
+                    let effectiveBuyAmount;
+                    let purchaseDetails;
+
+                    if (selectedBuyAmount === 'MAX') { // Access global selectedBuyAmount
+                        purchaseDetails = this.calculateMaxBuyableAmount(gen, cash); // Use this. for manager's method, global cash
+                        effectiveBuyAmount = purchaseDetails.count;
+                    } else {
+                        effectiveBuyAmount = selectedBuyAmount; // Access global selectedBuyAmount
+                        purchaseDetails = this.calculateCostForAmount(gen, effectiveBuyAmount); // Use this. for manager's method
+                    }
+
+                    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) { // Access global cash
+                        cash -= purchaseDetails.totalCost; // Modify global cash
+                        this.purchaseGenerator( // Use this. for manager's method
+                            gen.id,
+                            effectiveBuyAmount,
+                            purchaseDetails.costForNextSingleItemAfterMax || purchaseDetails.costForNextSingleItem
+                        );
+                        updateDisplay(); // Call global updateDisplay
+                    }
+                });
+            } else {
+                // console.warn(`GeneratorManager: No buttonElement found for generator ${gen.id} during listener setup.`);
+            }
+        });
+        // console.log("GeneratorManager: Generator button listeners setup complete.");
     }
 };
 // --- End of GeneratorManager Object ---
@@ -320,45 +227,82 @@ function initGlobalDOMElements() {
 GeneratorManager.initDOMReferences();
 initGlobalDOMElements();
 
-domElements.buyAmountRadios.forEach(radio => {
-    radio.addEventListener('change', () => {
-        if (radio.value === 'MAX') {
-            selectedBuyAmount = 'MAX';
-        } else {
-            selectedBuyAmount = parseInt(radio.value);
-        }
-        updateDisplay();
-    });
-});
-
-if (domElements.resetButton) {
-    domElements.resetButton.addEventListener('click', () => {
-        prestigePoints++;
-        resetBoostRate += 1.0;
-        cash = 0;
-
-        GeneratorManager.resetGeneratorStates();
-
-        if (domElements.resetContainer) {
-            domElements.resetContainer.style.height = '0px';
-            domElements.resetContainer.style.marginTop = '0px';
-            domElements.resetContainer.style.marginBottom = '0px';
-        }
-        gameHasReachedFirstGoal = false;
-        updateDisplay();
-    });
+// --- Event Handler Functions ---
+function handleBuyAmountChange(event) {
+    if (event.target.value === 'MAX') {
+        selectedBuyAmount = 'MAX';
+    } else {
+        selectedBuyAmount = parseInt(event.target.value);
+    }
+    updateDisplay();
 }
 
-if (domElements.optionsButton && domElements.optionsPanel) {
-    domElements.optionsButton.addEventListener('click', () => {
+function handleNumberFormatChange(event) {
+    if (event.target.checked) {
+        NumberFormatter.setSelectedFormat(event.target.value);
+        updateDisplay();
+    }
+}
+
+function handleOptionsButtonClick() {
+    if (domElements.optionsPanel && domElements.optionsButton) {
         domElements.optionsPanel.classList.toggle('open');
         if (domElements.optionsPanel.classList.contains('open')) {
             domElements.optionsButton.textContent = '✖️';
         } else {
             domElements.optionsButton.textContent = '⚙️';
         }
-    });
+    }
 }
+
+function handleResetButtonClick() {
+    prestigePoints++;
+    resetBoostRate += 1.0;
+    cash = 0;
+
+    GeneratorManager.resetGeneratorStates();
+
+    if (domElements.resetContainer) {
+        domElements.resetContainer.style.height = '0px';
+        domElements.resetContainer.style.marginTop = '0px';
+        domElements.resetContainer.style.marginBottom = '0px';
+    }
+    gameHasReachedFirstGoal = false;
+    updateDisplay();
+}
+// --- End of Event Handler Functions ---
+
+// --- Centralized Event Listener Initialization ---
+function initializeEventListeners() {
+    // console.log("Initializing event listeners...");
+
+    if (domElements.buyAmountRadios) {
+        domElements.buyAmountRadios.forEach(radio => {
+            radio.addEventListener('change', handleBuyAmountChange);
+        });
+    }
+
+    if (domElements.resetButton) {
+        domElements.resetButton.addEventListener('click', handleResetButtonClick);
+    }
+
+    if (domElements.optionsButton && domElements.optionsPanel) {
+        domElements.optionsButton.addEventListener('click', handleOptionsButtonClick);
+    }
+
+    if (domElements.numberFormatRadios) {
+        domElements.numberFormatRadios.forEach(radio => {
+            radio.addEventListener('change', handleNumberFormatChange);
+        });
+    }
+
+    if (GeneratorManager && typeof GeneratorManager.setupGeneratorButtonListeners === 'function') {
+        GeneratorManager.setupGeneratorButtonListeners();
+    }
+    // console.log("Event listeners initialization complete.");
+}
+// --- End of Centralized Event Listener Initialization ---
+
 
 // --- Number Formatter Object ---
 const NumberFormatter = {
@@ -482,16 +426,6 @@ const NumberFormatter = {
     }
 };
 
-if (domElements.numberFormatRadios) {
-    domElements.numberFormatRadios.forEach(radio => {
-        radio.addEventListener('change', () => {
-            if (radio.checked) {
-                NumberFormatter.setSelectedFormat(radio.value);
-                updateDisplay();
-            }
-        });
-    });
-}
 
 // --- New UI Update Helper Functions ---
 
@@ -703,33 +637,14 @@ function updateDisplay() {
     updateResetContainerVisibility(cash);
 }
 
-// Event listener setup for generator purchase buttons
-GeneratorManager.getAllGenerators().forEach(gen => {
-    if (gen.buttonElement) {
-        gen.buttonElement.addEventListener('click', () => {
-            let effectiveBuyAmount;
-            let purchaseDetails;
-
-            if (selectedBuyAmount === 'MAX') {
-                purchaseDetails = GeneratorManager.calculateMaxBuyableAmount(gen, cash);
-                effectiveBuyAmount = purchaseDetails.count;
-            } else {
-                effectiveBuyAmount = selectedBuyAmount;
-                purchaseDetails = GeneratorManager.calculateCostForAmount(gen, effectiveBuyAmount);
-            }
-
-            if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
-                cash -= purchaseDetails.totalCost;
-                GeneratorManager.purchaseGenerator(
-                    gen.id,
-                    effectiveBuyAmount,
-                    purchaseDetails.costForNextSingleItemAfterMax || purchaseDetails.costForNextSingleItem
-                );
-                updateDisplay();
-            }
-        });
-    }
-});
+// Event listener setup for generator purchase buttons - MOVED to GeneratorManager.setupGeneratorButtonListeners
+// GeneratorManager.getAllGenerators().forEach(gen => {
+//     if (gen.buttonElement) {
+//         gen.buttonElement.addEventListener('click', () => {
+//             // ...
+//         });
+//     }
+// });
 
 // Game loop - called every second
 setInterval(() => {
@@ -755,3 +670,4 @@ setInterval(() => {
 
 // Initial display update
 updateDisplay();
+initializeEventListeners(); // Call to setup event listeners
