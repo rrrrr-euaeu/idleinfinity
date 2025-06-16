@@ -177,20 +177,61 @@ const GeneratorManager = {
         this.generators.forEach(gen => {
             const pristineGen = initialGeneratorsData.find(pGen => pGen.id === gen.id);
 
-            if (pristineGen) { // Check if pristineGen was found
+            if (pristineGen) {
                 gen.totalCount = pristineGen.totalCount;
                 gen.purchasedCount = pristineGen.purchasedCount;
                 gen.currentCost = pristineGen.currentCost;
                 gen.boostRate = pristineGen.boostRate;
             } else {
-                // Fallback or error if pristine data for a gen is missing (should not happen)
                 gen.totalCount = (gen.id === 1) ? 1 : 0;
                 gen.purchasedCount = (gen.id === 1) ? 1 : 0;
-                gen.currentCost = gen.initialCost; // May not be accurate if initialCost was not on pristineGen
-                if (gen.id === 1) { // Recalculate Gen1 currentCost based on its own initialCost and rate
+                gen.currentCost = gen.initialCost;
+                if (gen.id === 1) {
                     gen.currentCost = Math.ceil(gen.initialCost * gen.costIncreaseRate);
                 }
                 gen.boostRate = 1.0;
+            }
+        });
+    },
+
+    setupGeneratorButtonListeners: function() {
+        if (!this.generators) return; // Safety check
+
+        this.generators.forEach(gen => {
+            if (gen.buttonElement) {
+                gen.buttonElement.addEventListener('click', () => {
+                    let effectiveBuyAmount;
+                    let purchaseDetails;
+
+                    // Access global 'selectedBuyAmount' and 'cash'
+                    if (selectedBuyAmount === 'MAX') {
+                        purchaseDetails = this.calculateMaxBuyableAmount(gen, cash);
+                        effectiveBuyAmount = purchaseDetails.count;
+                    } else {
+                        effectiveBuyAmount = selectedBuyAmount;
+                        purchaseDetails = this.calculateCostForAmount(gen, effectiveBuyAmount);
+                    }
+
+                    if (!purchaseDetails) {
+                        // console.error("Error calculating purchase details for gen " + gen.id);
+                        return;
+                    }
+
+                    if (cash >= purchaseDetails.totalCost && effectiveBuyAmount > 0) {
+                        cash -= purchaseDetails.totalCost;
+
+                        let nextCost = (selectedBuyAmount === 'MAX') ?
+                                       purchaseDetails.costForNextSingleItemAfterMax :
+                                       purchaseDetails.costForNextSingleItem;
+
+                        this.purchaseGenerator(
+                            gen.id,
+                            effectiveBuyAmount,
+                            nextCost
+                        );
+                        updateDisplay(); // Call global updateDisplay
+                    }
+                });
             }
         });
     }
@@ -268,6 +309,8 @@ function handleResetButtonClick() {
 
 // --- Centralized Event Listener Initialization ---
 function initializeEventListeners() {
+    // console.log("Initializing event listeners...");
+
     if (domElements.buyAmountRadios) {
         domElements.buyAmountRadios.forEach(radio => {
             radio.addEventListener('change', handleBuyAmountChange);
@@ -290,7 +333,10 @@ function initializeEventListeners() {
 
     if (GeneratorManager && typeof GeneratorManager.setupGeneratorButtonListeners === 'function') {
         GeneratorManager.setupGeneratorButtonListeners();
+    } else {
+        console.error("CRITICAL: GeneratorManager.setupGeneratorButtonListeners() is not defined or not a function, generator buy buttons will not work.");
     }
+    // console.log("Event listeners initialization complete.");
 }
 // --- End of Centralized Event Listener Initialization ---
 
