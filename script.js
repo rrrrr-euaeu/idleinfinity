@@ -20,6 +20,196 @@ let resetBoostRate = 1.0;
 let gameSpeed = 1;
 let gameLoopIntervalId = null;
 
+// --- Utility Functions ---
+function deepCopy(obj) {
+    if (typeof obj !== 'object' || obj === null) {
+        return obj; // Basic types or null are returned as is
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map(deepCopy);
+    }
+
+    const newObj = {};
+    for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            newObj[key] = deepCopy(obj[key]);
+        }
+    }
+    return newObj;
+}
+// --- End Utility Functions ---
+
+function simulateTimeToReachFirstGoal() {
+    // 1. 設定と状態のディープコピーと初期化
+    const simSettings = deepCopy(gameSettings);
+    const simInitialGeneratorsData = deepCopy(initialGeneratorsData);
+
+    let currentTimeInSeconds = 0;
+    let currentCash = simSettings.initialCash;
+    const targetCash = simSettings.firstGoalCash;
+    const resetBoost = 1.0; // Simulation uses a fixed resetBoost of 1.0
+
+    let simGenerators = simInitialGeneratorsData.map(genData => ({
+        id: genData.id,
+        initialCost: genData.initialCost,
+        currentCost: genData.currentCost, // This is the cost for the *next* purchase if purchasedCount > 0
+        costIncreaseRate: genData.costIncreaseRate,
+        totalCount: genData.id === 1 ? 1 : 0, // Initial state: Gen1 has 1, others 0
+        purchasedCount: genData.id === 1 ? 1 : 0, // Gen1 starts as if already purchased once
+        boostRate: 1.0, // Initial boost rate
+    }));
+
+    // Correct initial cost for Gen1 if it's meant to be the cost *before* the first purchase
+    // However, current initialGeneratorsData has gen1.currentCost = 12 (after 1 purchase of 10),
+    // and purchasedCount = 1. This is consistent.
+
+    const purchaseLog = {};
+    simGenerators.forEach(gen => {
+        purchaseLog['gen' + gen.id] = {
+            count: gen.totalCount,
+            first: (gen.id === 1 && gen.totalCount >= 1) ? 0 : null, // Gen1 starts with 1 at t=0
+            fifth: (gen.id === 1 && gen.totalCount >= 5) ? 0 : null  // Should not happen at t=0
+        };
+    });
+
+    const MAX_SIMULATION_SECONDS = 60 * 60 * 24 * 365 * 10; // Approx 10 years
+
+    // --- Simulation Loop ---
+    while (currentCash < targetCash) {
+        if (currentTimeInSeconds > MAX_SIMULATION_SECONDS) {
+            console.warn("Simulation exceeded max seconds. Terminating.", { currentTimeInSeconds, currentCash });
+            return { error: "Max simulation time exceeded", time: currentTimeInSeconds, log: purchaseLog, cash: currentCash };
+        }
+
+        // A. Generator Purchase Phase
+        let canStillBuySomething;
+        do {
+            canStillBuySomething = false;
+            let purchasableGeneratorsDetails = []; // Store gen and its actual current cost for this iteration
+
+            for (const gen of simGenerators) {
+                let isUnlocked = false;
+                if (gen.id === 1) {
+                    isUnlocked = true;
+                } else {
+                    const prevGen = simGenerators.find(g => g.id === gen.id - 1);
+                    if (prevGen && prevGen.totalCount >= simSettings.generatorUnlockThreshold) {
+                        isUnlocked = true;
+                    }
+                }
+
+                if (isUnlocked && currentCash >= gen.currentCost) {
+                    purchasableGeneratorsDetails.push(gen);
+                }
+            }
+
+            if (purchasableGeneratorsDetails.length > 0) {
+                purchasableGeneratorsDetails.sort((a, b) => {
+                    if (a.currentCost !== b.currentCost) {
+                        return a.currentCost - b.currentCost;
+                    }
+                    return a.id - b.id;
+                });
+
+                const genToBuy = purchasableGeneratorsDetails[0];
+
+                currentCash -= genToBuy.currentCost;
+                const costOfThisPurchase = genToBuy.currentCost; // Store before updating
+
+                genToBuy.purchasedCount++;
+                genToBuy.totalCount++;
+
+                // Update currentCost to the cost of the *next* single item
+                genToBuy.currentCost = Math.ceil(costOfThisPurchase * genToBuy.costIncreaseRate);
+
+                const logEntry = purchaseLog['gen' + genToBuy.id];
+                logEntry.count = genToBuy.totalCount;
+                if (logEntry.count === 1 && logEntry.first === null) {
+                    logEntry.first = currentTimeInSeconds;
+                }
+                if (logEntry.count === 5 && logEntry.fifth === null) {
+                    logEntry.fifth = currentTimeInSeconds;
+                }
+
+                canStillBuySomething = true;
+            }
+        } while (canStillBuySomething);
+
+        // B. Cash Production Phase
+        let cashProducedThisSecond = 0;
+        const firstGen = simGenerators.find(g => g.id === 1);
+        if (firstGen && firstGen.totalCount > 0) {
+            let combinedBoost = resetBoost;
+            simGenerators.forEach(gen => {
+                if (gen.totalCount > 0) { // Only owned generators contribute to boost
+                    combinedBoost *= gen.boostRate;
+                }
+            });
+            cashProducedThisSecond = firstGen.totalCount * combinedBoost;
+        }
+        currentCash += cashProducedThisSecond;
+
+        // C. Generator Boost Rate Update Phase
+        simGenerators.forEach(gen => {
+            if (gen.totalCount > 0) {
+                gen.boostRate += simSettings.baseBoostIncrementPerSecond;
+            }
+        });
+
+        // D. Lower-tier Generator Production Phase
+        for (let i = simGenerators.length - 1; i > 0; i--) {
+            if (simGenerators[i].totalCount > 0) {
+                const prevGen = simGenerators[i-1];
+                if (prevGen) { // Ensure previous generator exists
+                    prevGen.totalCount += simGenerators[i].totalCount;
+                    // Note: purchaseLog.count for prevGen is not updated here as it tracks *purchased* count milestones.
+                    // totalCount affects production, which is what we model.
+                }
+            }
+        }
+
+        if (currentCash >= targetCash) {
+            break;
+        }
+
+        currentTimeInSeconds++;
+    } // End of while loop
+
+    // --- 結果の整形とコンソール出力 ---
+    console.log("--- シミュレーション結果 ---");
+    console.log(`第1臨界点 (${NumberFormatter.format(targetCash)} cash) 到達時間: ${currentTimeInSeconds} 秒`);
+
+    console.log("各ジェネレーターの購入タイミング (秒):");
+    let tableOutput = {};
+    for (const genKey in purchaseLog) {
+        if (Object.prototype.hasOwnProperty.call(purchaseLog, genKey)) {
+            const log = purchaseLog[genKey];
+            tableOutput[genKey] = {
+                '1st_Purchase_Time': log.first !== null ? log.first : "N/A",
+                '5th_Purchase_Time': log.fifth !== null ? log.fifth : "N/A",
+                'Final_Count': log.count
+            };
+        }
+    }
+    console.table(tableOutput); // オブジェクトをテーブル形式で表示
+
+    if (currentCash < targetCash && currentTimeInSeconds >= MAX_SIMULATION_SECONDS) { // Check if max time was the reason for not reaching target
+        console.warn(`注意: 最大シミュレーション時間 (${MAX_SIMULATION_SECONDS}秒) に到達したため、目標キャッシュに到達できませんでした。最終キャッシュ: ${NumberFormatter.format(currentCash)}`);
+    } else if (currentCash < targetCash) {
+        console.warn(`注意: 目標キャッシュに到達できませんでした (予期せぬ終了)。最終キャッシュ: ${NumberFormatter.format(currentCash)}`);
+    }
+    console.log("--------------------------");
+
+    return {
+        totalTimeInSeconds: currentTimeInSeconds,
+        finalCash: currentCash,
+        purchaseLog: purchaseLog
+    };
+}
+
+window.runFirstGoalSimulation = simulateTimeToReachFirstGoal;
+
 const initialGeneratorsData = [
     {
         id: 1, namePrefix: "Generator", initialCost: 10, currentCost: 12, costIncreaseRate: 1.15,
