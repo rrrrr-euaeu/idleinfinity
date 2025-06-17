@@ -19,6 +19,8 @@ let gameHasReachedFirstGoal = false;
 let resetBoostRate = 1.0;
 let gameSpeed = 1;
 let gameLoopIntervalId = null;
+let gameTimeInSeconds = 0;
+let isAutobuyActive = false;
 
 // --- Utility Functions ---
 function deepCopy(obj) {
@@ -452,6 +454,7 @@ function initGlobalDOMElements() {
 
     domElements.gameSpeedSlider = document.getElementById('game-speed-slider');
     domElements.gameSpeedDisplay = document.getElementById('game-speed-display');
+    domElements.autobuyCheckbox = document.getElementById('autobuy-checkbox');
 }
 
 GeneratorManager.initDOMReferences();
@@ -557,6 +560,12 @@ function initializeEventListeners() {
         // Initial display update for game speed is handled by setGameSpeed call at the end of the script
     } else {
         // console.warn("gameSpeedSlider element not found during init");
+    }
+
+    if (domElements.autobuyCheckbox) {
+        domElements.autobuyCheckbox.addEventListener('change', () => {
+            isAutobuyActive = domElements.autobuyCheckbox.checked;
+        });
     }
     // console.log("Event listeners initialization complete.");
 }
@@ -899,6 +908,55 @@ function updateDisplay() {
 // Event listener setup for generator purchase buttons is now inside GeneratorManager.setupGeneratorButtonListeners
 
 function mainGameLoop() {
+    if (isAutobuyActive) {
+        let purchasedInThisCycle;
+        do {
+            purchasedInThisCycle = false;
+            let purchasableGenerators = [];
+
+            for (const gen of GeneratorManager.getAllGenerators()) {
+                let isUnlocked = false;
+                if (gen.id === 1) {
+                    isUnlocked = true;
+                } else {
+                    const prevGen = GeneratorManager.getGenerator(gen.id - 1);
+                    if (prevGen && prevGen.totalCount >= gameSettings.generatorUnlockThreshold) {
+                        isUnlocked = true;
+                    }
+                }
+
+                if (isUnlocked && cash >= gen.currentCost) {
+                    purchasableGenerators.push(gen);
+                }
+            }
+
+            if (purchasableGenerators.length > 0) {
+                purchasableGenerators.sort((a, b) => {
+                    if (a.currentCost !== b.currentCost) {
+                        return a.currentCost - b.currentCost;
+                    }
+                    return a.id - b.id;
+                });
+
+                const genToBuy = purchasableGenerators[0];
+
+                const costOfBoughtItem = genToBuy.currentCost;
+                cash -= costOfBoughtItem;
+
+                genToBuy.purchasedCount++;
+                genToBuy.totalCount++;
+
+                genToBuy.currentCost = Math.ceil(costOfBoughtItem * genToBuy.costIncreaseRate);
+
+                if (genToBuy.purchasedCount === 1 || genToBuy.purchasedCount === 5) {
+                    console.log(`Autobuy Log: ${genToBuy.namePrefix}${genToBuy.id} の ${genToBuy.purchasedCount}個目を ${gameTimeInSeconds}秒に購入しました。`);
+                }
+
+                purchasedInThisCycle = true;
+            }
+        } while (purchasedInThisCycle);
+    }
+
     GeneratorManager.updateBoostRates();
 
     let combinedGeneratorBoost = 1.0;
@@ -917,6 +975,7 @@ function mainGameLoop() {
     GeneratorManager.produceLowerTierGenerators();
 
     updateDisplay(); // updateDisplay is called at the end of the loop
+    gameTimeInSeconds++;
 }
 
 function stopGameLoop() {

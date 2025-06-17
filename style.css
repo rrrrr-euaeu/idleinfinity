@@ -471,3 +471,16 @@ button.can-buy:hover {
     /* 必要に応じてスライダーの見た目を調整するスタイルを追加可能 */
     /* 例: cursor: pointer; */
 }
+
+#autobuy-selector {
+    margin-top: 15px;
+    padding: 0 10px; /* options-panel内の他のセレクターと余白感を合わせる */
+    display: flex; /* チェックボックスとラベルを横並びにする */
+    align-items: center; /* チェックボックスとラベルを垂直方向中央揃えにする */
+}
+
+#autobuy-checkbox {
+    margin-right: 8px; /* チェックボックスとラベルの間隔 */
+    /* 必要に応じてチェックボックス自体のスタイル調整も可能 */
+    /* e.g., transform: scale(1.2); */
+}
