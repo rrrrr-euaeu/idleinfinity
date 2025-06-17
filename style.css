@@ -443,3 +443,44 @@ button.can-buy:hover {
         max-width: 1140px;
     }
 }
+
+/* Options Panel Enhancements */
+#options-panel {
+    /* 他のスタイルがあればそのまま */
+    padding-bottom: 20px; /* スライダーが見切れないようにパディングを追加 */
+}
+
+#game-speed-selector {
+    margin-top: 20px; /* number-format-selectorとの間隔を調整 */
+    padding: 0 10px; /*オプションパネルの端との余白を調整*/
+}
+
+#game-speed-selector span { /* ラベル「Game Speed: 1x」全体を指す */
+    display: block; /* ブロック要素にしてスライダーとの改行を促す */
+    margin-bottom: 8px; /* スライダーとの間隔 */
+    font-weight: bold;
+}
+
+#game-speed-display {
+    font-weight: normal; /* "1x"の部分だけ太字解除（span全体が太字なので） */
+}
+
+#game-speed-slider {
+    width: calc(100% - 20px); /* 親要素のpaddingを考慮して幅を設定 */
+    margin-top: 5px;
+    /* 必要に応じてスライダーの見た目を調整するスタイルを追加可能 */
+    /* 例: cursor: pointer; */
+}
+
+#autobuy-selector {
+    margin-top: 15px;
+    padding: 0 10px; /* options-panel内の他のセレクターと余白感を合わせる */
+    display: flex; /* チェックボックスとラベルを横並びにする */
+    align-items: center; /* チェックボックスとラベルを垂直方向中央揃えにする */
+}
+
+#autobuy-checkbox {
+    margin-right: 8px; /* チェックボックスとラベルの間隔 */
+    /* 必要に応じてチェックボックス自体のスタイル調整も可能 */
+    /* e.g., transform: scale(1.2); */
+}
