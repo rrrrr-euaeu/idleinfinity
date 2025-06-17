@@ -304,11 +304,11 @@ function handleOptionsButtonClick() {
             domElements.optionsButton.textContent = '✖️';
             // Add body click listener when panel is opened
             // Use mousedown to prevent closing when dragging from inside panel
-            document.body.addEventListener('mousedown', handleBodyClickForOptions);
+            document.documentElement.addEventListener('mousedown', handleBodyClickForOptions);
         } else {
             domElements.optionsButton.textContent = '⚙️';
             // Remove body click listener when panel is closed
-            document.body.removeEventListener('mousedown', handleBodyClickForOptions);
+            document.documentElement.removeEventListener('mousedown', handleBodyClickForOptions);
         }
     }
 }
