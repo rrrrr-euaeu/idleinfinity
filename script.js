@@ -17,6 +17,8 @@ const gameSettings = {
 let prestigePoints = 0;
 let gameHasReachedFirstGoal = false;
 let resetBoostRate = 1.0;
+let gameSpeed = 1;
+let gameLoopIntervalId = null;
 
 const initialGeneratorsData = [
     {
@@ -257,6 +259,9 @@ function initGlobalDOMElements() {
     domElements.milestoneMessageHeader = document.querySelector('#milestone-message h2');
 
     domElements.resetButton = document.getElementById('reset-button');
+
+    domElements.gameSpeedSlider = document.getElementById('game-speed-slider');
+    domElements.gameSpeedDisplay = document.getElementById('game-speed-display');
 }
 
 GeneratorManager.initDOMReferences();
@@ -353,6 +358,15 @@ function initializeEventListeners() {
         GeneratorManager.setupGeneratorButtonListeners();
     } else {
         console.error("CRITICAL: GeneratorManager.setupGeneratorButtonListeners() is not defined or not a function, generator buy buttons will not work.");
+    }
+
+    if (domElements.gameSpeedSlider) {
+        domElements.gameSpeedSlider.addEventListener('input', (event) => {
+            setGameSpeed(event.target.value);
+        });
+        // Initial display update for game speed is handled by setGameSpeed call at the end of the script
+    } else {
+        // console.warn("gameSpeedSlider element not found during init");
     }
     // console.log("Event listeners initialization complete.");
 }
@@ -694,8 +708,7 @@ function updateDisplay() {
 
 // Event listener setup for generator purchase buttons is now inside GeneratorManager.setupGeneratorButtonListeners
 
-// Game loop - called every second
-setInterval(() => {
+function mainGameLoop() {
     GeneratorManager.updateBoostRates();
 
     let combinedGeneratorBoost = 1.0;
@@ -713,9 +726,53 @@ setInterval(() => {
 
     GeneratorManager.produceLowerTierGenerators();
 
-    updateDisplay();
-}, 1000);
+    updateDisplay(); // updateDisplay is called at the end of the loop
+}
+
+function stopGameLoop() {
+    if (gameLoopIntervalId) {
+        clearInterval(gameLoopIntervalId);
+        gameLoopIntervalId = null;
+    }
+}
+
+function startGameLoop() {
+    stopGameLoop(); // Ensure no multiple loops are running
+    if (gameSpeed > 0) {
+        gameLoopIntervalId = setInterval(mainGameLoop, 1000 / gameSpeed);
+    }
+}
+
+function setGameSpeed(newSpeedInput) {
+    const newSpeed = parseInt(newSpeedInput, 10);
+    if (isNaN(newSpeed) || newSpeed < 0 || newSpeed > 10) {
+        // console.warn("Invalid game speed input:", newSpeedInput);
+        if (domElements.gameSpeedSlider) {
+            domElements.gameSpeedSlider.value = gameSpeed;
+        }
+        return;
+    }
+
+    gameSpeed = newSpeed;
+
+    if (domElements.gameSpeedDisplay) {
+        domElements.gameSpeedDisplay.textContent = gameSpeed + 'x';
+    }
+
+    stopGameLoop();
+    if (gameSpeed > 0) {
+        startGameLoop();
+    } else {
+        updateDisplay();
+    }
+}
 
 // Initial display update and listener setup
-updateDisplay();
+updateDisplay(); // This ensures UI is initially correct before loop starts
 initializeEventListeners();
+// Start the game loop with the initial speed setting
+if (domElements.gameSpeedSlider && domElements.gameSpeedSlider.value !== undefined) {
+    setGameSpeed(domElements.gameSpeedSlider.value);
+} else {
+    setGameSpeed(1); // Fallback if slider or its value isn't ready
+}
