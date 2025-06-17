@@ -279,13 +279,31 @@ function handleNumberFormatChange(event) {
     }
 }
 
+// Options panel specific body click handler
+function handleBodyClickForOptions(event) {
+    if (domElements.optionsPanel && domElements.optionsButton) {
+        // Check if the click is outside the options panel and not on the options button
+        if (!domElements.optionsPanel.contains(event.target) && event.target !== domElements.optionsButton) {
+            // If the panel is open, close it
+            if (domElements.optionsPanel.classList.contains('open')) {
+                handleOptionsButtonClick(); // Call the original toggle function
+            }
+        }
+    }
+}
+
 function handleOptionsButtonClick() {
     if (domElements.optionsPanel && domElements.optionsButton) {
         domElements.optionsPanel.classList.toggle('open');
         if (domElements.optionsPanel.classList.contains('open')) {
             domElements.optionsButton.textContent = '✖️';
+            // Add body click listener when panel is opened
+            // Use mousedown to prevent closing when dragging from inside panel
+            document.body.addEventListener('mousedown', handleBodyClickForOptions);
         } else {
             domElements.optionsButton.textContent = '⚙️';
+            // Remove body click listener when panel is closed
+            document.body.removeEventListener('mousedown', handleBodyClickForOptions);
         }
     }
 }
