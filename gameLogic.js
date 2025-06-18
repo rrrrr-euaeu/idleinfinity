@@ -291,6 +291,11 @@ function simulateTimeToReachFirstGoal() {
             }
         } while (canStillBuySomething);
 
+        // B. Cash Production Phase (Moved before Purchase Phase as per new logic) - Actually, this was already after purchase. Let's re-verify the original structure.
+        // Original structure was Purchase (A), then Cash Production (B), then Boost Update (C), then Lower-tier (D).
+        // New requested order: B, A, C, D.
+
+        // B. Cash Production Phase
         let cashProducedThisSecond = 0;
         const firstGen = simGenerators.find(g => g.id === 1);
         if (firstGen && firstGen.totalCount > 0) {
@@ -302,12 +307,71 @@ function simulateTimeToReachFirstGoal() {
         }
         currentCash += cashProducedThisSecond;
 
+        // A. Generator Purchase Phase (Now after cash production)
+        // This block was originally at the top of the loop. Now it's here.
+        // The do...while loop for purchasing:
+        // (The `canStillBuySomething` and `purchasableGeneratorsDetails` are defined inside it correctly)
+        // This re-paste is to ensure its placement is correct relative to cash production.
+        // The internal logic of this block was already confirmed.
+        do { // Copied from above, placed after cash production
+            canStillBuySomething = false;
+            let purchasableGeneratorsDetails = [];
+
+            for (const gen of simGenerators) {
+                let isUnlocked = false;
+                if (gen.id === 1) {
+                    isUnlocked = true;
+                } else {
+                    const prevGen = simGenerators.find(g => g.id === gen.id - 1);
+                    if (prevGen && prevGen.totalCount >= simSettings.generatorUnlockThreshold) {
+                        isUnlocked = true;
+                    }
+                }
+                if (isUnlocked && currentCash >= gen.currentCost) {
+                    purchasableGeneratorsDetails.push(gen);
+                }
+            }
+
+            if (purchasableGeneratorsDetails.length > 0) {
+                purchasableGeneratorsDetails.sort((a, b) => {
+                    if (a.currentCost !== b.currentCost) return a.currentCost - b.currentCost;
+                    return a.id - b.id;
+                });
+
+                const genToBuy = purchasableGeneratorsDetails[0];
+                // Check affordability again, as cash might have been spent if multiple purchases were allowed in a more complex scenario (not the case here, but good practice)
+                if (currentCash >= genToBuy.currentCost) {
+                    const costOfThisPurchase = genToBuy.currentCost;
+                    currentCash -= costOfThisPurchase;
+
+                    genToBuy.purchasedCount++;
+                    genToBuy.totalCount++;
+                    genToBuy.currentCost = Math.ceil(costOfThisPurchase * genToBuy.costIncreaseRate);
+
+                    const logEntry = purchaseLog['gen' + genToBuy.id];
+                    logEntry.count = genToBuy.totalCount;
+                    if (genToBuy.purchasedCount === 1 && logEntry.first === null) {
+                        logEntry.first = currentTimeInSeconds;
+                    }
+                    if (genToBuy.purchasedCount === 5 && logEntry.fifth === null) {
+                        logEntry.fifth = currentTimeInSeconds;
+                    }
+                    canStillBuySomething = true;
+                } else {
+                    canStillBuySomething = false; // Cannot afford this one, stop trying for this tick's purchase phase
+                }
+            }
+        } while (canStillBuySomething);
+
+
+        // C. Generator Boost Rate Update Phase
         simGenerators.forEach(gen => {
             if (gen.totalCount > 0) {
-                gen.boostRate += simSettings.baseBoostIncrementPerSecond; // Sim used gameSettings for this
+                gen.boostRate += simSettings.baseBoostIncrementPerSecond;
             }
         });
 
+        // D. Lower-tier Generator Production Phase
         for (let i = simGenerators.length - 1; i > 0; i--) {
             if (simGenerators[i].totalCount > 0) {
                 const prevGen = simGenerators[i-1];
