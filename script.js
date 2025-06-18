@@ -9,12 +9,13 @@ console.log("Starting main game initialization sequence...");
 
 // 1. Initialize GeneratorManager Data
 // GeneratorManager.initialize() will now use GeneratorManager.initialData by default.
-console.log("script.js: PRE-CALL GeneratorManager.initialize - typeof GeneratorManager:", typeof GeneratorManager, GeneratorManager);
-if (typeof GeneratorManager !== 'undefined' && typeof GeneratorManager.initialize === 'function') {
-    GeneratorManager.initialize(); // No argument needed, uses internal initialData
-    console.log("GeneratorManager initialized.");
+if (typeof GeneratorManager !== 'undefined') {
+    // GeneratorManager is defined. Its properties, including 'generators',
+    // are initialized at the point of its definition in generatorManager.js.
+    // No explicit .initialize() call is needed with the current design.
+    console.log("GeneratorManager is defined and considered initialized.");
 } else {
-    console.error("CRITICAL ERROR: GeneratorManager or GeneratorManager.initialize is not defined. Check script load order and generatorManager.js");
+    console.error("CRITICAL ERROR: GeneratorManager is not defined. Check script load order and generatorManager.js");
 }
 
 // 2. Initialize DOM Element References
