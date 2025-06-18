@@ -63,6 +63,21 @@ function deepCopy(obj) {
 // --- Game Loop Functions ---
 function mainGameLoop() {
     // Assumes isAutobuyActive, GeneratorManager, gameSettings, cash, gameTimeInSeconds, updateDisplay, resetBoostRate are global
+
+    // C. Cash Production
+    let combinedGeneratorBoost = 1.0;
+    GeneratorManager.getAllGenerators().forEach(gen => {
+        combinedGeneratorBoost *= gen.boostRate;
+    });
+
+    let cashProducedThisTick = 0;
+    const firstGenForProduction = GeneratorManager.getGenerator(1);
+    if (firstGenForProduction && firstGenForProduction.totalCount > 0) {
+        cashProducedThisTick = firstGenForProduction.totalCount * combinedGeneratorBoost * resetBoostRate;
+    }
+    cash += cashProducedThisTick;
+
+    // A. Autobuy logic
     if (isAutobuyActive) {
         let purchasedInThisCycle;
         do {
@@ -80,7 +95,7 @@ function mainGameLoop() {
                     }
                 }
 
-                if (isUnlocked && cash >= gen.currentCost) {
+                if (isUnlocked && cash >= gen.currentCost) { // Check against current cash AFTER production
                     purchasableGenerators.push(gen);
                 }
             }
@@ -95,40 +110,31 @@ function mainGameLoop() {
 
                 const genToBuy = purchasableGenerators[0];
 
-                const costOfBoughtItem = genToBuy.currentCost;
-                cash -= costOfBoughtItem;
+                // Double check affordability before buying, as cash might have been spent on another generator in the same tick
+                if (cash >= genToBuy.currentCost) {
+                    const costOfBoughtItem = genToBuy.currentCost;
+                    cash -= costOfBoughtItem;
 
-                genToBuy.purchasedCount++;
-                genToBuy.totalCount++;
+                    genToBuy.purchasedCount++;
+                    genToBuy.totalCount++;
 
-                genToBuy.currentCost = Math.ceil(costOfBoughtItem * genToBuy.costIncreaseRate);
-
-                // if (genToBuy.purchasedCount === 1 || genToBuy.purchasedCount === 5) {
-                //    console.log(`Autobuy Log: ${genToBuy.namePrefix}${genToBuy.id} の ${genToBuy.purchasedCount}個目を ${gameTimeInSeconds}秒に購入しました。`);
-                // }
-                purchasedInThisCycle = true;
+                    genToBuy.currentCost = Math.ceil(costOfBoughtItem * genToBuy.costIncreaseRate);
+                    purchasedInThisCycle = true;
+                }
             }
         } while (purchasedInThisCycle);
     }
 
+    // B. Boost Update
     GeneratorManager.updateBoostRates();
 
-    let combinedGeneratorBoost = 1.0;
-    GeneratorManager.getAllGenerators().forEach(gen => {
-        combinedGeneratorBoost *= gen.boostRate;
-    });
-
-    let cashProducedThisTick = 0;
-    const firstGenForProduction = GeneratorManager.getGenerator(1);
-    if (firstGenForProduction && firstGenForProduction.totalCount > 0) {
-        cashProducedThisTick = firstGenForProduction.totalCount * combinedGeneratorBoost * resetBoostRate;
-    }
-
-    cash += cashProducedThisTick;
-
+    // D. Lower-tier Generator Production
     GeneratorManager.produceLowerTierGenerators();
 
+    // E. UI Update
     updateDisplay();
+
+    // F. Time Increment
     gameTimeInSeconds++;
 }
 
