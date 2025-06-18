@@ -9,6 +9,7 @@ console.log("Starting main game initialization sequence...");
 
 // 1. Initialize GeneratorManager Data
 // GeneratorManager.initialize() will now use GeneratorManager.initialData by default.
+console.log("script.js: PRE-CALL GeneratorManager.initialize - typeof GeneratorManager:", typeof GeneratorManager, GeneratorManager);
 if (typeof GeneratorManager !== 'undefined' && typeof GeneratorManager.initialize === 'function') {
     GeneratorManager.initialize(); // No argument needed, uses internal initialData
     console.log("GeneratorManager initialized.");

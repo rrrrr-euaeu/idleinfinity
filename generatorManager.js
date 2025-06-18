@@ -1,3 +1,4 @@
+console.log("generatorManager.js: START parsing");
 // initialGeneratorsData and GeneratorManager definition
 // from the original script.js
 
@@ -187,3 +188,4 @@ const GeneratorManager = {
 // This was already requested to be GeneratorManager.initialData
 // The 'initialData' property on the object is fine.
 // The const initialGeneratorsData is also file-scoped (effectively global if not using modules).
+console.log("generatorManager.js: GeneratorManager object DEFINED", typeof GeneratorManager, GeneratorManager);
