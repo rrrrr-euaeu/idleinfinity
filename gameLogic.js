@@ -321,8 +321,9 @@ function simulateTimeToReachFirstGoal() {
         currentTimeInSeconds++;
     }
 
-    console.log("--- シミュレーション結果 ---");
-    console.log(`第1臨界点 (${NumberFormatter.format(targetCash)} cash) 到達時間: ${currentTimeInSeconds} 秒`);
+    console.log("--- Simulation Results ---");
+    console.log(`Time to reach 1st critical point (${NumberFormatter.format(targetCash)} cash): ${currentTimeInSeconds} seconds`);
+    console.log("Generator purchase timings (seconds):");
     let tableOutput = {};
     for (const genKey in purchaseLog) {
         if (Object.prototype.hasOwnProperty.call(purchaseLog, genKey)) {
@@ -336,9 +337,9 @@ function simulateTimeToReachFirstGoal() {
     }
     console.table(tableOutput);
     if (currentCash < targetCash && currentTimeInSeconds >= MAX_SIMULATION_SECONDS) {
-        console.warn(`注意: 最大シミュレーション時間 (${MAX_SIMULATION_SECONDS}秒) に到達したため、目標キャッシュに到達できませんでした。最終キャッシュ: ${NumberFormatter.format(currentCash)}`);
+        console.warn(`Note: Target cash not reached due to max simulation time (${MAX_SIMULATION_SECONDS}s). Final cash: ${NumberFormatter.format(currentCash)}`);
     } else if (currentCash < targetCash) {
-        console.warn(`注意: 目標キャッシュに到達できませんでした (予期せぬ終了)。最終キャッシュ: ${NumberFormatter.format(currentCash)}`);
+        console.warn(`Note: Target cash not reached (unexpected termination). Final cash: ${NumberFormatter.format(currentCash)}`);
     }
     console.log("--------------------------");
 
