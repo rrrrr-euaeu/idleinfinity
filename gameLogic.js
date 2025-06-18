@@ -186,54 +186,44 @@ function simulateTimeToReachFirstGoal() {
     const targetCash = simSettings.firstGoalCash;
     const resetBoost = 1.0;
 
+    // Correctly initialize simGenerators from GeneratorManager.initialData
     let simGenerators = simInitialGeneratorsData.map(genData => ({
-        // This mapping needs to align with the structure of initialGeneratorsData in generatorManager.js
-        // It was originally { id, namePrefix, initialCost, currentCost, costIncreaseRate, ... }
-        // Now it's { id, name, baseCost, baseProduction, level, costMultiplier, productionMultiplier }
-        // The simulation logic is tightly coupled to the OLD generator data structure.
-        // This will need significant rework if the simulation is to be kept.
-        // For now, I will map it as best as possible, but it might not work as intended.
         id: genData.id,
-        initialCost: genData.baseCost, // Approximate
-        currentCost: genData.baseCost, // Approximate, will be updated
-        costIncreaseRate: genData.costMultiplier, // Approximate
-        totalCount: genData.level, // Approximate, level might mean purchased count
-        purchasedCount: genData.level, // Approximate
-        boostRate: 1.0, // Simulation had its own boost logic, not directly from productionMultiplier
+        namePrefix: genData.namePrefix, // Keep for logging if necessary
+        initialCost: genData.initialCost,
+        currentCost: genData.initialCost, // Will be adjusted for Gen1 below
+        costIncreaseRate: genData.costIncreaseRate,
+        totalCount: 0, // Will be set below
+        purchasedCount: 0, // Will be set below
+        boostRate: 1.0 // Default starting boostRate
     }));
 
-    // The simulation's generator structure was:
-    // { id, initialCost, currentCost, costIncreaseRate, totalCount, purchasedCount, boostRate }
-    // The new structure in generatorManager.js for initialGeneratorsData is:
-    // { id, name, baseCost, baseProduction, level, costMultiplier, productionMultiplier }
-
-    // Due to the significant mismatch, and the fact that the simulation was based on the old structure,
-    // this function will likely break or produce incorrect results.
-    // The original simulation logic for purchasing and production was also different.
-    // For the purpose of this refactoring task (moving code), I will keep the internal logic of the simulation
-    // as it was, but acknowledge it's probably broken with the new generator data.
-
-    console.warn("SimulateTimeToReachFirstGoal is using an adapted generator structure and may not be accurate.");
-
-    // Fix: Gen1 starts with 1, others 0 as per original simulation
+    // Set the correct initial state for each generator
     simGenerators.forEach(sg => {
         if (sg.id === 1) {
-            sg.totalCount = 1;
             sg.purchasedCount = 1;
-            //sg.currentCost = Math.ceil(sg.initialCost * sg.costIncreaseRate); // As per original logic
+            sg.totalCount = 1;
+            // Correctly set currentCost for Gen1 as if it's been bought once
+            sg.currentCost = Math.ceil(sg.initialCost * sg.costIncreaseRate);
         } else {
-            sg.totalCount = 0;
+            // For other generators, currentCost is initialCost as they haven't been bought
+            sg.currentCost = sg.initialCost;
             sg.purchasedCount = 0;
+            sg.totalCount = 0;
         }
+        sg.boostRate = 1.0; // Ensure all start with 1.0 boostRate
     });
+
+    // The old console.warn about adapted structure can be removed as this is the new correct mapping.
+    // console.warn("SimulateTimeToReachFirstGoal is using an adapted generator structure and may not be accurate.");
 
 
     const purchaseLog = {};
     simGenerators.forEach(gen => {
         purchaseLog['gen' + gen.id] = {
-            count: gen.totalCount,
-            first: (gen.id === 1 && gen.totalCount >= 1) ? 0 : null,
-            fifth: (gen.id === 1 && gen.totalCount >= 5) ? 0 : null
+            count: gen.totalCount, // Reflects initial count
+            first: (gen.id === 1 && gen.purchasedCount >= 1) ? 0 : null, // Gen1 first purchase at t=0
+            fifth: null // No one has 5 purchases at t=0
         };
     });
 
@@ -283,9 +273,13 @@ function simulateTimeToReachFirstGoal() {
 
 
                 const logEntry = purchaseLog['gen' + genToBuy.id];
-                logEntry.count = genToBuy.totalCount;
-                if (logEntry.count === 1 && logEntry.first === null) logEntry.first = currentTimeInSeconds;
-                if (logEntry.count === 5 && logEntry.fifth === null) logEntry.fifth = currentTimeInSeconds;
+                logEntry.count = genToBuy.totalCount; // Update total count in log
+                if (genToBuy.purchasedCount === 1 && logEntry.first === null) { // Check purchasedCount for milestone
+                    logEntry.first = currentTimeInSeconds;
+                }
+                if (genToBuy.purchasedCount === 5 && logEntry.fifth === null) { // Check purchasedCount for milestone
+                    logEntry.fifth = currentTimeInSeconds;
+                }
 
                 canStillBuySomething = true;
             }
