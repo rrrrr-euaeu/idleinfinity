@@ -36,27 +36,24 @@ const NumberFormatter = {
         }
 
         // Handle large numbers with suffixes
-        if (num >= 1e18) { // Quintillion or more, switch to scientific
+        if (num >= 1e18) { // For 1e18 and above
             return num.toExponential(2).replace('e+', 'e');
-        }
-        if (num >= 1e15) { // Quadrillion
+        } else if (num >= 1e15) { // For [1e15, 1e18)
             let value = num / 1e15;
             if (value < 10) return formatSuffixedValue(value, 2) + 'Qa';
             if (value < 100) return formatSuffixedValue(value, 1) + 'Qa';
             return Math.floor(value).toString() + 'Qa';
-        }
-        if (num >= 1e12) { // Trillion
+        } else if (num >= 1e12) { // For [1e12, 1e15)
             let value = num / 1e12;
             if (value < 10) return formatSuffixedValue(value, 2) + 'T';
             if (value < 100) return formatSuffixedValue(value, 1) + 'T';
             return Math.floor(value).toString() + 'T';
+        } else { // For [1e9, 1e12) - num >= 1e9 is implied
+            let value = num / 1e9;
+            if (value < 10) return formatSuffixedValue(value, 2) + 'B';
+            if (value < 100) return formatSuffixedValue(value, 1) + 'B';
+            return Math.floor(value).toString() + 'B';
         }
-        // Billion (already covered by toLocaleString up to 999,999,999)
-        // This part handles exactly 1B or more, up to 1T-1
-        let value = num / 1e9;
-        if (value < 10) return formatSuffixedValue(value, 2) + 'B';
-        if (value < 100) return formatSuffixedValue(value, 1) + 'B';
-        return Math.floor(value).toString() + 'B';
     },
 
     hex: function(num) {
