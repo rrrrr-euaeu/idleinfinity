@@ -32,35 +32,46 @@
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = 'qunit-toggle-all';
-        checkbox.style.marginLeft = "1em"; // Added for spacing
+        checkbox.style.marginLeft = "1em";
 
         const label = document.createElement('label');
         label.htmlFor = 'qunit-toggle-all';
         label.textContent = 'Expand all tests';
 
-        // Try to append to the #qunit-options span, which usually holds other checkboxes
         let optionsSpan = toolbar.querySelector('#qunit-options');
         if (optionsSpan) {
             optionsSpan.appendChild(checkbox);
             optionsSpan.appendChild(label);
         } else {
-            // Fallback: append to the toolbar directly if #qunit-options is not found
-            // This might not look as integrated but ensures functionality
             toolbar.appendChild(checkbox);
             toolbar.appendChild(label);
-            console.warn('#qunit-options span not found. Appended toggle checkbox directly to toolbar.');
+            // console.warn('#qunit-options span not found. Appended toggle checkbox directly to toolbar.');
         }
 
         checkbox.addEventListener('change', function() {
-            const tests = document.querySelectorAll('#qunit-tests > li.qunit-test');
+            const testItems = document.querySelectorAll('#qunit-tests > li.qunit-test'); // Get all top-level test li elements
             if (this.checked) {
-                tests.forEach(function(test) {
-                    test.classList.remove('qunit-collapsed');
+                testItems.forEach(function(testItem) {
+                    const assertList = testItem.querySelector('ol.qunit-assert-list');
+                    if (assertList) {
+                        assertList.classList.remove('qunit-collapsed');
+                    }
+                    const sourcePara = testItem.querySelector('p.qunit-source');
+                    if (sourcePara) {
+                        sourcePara.classList.remove('qunit-collapsed');
+                    }
                 });
                 label.textContent = 'Collapse all tests';
             } else {
-                tests.forEach(function(test) {
-                    test.classList.add('qunit-collapsed');
+                testItems.forEach(function(testItem) {
+                    const assertList = testItem.querySelector('ol.qunit-assert-list');
+                    if (assertList) {
+                        assertList.classList.add('qunit-collapsed');
+                    }
+                    const sourcePara = testItem.querySelector('p.qunit-source');
+                    if (sourcePara) {
+                        sourcePara.classList.add('qunit-collapsed');
+                    }
                 });
                 label.textContent = 'Expand all tests';
             }
