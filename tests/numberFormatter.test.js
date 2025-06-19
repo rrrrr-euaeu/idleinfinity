@@ -76,6 +76,55 @@ QUnit.module("NumberFormatter", function() {
             assert.strictEqual(NumberFormatter.format(-1.234e9), "-1.23B", "NumberFormatter.format(-1.234e9) => '-1.23B'");
             assert.strictEqual(NumberFormatter.format(-1e15), "-1Qa", "NumberFormatter.format(-1e15) => '-1Qa'");
         });
+
+    QUnit.test("standard format - more small numbers and boundaries", function(assert) {
+        // Note: NumberFormatter.setSelectedFormat('standard'); is already in beforeEach for this module
+        assert.strictEqual(NumberFormatter.format(0.0000099), "0", "NumberFormatter.format(0.0000099) => '0'");
+        assert.strictEqual(NumberFormatter.format(0.00001), "0.0000", "NumberFormatter.format(0.00001) => '0.0000'");
+        assert.strictEqual(NumberFormatter.format(0.0099), "0.0099", "NumberFormatter.format(0.0099) => '0.0099'");
+        assert.strictEqual(NumberFormatter.format(0.001), "0.001", "NumberFormatter.format(0.001) => '0.001'");
+
+        assert.strictEqual(NumberFormatter.format(0.999), "0.999", "NumberFormatter.format(0.999) => '0.999'");
+        assert.strictEqual(NumberFormatter.format(0.01), "0.01", "NumberFormatter.format(0.01) => '0.01'");
+        assert.strictEqual(NumberFormatter.format(0.9999), "1", "NumberFormatter.format(0.9999) => '1'");
+
+        assert.strictEqual(NumberFormatter.format(9.99), "9.99", "NumberFormatter.format(9.99) => '9.99'");
+        assert.strictEqual(NumberFormatter.format(1), "1", "NumberFormatter.format(1) => '1'");
+        assert.strictEqual(NumberFormatter.format(9.999), "10", "NumberFormatter.format(9.999) => '10'");
+
+        assert.strictEqual(NumberFormatter.format(99.9), "99.9", "NumberFormatter.format(99.9) => '99.9'");
+        assert.strictEqual(NumberFormatter.format(10), "10", "NumberFormatter.format(10) => '10'");
+        assert.strictEqual(NumberFormatter.format(99.99), "100", "NumberFormatter.format(99.99) => '100'");
+    });
+
+    QUnit.test("standard format - toLocaleString boundaries and suffixes", function(assert) {
+        // Note: NumberFormatter.setSelectedFormat('standard'); is already in beforeEach for this module
+        assert.strictEqual(NumberFormatter.format(100), "100", "NumberFormatter.format(100) => '100'");
+        assert.strictEqual(NumberFormatter.format(999999999), "999,999,999", "NumberFormatter.format(999999999) => '999,999,999'");
+        assert.strictEqual(NumberFormatter.format(1e9 - 1), "999,999,999", "NumberFormatter.format(1e9 - 1) => '999,999,999'");
+
+        // Suffix boundaries
+        assert.strictEqual(NumberFormatter.format(1e9), "1B", "NumberFormatter.format(1e9) => '1B'");
+        assert.strictEqual(NumberFormatter.format(1e12 - 1), "999B", "NumberFormatter.format(1e12 - 1) => '999B'");
+        assert.strictEqual(NumberFormatter.format(1e12), "1T", "NumberFormatter.format(1e12) => '1T'");
+        assert.strictEqual(NumberFormatter.format(1e15 - 1), "999T", "NumberFormatter.format(1e15 - 1) => '999T'");
+        assert.strictEqual(NumberFormatter.format(1e15), "1Qa", "NumberFormatter.format(1e15) => '1Qa'");
+        assert.strictEqual(NumberFormatter.format(1e18 - 1), "999Qa", "NumberFormatter.format(1e18 - 1) => '999Qa'");
+        assert.strictEqual(NumberFormatter.format(1e18), "1.00e18", "NumberFormatter.format(1e18) => '1.00e18'");
+
+        // Suffix value < 10 and < 100 boundaries (based on current toFixed rounding)
+        // Billion
+        assert.strictEqual(NumberFormatter.format(9.999e9), "10B", "NumberFormatter.format(9.999e9) => '10B'");
+        assert.strictEqual(NumberFormatter.format(10e9), "10B", "NumberFormatter.format(10e9) => '10B'");
+        assert.strictEqual(NumberFormatter.format(99.99e9), "100B", "NumberFormatter.format(99.99e9) => '100B'");
+        assert.strictEqual(NumberFormatter.format(100e9), "100B", "NumberFormatter.format(100e9) => '100B'");
+        // Trillion
+        assert.strictEqual(NumberFormatter.format(9.999e12), "10T", "NumberFormatter.format(9.999e12) => '10T'");
+        assert.strictEqual(NumberFormatter.format(99.99e12), "100T", "NumberFormatter.format(99.99e12) => '100T'");
+        // Quadrillion
+        assert.strictEqual(NumberFormatter.format(9.999e15), "10Qa", "NumberFormatter.format(9.999e15) => '10Qa'");
+        assert.strictEqual(NumberFormatter.format(99.99e15), "100Qa", "NumberFormatter.format(99.99e15) => '100Qa'");
+    });
     });
 
     QUnit.module("format - hex", function(hooks) {
