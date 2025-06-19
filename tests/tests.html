@@ -49,7 +49,7 @@
         }
 
         checkbox.addEventListener('change', function() {
-            const testItems = document.querySelectorAll('#qunit-tests > li.qunit-test'); // Get all top-level test li elements
+            const testItems = document.querySelectorAll('#qunit-tests > li'); // CORRECTED SELECTOR
             if (this.checked) {
                 testItems.forEach(function(testItem) {
                     const assertList = testItem.querySelector('ol.qunit-assert-list');
