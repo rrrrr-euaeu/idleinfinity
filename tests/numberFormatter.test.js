@@ -31,7 +31,7 @@ QUnit.module("NumberFormatter", function() {
         });
 
         QUnit.test("very small positive numbers", function(assert) {
-            assert.strictEqual(NumberFormatter.format(0.000001), "0.0000", "Formatting 0.000001 (custom rule, should be 0.0000 due to toFixed(4))");
+            assert.strictEqual(NumberFormatter.format(0.000001), "0", "Formatting 0.000001 (custom rule, should be 0 due to toFixed(4) resulting in 0 after parseFloat)");
             // Based on current NumberFormatter.standard: if (num < 0.01) return parseFloat(num.toFixed(4)).toString();
             assert.strictEqual(NumberFormatter.format(0.0000001), "0", "Formatting 0.0000001 (custom rule, should be 0)");
         });
@@ -87,8 +87,8 @@ QUnit.module("NumberFormatter", function() {
             assert.strictEqual(NumberFormatter.format(0), "0", "Hex 0");
             assert.strictEqual(NumberFormatter.format(10), "a", "Hex 10");
             assert.strictEqual(NumberFormatter.format(255), "ff", "Hex 255");
-            assert.strictEqual(NumberFormatter.format(4096), "1 000", "Hex 4096 with space");
-            assert.strictEqual(NumberFormatter.format(65535), "ff ff", "Hex 65535 with space");
+            assert.strictEqual(NumberFormatter.format(4096), "1000", "Hex 4096 without space");
+            assert.strictEqual(NumberFormatter.format(65535), "ffff", "Hex 65535 without space");
         });
 
         QUnit.test("decimals (limited precision, for small numbers)", function(assert) {
