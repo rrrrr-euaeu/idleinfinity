@@ -18,11 +18,11 @@ QUnit.module("NumberFormatter", function() {
         });
 
         QUnit.test("small numbers (decimals, rounding)", function(assert) {
-            assert.strictEqual(NumberFormatter.format(0.1), "0.100", "Formatting 0.1");
-            assert.strictEqual(NumberFormatter.format(0.12), "0.120", "Formatting 0.12");
+            assert.strictEqual(NumberFormatter.format(0.1), "0.1", "Formatting 0.1 (no trailing zeros)");
+            assert.strictEqual(NumberFormatter.format(0.12), "0.12", "Formatting 0.12 (no trailing zeros)");
             assert.strictEqual(NumberFormatter.format(0.123), "0.123", "Formatting 0.123");
             assert.strictEqual(NumberFormatter.format(0.1234), "0.123", "Formatting 0.1234 (round to 3 dp)");
-            assert.strictEqual(NumberFormatter.format(1.2), "1.20", "Formatting 1.2");
+            assert.strictEqual(NumberFormatter.format(1.2), "1.2", "Formatting 1.2 (no trailing zeros)");
             assert.strictEqual(NumberFormatter.format(1.23), "1.23", "Formatting 1.23");
             assert.strictEqual(NumberFormatter.format(1.234), "1.23", "Formatting 1.234 (round to 2 dp)");
             assert.strictEqual(NumberFormatter.format(12.3), "12.3", "Formatting 12.3");
