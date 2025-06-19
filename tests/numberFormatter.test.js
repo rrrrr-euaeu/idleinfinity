@@ -46,21 +46,21 @@ QUnit.module("NumberFormatter", function() {
         QUnit.test("millions (B suffix)", function(assert) {
             assert.strictEqual(NumberFormatter.format(1000000), "1,000,000", "Formatting 1,000,000 (still uses toLocaleString)");
             assert.strictEqual(NumberFormatter.format(999999999), "999,999,999", "Formatting 999,999,999");
-            assert.strictEqual(NumberFormatter.format(1000000000), "1.00B", "Formatting 1,000,000,000 (Billion)");
+            assert.strictEqual(NumberFormatter.format(1000000000), "1B", "Formatting 1,000,000,000 (Billion)");
             assert.strictEqual(NumberFormatter.format(1.23456789e9), "1.23B", "Formatting 1.234... Billion");
             assert.strictEqual(NumberFormatter.format(12.3456789e9), "12.3B", "Formatting 12.345... Billion");
             assert.strictEqual(NumberFormatter.format(123.456789e9), "123B", "Formatting 123.456... Billion");
         });
 
         QUnit.test("trillions (T suffix)", function(assert) {
-            assert.strictEqual(NumberFormatter.format(1e12), "1.00T", "Formatting 1 Trillion");
+            assert.strictEqual(NumberFormatter.format(1e12), "1T", "Formatting 1 Trillion");
             assert.strictEqual(NumberFormatter.format(1.234e12), "1.23T", "Formatting 1.234 Trillion");
             assert.strictEqual(NumberFormatter.format(12.34e12), "12.3T", "Formatting 12.34 Trillion");
             assert.strictEqual(NumberFormatter.format(123.4e12), "123T", "Formatting 123.4 Trillion");
         });
 
         QUnit.test("quadrillions (Qa suffix)", function(assert) {
-            assert.strictEqual(NumberFormatter.format(1e15), "1.00Qa", "Formatting 1 Quadrillion");
+            assert.strictEqual(NumberFormatter.format(1e15), "1Qa", "Formatting 1 Quadrillion");
             assert.strictEqual(NumberFormatter.format(1.234e15), "1.23Qa", "Formatting 1.234 Quadrillion");
             assert.strictEqual(NumberFormatter.format(12.34e15), "12.3Qa", "Formatting 12.34 Quadrillion");
             assert.strictEqual(NumberFormatter.format(123.4e15), "123Qa", "Formatting 123.4 Quadrillion");
@@ -74,7 +74,7 @@ QUnit.module("NumberFormatter", function() {
         QUnit.test("negative numbers", function(assert) {
             assert.strictEqual(NumberFormatter.format(-123), "-123", "Formatting -123");
             assert.strictEqual(NumberFormatter.format(-1.234e9), "-1.23B", "Formatting -1.234 Billion");
-            assert.strictEqual(NumberFormatter.format(-1e15), "-1.00Qa", "Formatting -1 Quadrillion");
+            assert.strictEqual(NumberFormatter.format(-1e15), "-1Qa", "Formatting -1 Quadrillion");
         });
     });
 
