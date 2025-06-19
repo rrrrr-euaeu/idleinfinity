@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Idle Infinity Game</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:,">
 </head>
 <body>
     <button id="options-button">⚙️</button> <!-- Position with CSS -->
@@ -127,12 +128,16 @@
         <!-- New Autobuy Selector -->
         <div id="autobuy-selector">
             <input type="checkbox" id="autobuy-checkbox">
-            <label for="autobuy-checkbox">自動購入 (Autobuy)</label>
+            <label for="autobuy-checkbox">Autobuy</label>
         </div>
         <!-- End of Autobuy Selector -->
 
     </div>
 
-    <script src="script.js"></script>
+    <script src="numberFormatter.js" defer></script>
+    <script src="generatorManager.js" defer></script>
+    <script src="gameLogic.js" defer></script>
+    <script src="uiManager.js" defer></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
