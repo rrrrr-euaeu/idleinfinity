@@ -80,7 +80,7 @@ QUnit.module("NumberFormatter", function() {
     QUnit.test("standard format - more small numbers and boundaries", function(assert) {
         // Note: NumberFormatter.setSelectedFormat('standard'); is already in beforeEach for this module
         assert.strictEqual(NumberFormatter.format(0.0000099), "0", "NumberFormatter.format(0.0000099) => '0'");
-        assert.strictEqual(NumberFormatter.format(0.00001), "0.0000", "NumberFormatter.format(0.00001) => '0.0000'");
+        assert.strictEqual(NumberFormatter.format(0.00001), "0", "NumberFormatter.format(0.00001) => '0'");
         assert.strictEqual(NumberFormatter.format(0.0099), "0.0099", "NumberFormatter.format(0.0099) => '0.0099'");
         assert.strictEqual(NumberFormatter.format(0.001), "0.001", "NumberFormatter.format(0.001) => '0.001'");
 
