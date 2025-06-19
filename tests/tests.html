@@ -29,27 +29,39 @@
             return;
         }
 
+        // This is the <input type="checkbox">
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = 'qunit-toggle-all';
-        checkbox.style.marginLeft = "1em";
+        // checkbox.style.marginLeft = "1em"; // Margin will be on the container label instead
 
-        const label = document.createElement('label');
-        label.htmlFor = 'qunit-toggle-all';
+        // This is the text label element whose content will change
+        const label = document.createElement('span'); // Using a span for the text part
+        label.id = 'qunit-toggle-all-text'; // Give it an ID for clarity if needed
         label.textContent = 'Expand all tests';
+        label.style.marginLeft = '0.3em'; // Space between checkbox and text
 
-        let optionsSpan = toolbar.querySelector('#qunit-options');
-        if (optionsSpan) {
-            optionsSpan.appendChild(checkbox);
-            optionsSpan.appendChild(label);
+        const urlConfigSpan = toolbar.querySelector('span.qunit-url-config');
+        if (urlConfigSpan) {
+            const newContainerLabel = document.createElement('label');
+            newContainerLabel.htmlFor = checkbox.id; // Make the new label clickable for the checkbox
+            newContainerLabel.style.marginLeft = "0.8em";
+            newContainerLabel.title = "Expand or collapse all test details";
+
+            newContainerLabel.appendChild(checkbox);
+            newContainerLabel.appendChild(label); // Append the span that holds the text
+
+            urlConfigSpan.appendChild(newContainerLabel);
         } else {
+            // Fallback
+            checkbox.style.marginLeft = "1em"; // Apply margin to checkbox if appended directly
             toolbar.appendChild(checkbox);
-            toolbar.appendChild(label);
-            // console.warn('#qunit-options span not found. Appended toggle checkbox directly to toolbar.');
+            toolbar.appendChild(label); // label is already a span
+            console.warn('.qunit-url-config span not found. Appended toggle checkbox directly to toolbar.');
         }
 
         checkbox.addEventListener('change', function() {
-            const testItems = document.querySelectorAll('#qunit-tests > li'); // CORRECTED SELECTOR
+            const testItems = document.querySelectorAll('#qunit-tests > li');
             if (this.checked) {
                 testItems.forEach(function(testItem) {
                     const assertList = testItem.querySelector('ol.qunit-assert-list');
@@ -61,7 +73,7 @@
                         sourcePara.classList.remove('qunit-collapsed');
                     }
                 });
-                label.textContent = 'Collapse all tests';
+                label.textContent = 'Collapse all tests'; // Update the text of the span
             } else {
                 testItems.forEach(function(testItem) {
                     const assertList = testItem.querySelector('ol.qunit-assert-list');
@@ -73,7 +85,7 @@
                         sourcePara.classList.add('qunit-collapsed');
                     }
                 });
-                label.textContent = 'Expand all tests';
+                label.textContent = 'Expand all tests'; // Update the text of the span
             }
         });
     });
