@@ -11,6 +11,19 @@ const NumberFormatter = {
         if (num === 0) return "0";
         if (num < 0) return '-' + this.standard(Math.abs(num));
 
+        // Helper function for formatting suffixed values
+        function formatSuffixedValue(value, precision) {
+            let s = value.toFixed(precision);
+            // Only process if there's a decimal point and it's not an integer already
+            if (s.indexOf('.') !== -1) {
+                s = s.replace(/0+$/, ''); // Remove trailing zeros (e.g., "1.20" -> "1.2", "1.00" -> "1.")
+                if (s.endsWith('.')) {      // If it ends with a decimal point, remove it (e.g., "1." -> "1")
+                    s = s.slice(0, -1);
+                }
+            }
+            return s;
+        }
+
         if (num < 0.00001 && num > 0) return "0"; // Avoid extremely small fractions like e-6
         if (num < 0.01) return parseFloat(num.toFixed(4)).toString();
         if (num < 1) return parseFloat(num.toFixed(3)).toString();
@@ -23,27 +36,24 @@ const NumberFormatter = {
         }
 
         // Handle large numbers with suffixes
-        if (num >= 1e18) { // Quintillion or more, switch to scientific
+        if (num >= 1e18) { // For 1e18 and above
             return num.toExponential(2).replace('e+', 'e');
-        }
-        if (num >= 1e15) { // Quadrillion
+        } else if (num >= 1e15) { // For [1e15, 1e18)
             let value = num / 1e15;
-            if (value < 10) return parseFloat(value.toFixed(2)).toString() + 'Qa';
-            if (value < 100) return parseFloat(value.toFixed(1)).toString() + 'Qa';
+            if (value < 10) return formatSuffixedValue(value, 2) + 'Qa';
+            if (value < 100) return formatSuffixedValue(value, 1) + 'Qa';
             return Math.floor(value).toString() + 'Qa';
-        }
-        if (num >= 1e12) { // Trillion
+        } else if (num >= 1e12) { // For [1e12, 1e15)
             let value = num / 1e12;
-            if (value < 10) return parseFloat(value.toFixed(2)).toString() + 'T';
-            if (value < 100) return parseFloat(value.toFixed(1)).toString() + 'T';
+            if (value < 10) return formatSuffixedValue(value, 2) + 'T';
+            if (value < 100) return formatSuffixedValue(value, 1) + 'T';
             return Math.floor(value).toString() + 'T';
+        } else { // For [1e9, 1e12) - num >= 1e9 is implied
+            let value = num / 1e9;
+            if (value < 10) return formatSuffixedValue(value, 2) + 'B';
+            if (value < 100) return formatSuffixedValue(value, 1) + 'B';
+            return Math.floor(value).toString() + 'B';
         }
-        // Billion (already covered by toLocaleString up to 999,999,999)
-        // This part handles exactly 1B or more, up to 1T-1
-        let value = num / 1e9;
-        if (value < 10) return parseFloat(value.toFixed(2)).toString() + 'B';
-        if (value < 100) return parseFloat(value.toFixed(1)).toString() + 'B';
-        return Math.floor(value).toString() + 'B';
     },
 
     hex: function(num) {
