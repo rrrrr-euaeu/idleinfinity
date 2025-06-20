@@ -144,8 +144,8 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format(999e15), "999Qa", "999e15 => 999Qa");
 
         // Test rounding with BigInt logic
-        // 1.2345e16 is 12.345e15. integerPartOfValue = 12n. finalPrecision = 1. tempStr = "12.345". digitAfter = 5. Should round to "12.4Qa".
-        assert.strictEqual(NumberFormatter.format(1.2345e16), "12.4Qa", "1.2345e16 (12.345e15) => 12.4Qa (rounds up)");
+        // 1.2345e16 is 12.345e15.
+        assert.strictEqual(NumberFormatter.format(1.2345e16), "12.3Qa", "NumberFormatter.format(1.2345e16) (12.345e15) should be 12.3Qa with round-half-up to 1 decimal place");
         // 1.2344e16 is 12.344e15. integerPartOfValue = 12n. finalPrecision = 1. tempStr = "12.344". digitAfter = 4. Should truncate to "12.3Qa".
         assert.strictEqual(NumberFormatter.format(1.2344e16), "12.3Qa", "1.2344e16 (12.344e15) => 12.3Qa (truncates)");
 
@@ -153,16 +153,12 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format(9.8765e17), "987Qa", "9.8765e17 (987.65e15) => 987Qa (finalPrecision 0)");
 
         // Test near 1e18
-        // Math.floor(1e18-1000) = 999999999999999000. BigInt(...) / 1e15n = 999999n. finalPrecision = 0.
-        assert.strictEqual(NumberFormatter.format(1e18 - 1000), "999999Qa", "NumberFormatter.format(1e18 - 1000) => 999999Qa");
+        const val1e18minus1000 = 1e18 - 1000;
+        assert.strictEqual(NumberFormatter.format(val1e18minus1000), Number(val1e18minus1000).toExponential(2).replace('e+', 'e'), "NumberFormatter.format(1e18 - 1000) should return exponential form");
 
-        // Test 999e15 - 1. Math.floor(999e15 - 1) depends on Number precision.
-        // If 999e15 - 1 is 998999999999999999, then BigInt / 1e15n = 998n. finalPrecision = 0.
-        const val999e15minus1 = 999e15 - 1; // May be 998.999...e15 in effect
-        // Expected: BigInt(Math.floor(val999e15minus1)) / BInt1e15 .toString() + "Qa"
-        // Math.floor(999000000000000000 - 1) = 998999999999999999
-        // BigInt("998999999999999999") / BigInt("1000000000000000") = 998n
-        assert.strictEqual(NumberFormatter.format(val999e15minus1), "998Qa", "NumberFormatter.format(999e15 - 1) => 998Qa");
+        // Test 999e15 - 1.
+        const val999e15minus1 = 999e15 - 1;
+        assert.strictEqual(NumberFormatter.format(val999e15minus1), "999Qa", "NumberFormatter.format(999e15 - 1) should be 999Qa due to Number precision and Math.floor");
 
         // Check if 1e15 - 1 is still "999T"
         assert.strictEqual(NumberFormatter.format(1e15 - 1), "999T", "NumberFormatter.format(1e15 - 1) remains 999T");
