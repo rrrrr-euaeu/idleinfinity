@@ -107,9 +107,11 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format(1e9), "1B", "NumberFormatter.format(1e9) => '1B'");
         assert.strictEqual(NumberFormatter.format(1e12 - 1), "999B", "NumberFormatter.format(1e12 - 1) => '999B'");
         assert.strictEqual(NumberFormatter.format(1e12), "1T", "NumberFormatter.format(1e12) => '1T'");
-        assert.strictEqual(NumberFormatter.format(1e15 - 1), "999T", "NumberFormatter.format(1e15 - 1) => '999T'");
+        assert.strictEqual(NumberFormatter.format(1e15 - 1), "999T", "NumberFormatter.format(1e15 - 1) => '999T'"); // This should remain as is, handled by non-BigInt path
         assert.strictEqual(NumberFormatter.format(1e15), "1Qa", "NumberFormatter.format(1e15) => '1Qa'");
-        assert.strictEqual(NumberFormatter.format(1e18 - 1), "999Qa", "NumberFormatter.format(1e18 - 1) => '999Qa'");
+        // Due to Number precision, 1e18 - 1 is often treated as 1e18, thus formatted as exponential.
+        const val1e18minus1 = 1e18 - 1;
+        assert.strictEqual(NumberFormatter.format(val1e18minus1), Number(val1e18minus1).toExponential(2).replace('e+', 'e'), "NumberFormatter.format(1e18 - 1) should now return exponential form due to Number precision");
         assert.strictEqual(NumberFormatter.format(1e18), "1.00e18", "NumberFormatter.format(1e18) => '1.00e18'");
 
         // Suffix value < 10 and < 100 boundaries (based on current toFixed rounding)
@@ -122,8 +124,48 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format(9.999e12), "10T", "NumberFormatter.format(9.999e12) => '10T'");
         assert.strictEqual(NumberFormatter.format(99.99e12), "100T", "NumberFormatter.format(99.99e12) => '100T'");
         // Quadrillion
-        assert.strictEqual(NumberFormatter.format(9.999e15), "10Qa", "NumberFormatter.format(9.999e15) => '10Qa'");
-        assert.strictEqual(NumberFormatter.format(99.99e15), "100Qa", "NumberFormatter.format(99.99e15) => '100Qa'");
+        assert.strictEqual(NumberFormatter.format(9.999e15), "10Qa", "NumberFormatter.format(9.999e15) => '10Qa'"); // Standard rounding in JS for suffixes. Qa logic might differ for BigInt.
+        assert.strictEqual(NumberFormatter.format(99.99e15), "100Qa", "NumberFormatter.format(99.99e15) => '100Qa'"); // Standard rounding.
+    });
+
+    QUnit.test("quadrillions (Qa suffix - BigInt handling)", function(assert) {
+        NumberFormatter.setSelectedFormat('standard'); // Ensure standard format
+
+        assert.strictEqual(NumberFormatter.format(1e15), "1Qa", "1e15 => 1Qa");
+        assert.strictEqual(NumberFormatter.format(1.23e15), "1.23Qa", "1.23e15 => 1.23Qa");
+        assert.strictEqual(NumberFormatter.format(9.99e15), "9.99Qa", "9.99e15 => 9.99Qa");
+
+        assert.strictEqual(NumberFormatter.format(10e15), "10Qa", "10e15 => 10Qa");
+        assert.strictEqual(NumberFormatter.format(12.3e15), "12.3Qa", "12.3e15 => 12.3Qa");
+        assert.strictEqual(NumberFormatter.format(99.9e15), "99.9Qa", "99.9e15 => 99.9Qa");
+
+        assert.strictEqual(NumberFormatter.format(100e15), "100Qa", "100e15 => 100Qa");
+        assert.strictEqual(NumberFormatter.format(123e15), "123Qa", "123e15 => 123Qa");
+        assert.strictEqual(NumberFormatter.format(999e15), "999Qa", "999e15 => 999Qa");
+
+        // Test rounding with BigInt logic
+        // 1.2345e16 is 12.345e15. integerPartOfValue = 12n. finalPrecision = 1. tempStr = "12.345". digitAfter = 5. Should round to "12.4Qa".
+        assert.strictEqual(NumberFormatter.format(1.2345e16), "12.4Qa", "1.2345e16 (12.345e15) => 12.4Qa (rounds up)");
+        // 1.2344e16 is 12.344e15. integerPartOfValue = 12n. finalPrecision = 1. tempStr = "12.344". digitAfter = 4. Should truncate to "12.3Qa".
+        assert.strictEqual(NumberFormatter.format(1.2344e16), "12.3Qa", "1.2344e16 (12.344e15) => 12.3Qa (truncates)");
+
+        // 9.8765e17 is 987.65e15. integerPartOfValue = 987n. finalPrecision = 0. resultStr = "987".
+        assert.strictEqual(NumberFormatter.format(9.8765e17), "987Qa", "9.8765e17 (987.65e15) => 987Qa (finalPrecision 0)");
+
+        // Test near 1e18
+        // Math.floor(1e18-1000) = 999999999999999000. BigInt(...) / 1e15n = 999999n. finalPrecision = 0.
+        assert.strictEqual(NumberFormatter.format(1e18 - 1000), "999999Qa", "NumberFormatter.format(1e18 - 1000) => 999999Qa");
+
+        // Test 999e15 - 1. Math.floor(999e15 - 1) depends on Number precision.
+        // If 999e15 - 1 is 998999999999999999, then BigInt / 1e15n = 998n. finalPrecision = 0.
+        const val999e15minus1 = 999e15 - 1; // May be 998.999...e15 in effect
+        // Expected: BigInt(Math.floor(val999e15minus1)) / BInt1e15 .toString() + "Qa"
+        // Math.floor(999000000000000000 - 1) = 998999999999999999
+        // BigInt("998999999999999999") / BigInt("1000000000000000") = 998n
+        assert.strictEqual(NumberFormatter.format(val999e15minus1), "998Qa", "NumberFormatter.format(999e15 - 1) => 998Qa");
+
+        // Check if 1e15 - 1 is still "999T"
+        assert.strictEqual(NumberFormatter.format(1e15 - 1), "999T", "NumberFormatter.format(1e15 - 1) remains 999T");
     });
     });
 
