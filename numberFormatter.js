@@ -127,12 +127,9 @@ const NumberFormatter = {
                 }
             }
 
-
-            const scaleFactorForRounding = 10n ** BigInt(numDecimalPlaces + 1);
-            const valueScaledForRounding = overallBigInt * scaleFactorForRounding / divisorBigInt;
-
-            const digitToRound = valueScaledForRounding % 10n;
-            const valueToShowScaled = (valueScaledForRounding / 10n) + (digitToRound >= 5n ? 1n : 0n);
+            // New logic: Truncate to numDecimalPlaces for "3 significant digits, 4th digit truncated"
+            const scaleFactorForDisplay = 10n ** BigInt(numDecimalPlaces);
+            const valueToShowScaled = overallBigInt * scaleFactorForDisplay / divisorBigInt;
 
             let finalStr;
             const valueToShowStr = valueToShowScaled.toString();
