@@ -266,5 +266,3 @@ QUnit.module("NumberFormatter", function() {
         });
     });
 });
-
-[end of tests/numberFormatter.test.js]
