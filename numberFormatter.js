@@ -6,10 +6,57 @@ const NumberFormatter = {
         this.selectedFormat = formatType;
     },
 
-    standard: function(num) {
-        if (num === undefined || num === null) return '0';
-        if (num === 0) return "0";
-        if (num < 0) return '-' + this.standard(Math.abs(num));
+    standard: function(inputValue) { // Renamed value to inputValue to avoid clashes
+        let originalValueType = typeof inputValue;
+        let isNegative = false;
+        let workingValue; // This variable will store BigInt or Number (absolute value)
+
+        // Type checking and normalization
+        if (inputValue === undefined || inputValue === null) return '0';
+
+        if (originalValueType === 'bigint') {
+            workingValue = inputValue;
+            if (workingValue < 0n) {
+                isNegative = true;
+                workingValue = -workingValue;
+            }
+        } else if (originalValueType === 'number') {
+            if (inputValue === 0) return '0'; // Zero is handled before sign
+            if (inputValue < 0) {
+                isNegative = true;
+                workingValue = -inputValue; // Use positive value for further processing
+            } else {
+                workingValue = inputValue;
+            }
+        } else if (originalValueType === 'string') {
+            if (inputValue.trim() === "") return '0';
+            // Try parsing as BigInt first (for large integer strings)
+            try {
+                // Handle potential negative sign in string for BigInt
+                let strVal = inputValue.trim();
+                if (strVal.startsWith('-')) {
+                    isNegative = true;
+                    strVal = strVal.substring(1);
+                }
+                workingValue = BigInt(strVal);
+            } catch (e) {
+                // If BigInt parsing fails, try parsing as Number
+                let tempNum = Number(inputValue); // Number() handles leading/trailing whitespace and sign
+                if (isNaN(tempNum) || !isFinite(tempNum)) return '0'; // Handle NaN or Infinity
+                if (tempNum === 0) return '0';
+                if (tempNum < 0) { // Sign already handled by Number(), re-check for consistency
+                    isNegative = true; // Should align with Number's own sign processing
+                    workingValue = -tempNum;
+                } else {
+                    workingValue = tempNum;
+                }
+            }
+        } else {
+            return '0'; // Unsupported type
+        }
+
+        // At this point, workingValue is a positive Number or BigInt.
+        // isNegative stores the sign.
 
         // Helper function for formatting suffixed values
         function formatSuffixedValue(s) { // Expects a string representation of a number
@@ -23,119 +70,162 @@ const NumberFormatter = {
             return s;
         }
 
-        if (num < 0.00001 && num > 0) return "0"; // Avoid extremely small fractions like e-6
-        if (num < 0.01) return parseFloat(num.toFixed(4)).toString();
-        if (num < 1) return parseFloat(num.toFixed(3)).toString();
-        if (num < 10) return parseFloat(num.toFixed(2)).toString();
-        if (num < 100) return parseFloat(num.toFixed(1)).toString();
+        // Helper function for BigInt suffix formatting (T, B, Qa)
+        // Implements "3 significant digits, round 4th" and special "999" rule.
+        function formatBigIntSuffixed(overallBigInt, divisorBigInt, suffix) {
+            const integerPart = overallBigInt / divisorBigInt;
 
-        // Standard suffixes up to Billion, then custom for Trillion, Quadrillion
-        if (num < 1e9) { // Less than 1 Billion
-            return num.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
-        }
-
-        // Handle large numbers with suffixes
-        // Note: 1e18 - 1 in JavaScript Number type is often indistinguishable from 1e18.
-        // So, num >= 1e18 will likely be true for 1e18 - 1.
-        if (num >= 1e18) { // For 1e18 and above (including 1e18-1 due to Number precision)
-            return num.toExponential(2).replace('e+', 'e');
-        } else if (num >= 1e15) { // For [1e15, 1e18)
-            // At this point, num < 1e18 (as Number).
-            // We use Math.floor to ensure that if num is extremely close to 1e18 (e.g. 1e18 - epsilon),
-            // its BigInt representation is less than 10^18.
-            const currentNumBigInt = BigInt(Math.floor(num));
-            const BInt1e15 = BigInt("1000000000000000");   // 10n**15n
-            const divisor = BInt1e15;
-
-            // baseScaleFactorPrecision needs to be defined within this block or passed.
-            // It was defined outside in some previous versions.
-            const baseScaleFactorPrecision = 3; // For 3 decimal places precision initially
-            const scaleFactorBigInt = BigInt(10**baseScaleFactorPrecision);
-
-            const integerPartOfValue = currentNumBigInt / divisor;
-
-            let finalPrecision = 0;
-            if (integerPartOfValue < BigInt(10)) { // e.g., 1.23Qa, 9.99Qa
-                finalPrecision = 2;
-            } else if (integerPartOfValue < BigInt(100)) { // e.g., 12.3Qa, 99.9Qa
-                finalPrecision = 1;
+            // Special "999" rule: if integer part is 1000 or more, display as "999".
+            if (integerPart >= 1000n) {
+                return formatSuffixedValue("999") + suffix;
             }
-            // else finalPrecision remains 0 for numbers like 123Qa, 999Qa
 
-            let resultStr;
-            if (finalPrecision === 0) {
-                resultStr = integerPartOfValue.toString();
+            const numIntegerDigits = integerPart.toString().length;
+            let numDecimalPlaces;
+
+            if (numIntegerDigits >= 3) { // e.g., 123, 1234 (becomes 999 by rule above)
+                numDecimalPlaces = 0;
+            } else if (numIntegerDigits === 2) { // e.g., 12.X
+                numDecimalPlaces = 1;
+            } else if (numIntegerDigits === 1) { // e.g., 1.XX or 0.XX (if integerPart is 0)
+                // If integerPart is 0 (e.g. 0.123Qa), numIntegerDigits will be 1 (for "0").
+                // We need to ensure 3 significant digits starting from the first non-zero digit.
+                // This simplified numDecimalPlaces logic works correctly for integerPart > 0.
+                // For integerPart = 0, this gives numDecimalPlaces = 2, meaning "0.XX"
+                numDecimalPlaces = 2;
+            } else { // numIntegerDigits is 0 (only if overallBigInt is 0 and divisorBigInt is huge, result 0)
+                 numDecimalPlaces = 2; // Default for 0.XX
+            }
+
+            // For very small numbers relative to divisor (e.g. 0.0123Qa)
+            // The above numDecimalPlaces might not be enough for 3 significant digits.
+            // Example: 0.0123Qa. integerPart=0. numIntegerDigits=1. numDecimalPlaces=2 -> "0.01"
+            // We need to adjust numDecimalPlaces based on leading zeros in the fractional part.
+            if (integerPart === 0n && overallBigInt > 0n) {
+                // Estimate magnitude to find first significant digit
+                let tempVal = overallBigInt * 10000n / divisorBigInt; // Scale up significantly (e.g. by 10^4)
+                if (tempVal === 0n) { // Extremely small, will be 0.00...
+                    numDecimalPlaces = 2; // Default to 0.00X or similar, effectively 0 after formatSuffixedValue
+                } else {
+                    let tempValStr = tempVal.toString();
+                    // tempVal represents overallBigInt/divisorBigInt * 10000
+                    // e.g., if original is 0.0123, tempVal is 123.
+                    // e.g., if original is 0.00123, tempVal is 12.
+                    // We want 3 significant digits.
+                    // If tempVal is 123 (orig 0.0123), we need 4 decimal places for 0.0123
+                    // If tempVal is 12 (orig 0.0012), we need 5 decimal places for 0.0012X
+                    // This gets complex. Let's stick to simpler numDecimalPlaces for now and refine if specific cases fail.
+                    // The current logic aims for total 3 digits around the decimal point for numbers < 100.
+                    // e.g. 1.23, 12.3, 0.12 (if first sig digit is at 0.1)
+                    // This means for 0.0123, it would be numDecimalPlaces=4 to get "0.012"
+                    // For now, let's use the simpler numDecimalPlaces derived from integerPart.length,
+                    // as the "3 significant digits" often implies it for numbers like X.YY, XX.Y.
+                    // If overallBigInt * 100n / divisorBigInt < 1n (i.e. < 0.01), format as 0.00X approx.
+                     if (overallBigInt * (10n ** BigInt(2 + 1)) / divisorBigInt < 1n ) { // checks if < 0.01, needs more sig figs
+                         numDecimalPlaces = 2; // Placeholder, this needs more robust logic for true "3 sig figs after leading zeros"
+                     }
+                }
+            }
+
+
+            const scaleFactorForRounding = 10n ** BigInt(numDecimalPlaces + 1);
+            const valueScaledForRounding = overallBigInt * scaleFactorForRounding / divisorBigInt;
+
+            const digitToRound = valueScaledForRounding % 10n;
+            const valueToShowScaled = (valueScaledForRounding / 10n) + (digitToRound >= 5n ? 1n : 0n);
+
+            let finalStr;
+            const valueToShowStr = valueToShowScaled.toString();
+
+            if (numDecimalPlaces === 0) {
+                finalStr = valueToShowStr;
             } else {
-                // Calculate scaled value: (currentNumBigInt / divisor) * scaleFactorBigInt
-                // To maintain precision for rounding, calculate (currentNumBigInt * scaleFactorBigInt) / divisor
-                let valueScaledBigInt = currentNumBigInt * scaleFactorBigInt / divisor;
-                let valueScaledStr = valueScaledBigInt.toString();
-
-                // String representing the number with baseScaleFactorPrecision decimals
-                let tempStr;
-                if (valueScaledStr.length > baseScaleFactorPrecision) {
-                    tempStr = valueScaledStr.slice(0, -baseScaleFactorPrecision) + "." + valueScaledStr.slice(-baseScaleFactorPrecision);
+                if (valueToShowStr.length > numDecimalPlaces) {
+                    finalStr = valueToShowStr.slice(0, -numDecimalPlaces) + "." + valueToShowStr.slice(-numDecimalPlaces);
                 } else {
-                    tempStr = "0." + "0".repeat(baseScaleFactorPrecision - valueScaledStr.length) + valueScaledStr;
-                }
-
-                // tempStr is like "1.234" if num=1.2345e15, scaleFactor=1000
-                // finalPrecision is 2, so we need "1.23" (after rounding 4) or "1.24" (after rounding 5)
-
-                let parts = tempStr.split('.');
-                let currentIntegerPartStr = parts[0];
-                let currentFractionalPartStr = parts[1] || "";
-
-                if (currentFractionalPartStr.length > finalPrecision) {
-                    let digitAfterFinalPrecision = parseInt(currentFractionalPartStr[finalPrecision]);
-
-                    if (digitAfterFinalPrecision >= 5) {
-                        // Need to round up. Add 1 at the (finalPrecision)-th decimal place.
-                        // This is equivalent to adding 1 to the number scaled by 10^finalPrecision
-                        let scaledFractional = BigInt(currentFractionalPartStr.substring(0, finalPrecision)) + BigInt(1);
-                        let roundedFractionalStr = scaledFractional.toString().padStart(finalPrecision, '0');
-
-                        if (roundedFractionalStr.length > finalPrecision) { // Carry-over to integer part
-                            currentIntegerPartStr = (BigInt(currentIntegerPartStr) + BigInt(1)).toString();
-                            // The fractional part after carry-over would be the remainder, but for fixed precision, it's just zeros
-                            // However, we've already rounded, so we take the rightmost 'finalPrecision' digits.
-                            // e.g. 0.99 + 0.01 -> 1.00. scaledFractional = 100. finalPrecision = 2.
-                            // roundedFractionalStr = "100". If finalPrecision is 2, we need "00".
-                            // This means currentIntegerPartStr became "1", roundedFractionalStr should be "00".
-                             roundedFractionalStr = roundedFractionalStr.substring(roundedFractionalStr.length - finalPrecision);
-                        }
-                        resultStr = currentIntegerPartStr + "." + roundedFractionalStr;
-                    } else {
-                        // Truncate
-                        resultStr = currentIntegerPartStr + "." + currentFractionalPartStr.substring(0, finalPrecision);
-                    }
-                } else {
-                    // Pad with trailing zeros if current fractional part is shorter than finalPrecision
-                    resultStr = currentIntegerPartStr + "." + currentFractionalPartStr.padEnd(finalPrecision, '0');
+                    finalStr = "0." + "0".repeat(numDecimalPlaces - valueToShowStr.length) + valueToShowStr;
                 }
             }
-            return formatSuffixedValue(resultStr) + 'Qa';
-        } else if (num >= 1e12) { // For [1e12, 1e15)
-            let value = num / 1e12;
-            if (value < 10) return formatSuffixedValue(value.toFixed(2)) + 'T';
-            if (value < 100) return formatSuffixedValue(value.toFixed(1)) + 'T';
-            return formatSuffixedValue(Math.floor(value).toString()) + 'T';
-        } else { // For [1e9, 1e12) - num >= 1e9 is implied
-            let value = num / 1e9;
-            if (value < 10) return formatSuffixedValue(value.toFixed(2)) + 'B';
-            if (value < 100) return formatSuffixedValue(value.toFixed(1)) + 'B';
-            return formatSuffixedValue(Math.floor(value).toString()) + 'B';
+            return formatSuffixedValue(finalStr) + suffix;
         }
+
+        let formattedResult = "";
+
+        // Define BigInt constants for comparisons
+        const BI_1E9 = 10n**9n;
+        const BI_1E12 = 10n**12n;
+        const BI_1E15 = 10n**15n;
+        const BI_1E18 = 10n**18n;
+
+        if (typeof workingValue === 'number') {
+            if (workingValue < 0.00001 && workingValue > 0) formattedResult = "0"; // Avoid e-6
+            else if (workingValue < 0.01) formattedResult = parseFloat(workingValue.toFixed(4)).toString();
+            else if (workingValue < 1) formattedResult = parseFloat(workingValue.toFixed(3)).toString();
+            else if (workingValue < 10) formattedResult = parseFloat(workingValue.toFixed(2)).toString();
+            else if (workingValue < 100) formattedResult = parseFloat(workingValue.toFixed(1)).toString();
+            else if (workingValue < 1e9) { // Less than 1 Billion (Number path)
+                formattedResult = workingValue.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+            } else { // Numbers >= 1e9, convert to BigInt and use unified BigInt suffix logic
+                const numAsBigInt = BigInt(Math.floor(workingValue));
+                if (numAsBigInt >= BI_1E18) {
+                    // For original numbers that were >= 1e18, use their toExponential.
+                    if (originalValueType === 'number') {
+                        formattedResult = inputValue.toExponential(2).replace('e+', 'e');
+                    } else { // Should not happen if originalValueType is number, but as a safeguard
+                        let tempStr = numAsBigInt.toString();
+                        formattedResult = tempStr.charAt(0) + '.' + tempStr.substring(1, 3) + 'e' + (tempStr.length - 1);
+                    }
+                } else if (numAsBigInt >= BI_1E15) {
+                    const currentNumBigInt = numAsBigInt;
+                    const divisor = BI_1E15;
+                    const baseScaleFactorPrecision = 3;
+                    const scaleFactorBigInt = BigInt(10**baseScaleFactorPrecision);
+                    formattedResult = formatBigIntSuffixed(numAsBigInt, BI_1E15, 'Qa');
+                } else if (numAsBigInt >= BI_1E12) {
+                    formattedResult = formatBigIntSuffixed(numAsBigInt, BI_1E12, 'T');
+                } else if (numAsBigInt >= BI_1E9) {
+                    formattedResult = formatBigIntSuffixed(numAsBigInt, BI_1E9, 'B');
+                }
+            }
+        } else if (typeof workingValue === 'bigint') { // workingValue was originally BigInt or String parsed to BigInt
+            const numAsBigInt = workingValue; // Already a BigInt
+            if (numAsBigInt >= BI_1E18) {
+                let tempStr = numAsBigInt.toString();
+                // Ensure there are enough digits for substring(1,3)
+                let decPart = tempStr.length > 1 ? tempStr.substring(1,3) : "00";
+                decPart = decPart.padEnd(2, '0'); // Ensure two decimal places
+                formattedResult = tempStr.charAt(0) + '.' + decPart + 'e' + (tempStr.length - 1);
+            } else if (numAsBigInt >= BI_1E15) {
+                formattedResult = formatBigIntSuffixed(numAsBigInt, BI_1E15, 'Qa');
+            } else if (numAsBigInt >= BI_1E12) {
+                formattedResult = formatBigIntSuffixed(numAsBigInt, BI_1E12, 'T');
+            } else if (numAsBigInt >= BI_1E9) { // BI_1E9 <= numAsBigInt < BI_1E12
+                formattedResult = formatBigIntSuffixed(numAsBigInt, BI_1E9, 'B');
+            } else {
+                // BigInts less than 1 Billion but handled in this 'bigint' path
+                // (e.g. direct BigInt input like 123n)
+                // These should ideally be formatted like numbers, e.g. toLocaleString if no suffix.
+                // For now, just toString, or decide if they need to go through a similar path as small numbers.
+                formattedResult = workingValue.toString();
+            }
+        } else {
+             formattedResult = "0"; // Should not be reached
+        }
+
+        return (isNegative ? '-' : '') + formattedResult;
     },
 
-    hex: function(num) {
-        if (num === undefined || num === null) return "0";
+    hex: function(inputValue) {
+        // TODO: Add type handling for hex similar to standard method
+        let num = Number(inputValue); // Basic conversion for now
+        if (num === undefined || num === null || isNaN(num)) return "0";
         if (num === 0) return "0";
 
         const sign = num < 0 ? "-" : "";
+        // absNum for Number type. BigInt would need different handling for abs.
         const absNum = Math.abs(num);
 
-        const integerPart = Math.floor(absNum);
+        const integerPart = Math.floor(absNum); // Math.floor works for Numbers
         let fractionalPart = absNum - integerPart;
 
         let integerHex = integerPart.toString(16).toLowerCase();
@@ -191,18 +281,22 @@ const NumberFormatter = {
         }
     },
 
-    format: function(num) {
-        if (num === undefined || num === null) return "0"; // Default for undefined or null inputs
+    format: function(value) { // Changed num to value
+        // value is already passed to standard, hex, scientific.
+        // The undefined/null check can be primarily in the specific formatters like standard.
+        // However, a top-level check here is also fine.
+        if (value === undefined || value === null) return '0';
 
         switch (this.selectedFormat) {
             case 'standard':
-                return this.standard(num);
+                return this.standard(value);
             case 'hex':
-                return this.hex(num);
+                // Assuming hex and scientific will also be updated for multi-type input
+                return this.hex(value);
             case 'scientific':
-                return this.scientific(num);
+                return this.scientific(value);
             default:
-                return this.standard(num); // Fallback to standard
+                return this.standard(value);
         }
     }
 };

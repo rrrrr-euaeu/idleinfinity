@@ -107,14 +107,19 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format(1e9), "1B", "NumberFormatter.format(1e9) => '1B'");
         assert.strictEqual(NumberFormatter.format(1e12 - 1), "999B", "NumberFormatter.format(1e12 - 1) => '999B'");
         assert.strictEqual(NumberFormatter.format(1e12), "1T", "NumberFormatter.format(1e12) => '1T'");
-        assert.strictEqual(NumberFormatter.format(1e15 - 1), "999T", "NumberFormatter.format(1e15 - 1) => '999T'"); // This should remain as is, handled by non-BigInt path
+        assert.strictEqual(NumberFormatter.format(1e15 - 1), "999T", "NumberFormatter.format(1e15 - 1) => '999T'");
         assert.strictEqual(NumberFormatter.format(1e15), "1Qa", "NumberFormatter.format(1e15) => '1Qa'");
-        // Due to Number precision, 1e18 - 1 is often treated as 1e18, thus formatted as exponential.
-        const val1e18minus1 = 1e18 - 1;
-        assert.strictEqual(NumberFormatter.format(val1e18minus1), Number(val1e18minus1).toExponential(2).replace('e+', 'e'), "NumberFormatter.format(1e18 - 1) should now return exponential form due to Number precision");
-        assert.strictEqual(NumberFormatter.format(1e18), "1.00e18", "NumberFormatter.format(1e18) => '1.00e18'");
 
-        // Suffix value < 10 and < 100 boundaries (based on current toFixed rounding)
+        // 1e18 - 1 cases
+        const val1e18minus1Num = 1e18 - 1;
+        assert.strictEqual(NumberFormatter.format(val1e18minus1Num), Number(val1e18minus1Num).toExponential(2).replace('e+', 'e'), "NumberFormatter.format(Number: 1e18 - 1) returns exponential form");
+        assert.strictEqual(NumberFormatter.format(10n**18n - 1n), "999Qa", "NumberFormatter.format(BigInt: 10e18 - 1) => '999Qa'");
+        assert.strictEqual(NumberFormatter.format("999999999999999999"), "999Qa", "NumberFormatter.format(String: \"999...\") => '999Qa'");
+
+        assert.strictEqual(NumberFormatter.format(1e18), "1.00e18", "NumberFormatter.format(1e18) => '1.00e18'");
+        assert.strictEqual(NumberFormatter.format(10n**18n), "1.00e18", "NumberFormatter.format(BigInt: 10e18) => '1.00e18'"); // Based on current BigInt to exponential logic
+
+        // Suffix value < 10 and < 100 boundaries (based on current toFixed rounding for Number inputs)
         // Billion
         assert.strictEqual(NumberFormatter.format(9.999e9), "10B", "NumberFormatter.format(9.999e9) => '10B'");
         assert.strictEqual(NumberFormatter.format(10e9), "10B", "NumberFormatter.format(10e9) => '10B'");
@@ -145,24 +150,87 @@ QUnit.module("NumberFormatter", function() {
 
         // Test rounding with BigInt logic
         // 1.2345e16 is 12.345e15.
-        assert.strictEqual(NumberFormatter.format(1.2345e16), "12.3Qa", "NumberFormatter.format(1.2345e16) (12.345e15) should be 12.3Qa with round-half-up to 1 decimal place");
-        // 1.2344e16 is 12.344e15. integerPartOfValue = 12n. finalPrecision = 1. tempStr = "12.344". digitAfter = 4. Should truncate to "12.3Qa".
-        assert.strictEqual(NumberFormatter.format(1.2344e16), "12.3Qa", "1.2344e16 (12.344e15) => 12.3Qa (truncates)");
+        // 1.2345e16 (12.345e15)
+        assert.strictEqual(NumberFormatter.format(1.2345e16), "12.3Qa", "NumberFormatter.format(Number: 1.2345e16) => 12.3Qa (Math.floor then valid 3 sig fig)");
+        assert.strictEqual(NumberFormatter.format(12345n * (10n**12n)), "12.3Qa", "NumberFormatter.format(BigInt: 12.345e15) => 12.3Qa (valid 3 sig fig)");
+        assert.strictEqual(NumberFormatter.format("12345000000000000"), "12.3Qa", "NumberFormatter.format(String: 12.345e15) => 12.3Qa");
 
-        // 9.8765e17 is 987.65e15. integerPartOfValue = 987n. finalPrecision = 0. resultStr = "987".
-        assert.strictEqual(NumberFormatter.format(9.8765e17), "987Qa", "9.8765e17 (987.65e15) => 987Qa (finalPrecision 0)");
+        assert.strictEqual(NumberFormatter.format(1.2344e16), "12.3Qa", "NumberFormatter.format(1.2344e16) => 12.3Qa (truncates)");
 
-        // Test near 1e18
-        const val1e18minus1000 = 1e18 - 1000;
-        assert.strictEqual(NumberFormatter.format(val1e18minus1000), Number(val1e18minus1000).toExponential(2).replace('e+', 'e'), "NumberFormatter.format(1e18 - 1000) should return exponential form");
+        assert.strictEqual(NumberFormatter.format(9.8765e17), "988Qa", "NumberFormatter.format(9.8765e17) => 988Qa (Math.floor then valid 3 sig fig rounding)");
 
-        // Test 999e15 - 1.
-        const val999e15minus1 = 999e15 - 1;
-        assert.strictEqual(NumberFormatter.format(val999e15minus1), "999Qa", "NumberFormatter.format(999e15 - 1) should be 999Qa due to Number precision and Math.floor");
+        // 1e18 - 1000
+        const val1e18minus1000Num = 1e18 - 1000;
+        assert.strictEqual(NumberFormatter.format(val1e18minus1000Num), Number(val1e18minus1000Num).toExponential(2).replace('e+', 'e'), "NumberFormatter.format(Number: 1e18 - 1000) returns exponential");
+        assert.strictEqual(NumberFormatter.format(10n**18n - 1000n), "999Qa", "NumberFormatter.format(BigInt: 1e18 - 1000) => '999Qa' (999 rule)");
+        assert.strictEqual(NumberFormatter.format("999999999999999000"), "999Qa", "NumberFormatter.format(String: \"999...9000\") => '999Qa' (999 rule)");
+
+        // 999e15 - 1
+        const val999e15minus1Num = 999e15 - 1;
+        assert.strictEqual(NumberFormatter.format(val999e15minus1Num), "999Qa", "NumberFormatter.format(Number: 999e15 - 1) => 999Qa (Math.floor then valid 3 sig fig)");
+        assert.strictEqual(NumberFormatter.format(999n * (10n**15n) - 1n), "999Qa", "NumberFormatter.format(BigInt: 999e15 - 1) => 999Qa (valid 3 sig fig rounding)");
+        assert.strictEqual(NumberFormatter.format("998999999999999999"), "999Qa", "NumberFormatter.format(String: \"998999...\") => 999Qa (valid 3 sig fig rounding)");
+
+        // Additional BigInt cases for Qa
+        assert.strictEqual(NumberFormatter.format(123n * (10n**13n)), "1.23Qa", "NumberFormatter.format(BigInt: 1.23e15) => 1.23Qa");
+        assert.strictEqual(NumberFormatter.format(1237n * (10n**12n)), "1.24Qa", "NumberFormatter.format(BigInt: 1.237e15) => 1.24Qa"); // 1.237 -> 1.24
+
+        // Value is 987600000000000n, which is 987.6e12 (Trillion)
+        assert.strictEqual(NumberFormatter.format(9876n * (10n**11n)), "988T", "NumberFormatter.format(BigInt: 0.9876e15 or 987.6e12) => 988T");
+
+        assert.strictEqual(NumberFormatter.format(1234n * (10n**13n)), "12.3Qa", "NumberFormatter.format(BigInt: 12.34e15) => 12.3Qa");
+        assert.strictEqual(NumberFormatter.format(1237n * (10n**13n)), "12.4Qa", "NumberFormatter.format(BigInt: 12.37e15) => 12.4Qa");
+        assert.strictEqual(NumberFormatter.format(1234n * (10n**14n)), "123Qa", "NumberFormatter.format(BigInt: 123.4e15) => 123Qa");
+        assert.strictEqual(NumberFormatter.format(1237n * (10n**14n)), "124Qa", "NumberFormatter.format(BigInt: 123.7e15) => 124Qa");
+        assert.strictEqual(NumberFormatter.format(999n * (10n**15n)), "999Qa", "NumberFormatter.format(BigInt: 999e15) => 999Qa");
+        assert.strictEqual(NumberFormatter.format(9998n * (10n**14n)), "999Qa", "NumberFormatter.format(BigInt: 999.8e15) => 999Qa (999 rule after rounding 1000)");
 
         // Check if 1e15 - 1 is still "999T"
         assert.strictEqual(NumberFormatter.format(1e15 - 1), "999T", "NumberFormatter.format(1e15 - 1) remains 999T");
     });
+
+    QUnit.test("standard format - BigInt T and B suffixes", function(assert) {
+        NumberFormatter.setSelectedFormat('standard');
+        // Trillion (T)
+        assert.strictEqual(NumberFormatter.format(10n**12n), "1T", "NumberFormatter.format(BigInt: 1e12) => 1T");
+        assert.strictEqual(NumberFormatter.format(1234n * (10n**9n)), "1.23T", "NumberFormatter.format(BigInt: 1.234e12) => 1.23T"); // 1.234 -> 1.23
+        assert.strictEqual(NumberFormatter.format(1237n * (10n**9n)), "1.24T", "NumberFormatter.format(BigInt: 1.237e12) => 1.24T"); // 1.237 -> 1.24
+        assert.strictEqual(NumberFormatter.format(9998n * (10n**11n)), "999T", "NumberFormatter.format(BigInt: 999.8e12) => 999T (999 rule)");
+        // Billion (B)
+        assert.strictEqual(NumberFormatter.format(10n**9n), "1B", "NumberFormatter.format(BigInt: 1e9) => 1B");
+        assert.strictEqual(NumberFormatter.format(1234n * (10n**6n)), "1.23B", "NumberFormatter.format(BigInt: 1.234e9) => 1.23B");
+        assert.strictEqual(NumberFormatter.format(1237n * (10n**6n)), "1.24B", "NumberFormatter.format(BigInt: 1.237e9) => 1.24B");
+        assert.strictEqual(NumberFormatter.format(9998n * (10n**8n)), "999B", "NumberFormatter.format(BigInt: 999.8e9) => 999B (999 rule)");
+    });
+
+    QUnit.test("standard format - BigInt exponential notation", function(assert) {
+        NumberFormatter.setSelectedFormat('standard');
+        // Current BigInt to exponential logic is basic: X.YYeZ
+        assert.strictEqual(NumberFormatter.format(10n**18n), "1.00e18", "NumberFormatter.format(BigInt: 1e18) => 1.00e18");
+        assert.strictEqual(NumberFormatter.format(1234n * (10n**15n)), "1.23e18", "NumberFormatter.format(BigInt: 1.234e18) => 1.23e18");
+        assert.strictEqual(NumberFormatter.format(1237n * (10n**15n)), "1.23e18", "NumberFormatter.format(BigInt: 1.237e18) => 1.23e18 (truncates for current exp logic)");
+        assert.strictEqual(NumberFormatter.format(10n**20n), "1.00e20", "NumberFormatter.format(BigInt: 1e20) => 1.00e20");
+    });
+
+    QUnit.test("standard format - String inputs", function(assert) {
+        NumberFormatter.setSelectedFormat('standard');
+        assert.strictEqual(NumberFormatter.format("0"), "0", "NumberFormatter.format(String: \"0\")");
+        assert.strictEqual(NumberFormatter.format("123"), "123", "NumberFormatter.format(String: \"123\")");
+        assert.strictEqual(NumberFormatter.format("-1000"), "-1,000", "NumberFormatter.format(String: \"-1000\")");
+        assert.strictEqual(NumberFormatter.format("1234567890"), "1.23B", "NumberFormatter.format(String: \"1.23...e9\") => 1.23B");
+        assert.strictEqual(NumberFormatter.format("123456789012345678"), "123Qa", "NumberFormatter.format(String: \"1.23...e17\") => 123Qa");
+        assert.strictEqual(NumberFormatter.format("-1234567890123456789"), "-1.23Qa", "NumberFormatter.format(String: \"-1.23...e18\") => -1.23Qa (current exp logic for BigInt, then Qa)");
+        // The last case depends on how BigInt exponential string "1.23e18" would be re-parsed if it were a primary path.
+        // However, for string "-1234567890123456789", it will be parsed as BigInt directly.
+        // -1234567890123456789n is < -10^18n. It's actually -(1.23... * 10^18).
+        // So, it should be -(10^18n) range, thus exponential.
+        // The BigInt value is -1234567890123456789n.
+        // abs(workingValue) = 1234567890123456789n. This is < BI_1E18 (10^18). No, it's > BI_1E18.
+        // It's 1.23 * 10^18, so it should be exponential.
+        // expected: "-1.23e18"
+         assert.strictEqual(NumberFormatter.format("-1234567890123456789"), "-1.23e18", "NumberFormatter.format(String: \"-1.23...e18\") => -1.23e18");
+    });
+
     });
 
     QUnit.module("format - hex", function(hooks) {
