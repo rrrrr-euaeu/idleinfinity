@@ -75,6 +75,8 @@ QUnit.module("NumberFormatter", function() {
             assert.strictEqual(NumberFormatter.format(-123), "-123", "NumberFormatter.format(-123) => '-123'");
             assert.strictEqual(NumberFormatter.format(-1.234e9), "-1.23B", "NumberFormatter.format(-1.234e9) => '-1.23B'");
             assert.strictEqual(NumberFormatter.format(-1e15), "-1Qa", "NumberFormatter.format(-1e15) => '-1Qa'");
+        assert.strictEqual(NumberFormatter.format(Number(-12345)), "-12,345", "Number -12345 should have comma");
+        assert.strictEqual(NumberFormatter.format(BigInt(-1234567)), "-1,234,567", "BigInt -1234567 should have comma");
         });
 
     QUnit.test("standard format - more small numbers and boundaries", function(assert) {
@@ -222,6 +224,7 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format("0"), "0", "NumberFormatter.format(String: \"0\")");
         assert.strictEqual(NumberFormatter.format("123"), "123", "NumberFormatter.format(String: \"123\")");
         assert.strictEqual(NumberFormatter.format("-1000"), "-1,000", "NumberFormatter.format(String: \"-1000\")");
+        assert.strictEqual(NumberFormatter.format("-12345"), "-12,345", "String -12345 should have comma");
         assert.strictEqual(NumberFormatter.format("1234567890"), "1.23B", "NumberFormatter.format(String: \"1.23...e9\") => 1.23B");
         assert.strictEqual(NumberFormatter.format("123456789012345678"), "123Qa", "NumberFormatter.format(String: \"1.23...e17\") => 123Qa");
         // The string "-1234567890123456789" is parsed as a BigInt.

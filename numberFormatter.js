@@ -202,8 +202,8 @@ const NumberFormatter = {
                 // BigInts less than 1 Billion but handled in this 'bigint' path
                 // (e.g. direct BigInt input like 123n)
                 // These should ideally be formatted like numbers, e.g. toLocaleString if no suffix.
-                // For now, just toString, or decide if they need to go through a similar path as small numbers.
-                formattedResult = workingValue.toString();
+                // Apply toLocaleString for digit grouping as per new requirement.
+                formattedResult = workingValue.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
             }
         } else {
              formattedResult = "0"; // Should not be reached
