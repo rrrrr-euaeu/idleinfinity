@@ -254,15 +254,14 @@ QUnit.module("NumberFormatter", function() {
 
         QUnit.test("BigInt inputs (direct hex conversion)", function(assert) {
             NumberFormatter.setSelectedFormat('hex');
-            assert.strictEqual(NumberFormatter.format(0n), "0", "BigInt: 0n => 0 (hex)");
-            assert.strictEqual(NumberFormatter.format(10n**15n), "38d7 ea4c 68000", "BigInt: 10n**15n => 38d7 ea4c 68000 (hex, direct BigInt)");
-            assert.strictEqual(NumberFormatter.format(-(10n**15n)), "-38d7 ea4c 68000", "BigInt: -(10n**15n) => -38d7 ea4c 68000 (hex, direct BigInt)");
+            assert.strictEqual(NumberFormatter.format(0n), "0", "BigInt: 0n => 0 (hex, direct BigInt)");
+            assert.strictEqual(NumberFormatter.format(10n**15n), "3 8d7e a4c6 8000", "BigInt: 10n**15n => 3 8d7e a4c6 8000 (hex, direct BigInt)");
+            assert.strictEqual(NumberFormatter.format(-(10n**15n)), "-3 8d7e a4c6 8000", "BigInt: -(10n**15n) => -3 8d7e a4c6 8000 (hex, direct BigInt)");
             assert.strictEqual(NumberFormatter.format(10n**18n - 1n), "de0b 6b3a 763f ffff", "BigInt: 10n**18n - 1n => de0b 6b3a 763f ffff (hex, direct BigInt)");
             assert.strictEqual(NumberFormatter.format(10n**21n), "36 35c9 adc5 dea0 0000", "BigInt: 10n**21n => 36 35c9 adc5 dea0 0000 (hex, direct BigInt)");
-            // The following two are very long, ensure they don't cause issues, actual value check might be too much for here
-            // For 10n**30n, the full string is "c9f2c9cd046750000000000000000", which gets formatted.
-            assert.strictEqual(NumberFormatter.format(10n**30n), "c9f2 c9cd 0467 5000 0000 0000", "BigInt: 10n**30n => c9f2 c9cd 0467 5000 0000 0000 (hex, direct BigInt, might be truncated by Number in old version)");
-            assert.ok(NumberFormatter.format(10n**309n).length > 50, "BigInt: 10n**309n produces a long hex string (direct BigInt)");
+            // For 10n**30n, the full string is "c9f2c9cd04674edea40000000" (26 chars), formatted with current logic.
+            assert.strictEqual(NumberFormatter.format(10n**30n), "c9 f2c9 cd04 674e dea4 0000 0000", "BigInt: 10n**30n => c9 f2c9 cd04 674e dea4 0000 0000 (hex, direct BigInt)");
+            assert.ok(NumberFormatter.format(10n**309n).length > 50, "BigInt: 10n**309n => (long hex string) (hex, direct BigInt)");
         });
     });
 
