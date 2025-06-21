@@ -118,16 +118,13 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format(1e18), "1.00e18", "Number: 1e18 => 1.00e18");
         assert.strictEqual(NumberFormatter.format(10n**18n), "1.00e18", "BigInt: 10n**18n => 1.00e18");
 
-        // Suffix value < 10 and < 100 boundaries (based on current toFixed rounding for Number inputs)
-        // Updated to reflect truncation rule for numbers >= 1e9
+        // Suffix value < 10 and < 100 boundaries
         assert.strictEqual(NumberFormatter.format(9.999e9), "9.99B", "Number: 9.999e9 => 9.99B");
         assert.strictEqual(NumberFormatter.format(10e9), "10B", "Number: 10e9 => 10B");
         assert.strictEqual(NumberFormatter.format(99.99e9), "99.9B", "Number: 99.99e9 => 99.9B");
         assert.strictEqual(NumberFormatter.format(100e9), "100B", "Number: 100e9 => 100B");
-        // Trillion
         assert.strictEqual(NumberFormatter.format(9.999e12), "9.99T", "Number: 9.999e12 => 9.99T");
         assert.strictEqual(NumberFormatter.format(99.99e12), "99.9T", "Number: 99.99e12 => 99.9T");
-        // Quadrillion (Number input via BigInt path)
         assert.strictEqual(NumberFormatter.format(9.999e15), "9.99Qa", "Number: 9.999e15 => 9.99Qa");
         assert.strictEqual(NumberFormatter.format(99.99e15), "99.9Qa", "Number: 99.99e15 => 99.9Qa");
     });
@@ -135,7 +132,7 @@ QUnit.module("NumberFormatter", function() {
     QUnit.test("quadrillions (Qa suffix - BigInt handling)", function(assert) {
         NumberFormatter.setSelectedFormat('standard');
 
-        assert.strictEqual(NumberFormatter.format(1e15), "1Qa", "Number: 1e15 => 1Qa"); // Number input handled by BigInt path in formatter
+        assert.strictEqual(NumberFormatter.format(1e15), "1Qa", "Number: 1e15 => 1Qa");
         assert.strictEqual(NumberFormatter.format(1.23e15), "1.23Qa", "Number: 1.23e15 => 1.23Qa");
         assert.strictEqual(NumberFormatter.format(9.99e15), "9.99Qa", "Number: 9.99e15 => 9.99Qa");
 
@@ -159,7 +156,7 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format(10n**18n - 1000n), "999Qa", "BigInt: 10n**18n - 1000n => 999Qa");
         assert.strictEqual(NumberFormatter.format("999999999999999000"), "999Qa", "String: \"999999999999999000\" => 999Qa");
 
-        // 999e15 - 1 (BigInt and String input tests for truncation)
+        // 999e15 - 1 (BigInt and String input tests)
         assert.strictEqual(NumberFormatter.format(999n * (10n**15n) - 1n), "998Qa", "BigInt: 999n * (10n**15n) - 1n => 998Qa");
         assert.strictEqual(NumberFormatter.format("998999999999999999"), "998Qa", "String: \"998999999999999999\" => 998Qa");
 
