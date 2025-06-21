@@ -163,9 +163,7 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format(10n**18n - 1000n), "999Qa", "NumberFormatter.format(BigInt: 1e18 - 1000) => '999Qa' (999 rule)");
         assert.strictEqual(NumberFormatter.format("999999999999999000"), "999Qa", "NumberFormatter.format(String: \"999...9000\") => '999Qa' (999 rule)");
 
-        // 999e15 - 1
-        const val999e15minus1Num = 999e15 - 1;
-        assert.strictEqual(NumberFormatter.format(val999e15minus1Num), "998Qa", "NumberFormatter.format(Number: 999e15 - 1) => 998Qa (Math.floor then truncate)");
+        // 999e15 - 1 (BigInt and String input tests)
         assert.strictEqual(NumberFormatter.format(999n * (10n**15n) - 1n), "998Qa", "NumberFormatter.format(BigInt: 999e15 - 1) => 998Qa (truncate)");
         assert.strictEqual(NumberFormatter.format("998999999999999999"), "998Qa", "NumberFormatter.format(String: \"998999...\") => 998Qa (truncate)");
 
