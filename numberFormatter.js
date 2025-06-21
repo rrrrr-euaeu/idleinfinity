@@ -142,8 +142,13 @@ const NumberFormatter = {
                 const numAsBigInt = BigInt(Math.floor(workingValue));
                 if (numAsBigInt >= BI_1E18) {
                     if (originalValueType === 'number') {
-                        formattedResult = inputValue.toExponential(2).replace('e+', 'e');
-                    } else {
+                        // For numbers >= 1e18, scientific notation is clearer than Qa, etc.
+                        // This aligns with the new scientific function's BigInt path for very large numbers
+                        let tempStr = numAsBigInt.toString();
+                        let decPart = tempStr.length > 1 ? tempStr.substring(1,3) : "00";
+                        decPart = decPart.padEnd(2, '0');
+                        formattedResult = tempStr.charAt(0) + '.' + decPart + 'e' + (tempStr.length - 1);
+                    } else { // Should ideally not be reached if original type was 'bigint'
                         let tempStr = numAsBigInt.toString();
                         formattedResult = tempStr.charAt(0) + '.' + tempStr.substring(1, 3) + 'e' + (tempStr.length - 1);
                     }
@@ -157,10 +162,10 @@ const NumberFormatter = {
             }
         } else if (typeof workingValue === 'bigint') { // workingValue was originally BigInt or String parsed to BigInt
             const numAsBigInt = workingValue; // Already a BigInt
-            if (numAsBigInt >= BI_1E18) {
+            if (numAsBigInt >= BI_1E18) { // For BigInts >= 10^18 (Quintillion)
                 let tempStr = numAsBigInt.toString();
-                let decPart = tempStr.length > 1 ? tempStr.substring(1,3) : "00";
-                decPart = decPart.padEnd(2, '0');
+                let decPart = tempStr.length > 1 ? tempStr.substring(1,3) : "00"; // Get next two digits
+                decPart = decPart.padEnd(2, '0'); // Pad with '0' if less than two digits
                 formattedResult = tempStr.charAt(0) + '.' + decPart + 'e' + (tempStr.length - 1);
             } else if (numAsBigInt >= BI_1E15) {
                 formattedResult = formatBigIntSuffixed(numAsBigInt, BI_1E15, 'Qa');
@@ -168,7 +173,7 @@ const NumberFormatter = {
                 formattedResult = formatBigIntSuffixed(numAsBigInt, BI_1E12, 'T');
             } else if (numAsBigInt >= BI_1E9) {
                 formattedResult = formatBigIntSuffixed(numAsBigInt, BI_1E9, 'B');
-            } else {
+            } else { // BigInts less than 1 Billion
                 formattedResult = workingValue.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
             }
         } else {
@@ -280,12 +285,73 @@ const NumberFormatter = {
         if (num === undefined || num === null) {
             return "0";
         }
-        const absNum = Math.abs(num);
 
-        if (absNum < 10) { // For small numbers, use standard formatting for better readability
-            return this.standard(num);
+        const valueType = typeof num;
+        let isNegative = false;
+        let workingValueStr;
+
+        if (valueType === 'bigint') {
+            // Assumed to be >= 1e15, but the logic will handle any BigInt.
+            // No, the requirement is that BigInts are >= 1e15.
+            // The problem is that standard formatter already handles BigInts < 1e18 with suffixes.
+            // This scientific function should primarily kick in for BigInts that would otherwise be 'Qa' or larger,
+            // or if explicitly called.
+            // For now, let's stick to the ">= 1e15" assumption for BigInts *passed directly to scientific*.
+            // If a BigInt < 1e15 is passed, it will still be formatted, but the assumption is it's >= 1e15.
+
+            if (num < 0n) {
+                isNegative = true;
+                workingValueStr = (-num).toString();
+            } else {
+                workingValueStr = num.toString();
+            }
+
+            if (workingValueStr === "0") return "0"; // Handles 0n
+
+            let integerPart = workingValueStr.charAt(0);
+            let fractionalPart = "";
+            if (workingValueStr.length > 1) {
+                fractionalPart = workingValueStr.substring(1, 3); // Next two characters
+            }
+            fractionalPart = fractionalPart.padEnd(2, '0'); // Pad with '0' if needed
+
+            const exponent = workingValueStr.length - 1;
+            return (isNegative ? '-' : '') + integerPart + '.' + fractionalPart + 'e' + exponent;
+
+        } else if (valueType === 'number') {
+            if (isNaN(num) || !isFinite(num)) return this.standard(num); // Let standard handle NaN/Infinity
+
+            const absNum = Math.abs(num);
+            if (absNum === 0) return "0"; // Handle 0 explicitly
+
+            // If its absolute value is less than 10, call this.standard(num)
+            if (absNum < 10) {
+                return this.standard(num);
+            } else {
+                // Otherwise, use num.toExponential(2).replace('e+', 'e')
+                return num.toExponential(2).replace('e+', 'e');
+            }
+        } else if (valueType === 'string') {
+            // Attempt to parse as BigInt first, then Number, then default to standard.
+            try {
+                const bigIntValue = BigInt(num);
+                // If it parses as BigInt, treat it as such.
+                // Re-call scientific with the BigInt value to use the BigInt logic.
+                return this.scientific(bigIntValue);
+            } catch (e) {
+                // Not a BigInt string, try as Number.
+                const numberValue = Number(num);
+                if (isNaN(numberValue) || !isFinite(numberValue)) {
+                    // If it's not a valid number string (e.g., "abc", "1.2.3")
+                    // or if it's a string like "Infinity"
+                    return this.standard(num); // Fallback to standard for unparseable or special strings
+                }
+                // Re-call scientific with the Number value to use the Number logic.
+                return this.scientific(numberValue);
+            }
         } else {
-            return num.toExponential(2).replace('e+', 'e');
+            // For any other types, or if somehow missed, return "0" or delegate to standard.
+            return "0";
         }
     },
 
