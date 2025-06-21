@@ -1,3 +1,15 @@
+// Assertion Message Format:
+// For assert.strictEqual(NumberFormatter.format(inputValue), expectedValue, message),
+// the 'message' (3rd argument) should follow the format:
+// "InputType: InputValueAsCode => ExpectedValue (Description)"
+// Examples:
+// "Number: 0 => 0 (zero input)"
+// "BigInt: 10n**15n => 1Qa (Qa suffix boundary)"
+// "String: \"-1000\" => -1,000 (comma grouping)"
+// "Number: 1.2345e16 => 12.3Qa (truncate rule)"
+// "BigInt: 10n**18n - 1000n => 999Qa (999-rule)"
+// "String: \"-1237500000000000000\" => -1.23e18 (exp, truncate 2 dec)"
+
 // tests/numberFormatter.test.js
 
 QUnit.module("NumberFormatter", function() {
@@ -46,23 +58,23 @@ QUnit.module("NumberFormatter", function() {
             assert.strictEqual(NumberFormatter.format(1000000), "1,000,000", "Number: 1000000 => 1,000,000 (comma grouping)");
             assert.strictEqual(NumberFormatter.format(999999999), "999,999,999", "Number: 999999999 => 999,999,999 (comma grouping)");
             assert.strictEqual(NumberFormatter.format(1000000000), "1B", "Number: 1000000000 => 1B (B suffix)");
-            assert.strictEqual(NumberFormatter.format(1.23456789e9), "1.23B", "Number: 1.23456789e9 => 1.23B (B suffix, truncate)");
-            assert.strictEqual(NumberFormatter.format(12.3456789e9), "12.3B", "Number: 12.3456789e9 => 12.3B (B suffix, truncate)");
-            assert.strictEqual(NumberFormatter.format(123.456789e9), "123B", "Number: 123.456789e9 => 123B (B suffix, truncate)");
+            assert.strictEqual(NumberFormatter.format(1.23456789e9), "1.23B", "Number: 1.23456789e9 => 1.23B (B suffix, truncate rule)");
+            assert.strictEqual(NumberFormatter.format(12.3456789e9), "12.3B", "Number: 12.3456789e9 => 12.3B (B suffix, truncate rule)");
+            assert.strictEqual(NumberFormatter.format(123.456789e9), "123B", "Number: 123.456789e9 => 123B (B suffix, truncate rule)");
         });
 
         QUnit.test("trillions (T suffix)", function(assert) {
             assert.strictEqual(NumberFormatter.format(1e12), "1T", "Number: 1e12 => 1T (T suffix)");
-            assert.strictEqual(NumberFormatter.format(1.234e12), "1.23T", "Number: 1.234e12 => 1.23T (T suffix, truncate)");
-            assert.strictEqual(NumberFormatter.format(12.34e12), "12.3T", "Number: 12.34e12 => 12.3T (T suffix, truncate)");
-            assert.strictEqual(NumberFormatter.format(123.4e12), "123T", "Number: 123.4e12 => 123T (T suffix, truncate)");
+            assert.strictEqual(NumberFormatter.format(1.234e12), "1.23T", "Number: 1.234e12 => 1.23T (T suffix, truncate rule)");
+            assert.strictEqual(NumberFormatter.format(12.34e12), "12.3T", "Number: 12.34e12 => 12.3T (T suffix, truncate rule)");
+            assert.strictEqual(NumberFormatter.format(123.4e12), "123T", "Number: 123.4e12 => 123T (T suffix, truncate rule)");
         });
 
         QUnit.test("quadrillions (Qa suffix)", function(assert) {
             assert.strictEqual(NumberFormatter.format(1e15), "1Qa", "Number: 1e15 => 1Qa (Qa suffix)");
-            assert.strictEqual(NumberFormatter.format(1.234e15), "1.23Qa", "Number: 1.234e15 => 1.23Qa (Qa suffix, truncate)");
-            assert.strictEqual(NumberFormatter.format(12.34e15), "12.3Qa", "Number: 12.34e15 => 12.3Qa (Qa suffix, truncate)");
-            assert.strictEqual(NumberFormatter.format(123.4e15), "123Qa", "Number: 123.4e15 => 123Qa (Qa suffix, truncate)");
+            assert.strictEqual(NumberFormatter.format(1.234e15), "1.23Qa", "Number: 1.234e15 => 1.23Qa (Qa suffix, truncate rule)");
+            assert.strictEqual(NumberFormatter.format(12.34e15), "12.3Qa", "Number: 12.34e15 => 12.3Qa (Qa suffix, truncate rule)");
+            assert.strictEqual(NumberFormatter.format(123.4e15), "123Qa", "Number: 123.4e15 => 123Qa (Qa suffix, truncate rule)");
         });
 
         QUnit.test("large numbers (scientific fallback for >= 1e18)", function(assert) {
@@ -85,7 +97,7 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format(0.001), "0.001", "Number: 0.001 => 0.001 (decimal, toFixed(3))");
 
         assert.strictEqual(NumberFormatter.format(0.999), "0.999", "Number: 0.999 => 0.999 (decimal, toFixed(3))");
-        assert.strictEqual(NumberFormatter.format(0.01), "0.01", "Number: 0.01 => 0.01 (decimal, toFixed(2))"); // Note: This rule is specific in code (num < 0.01 uses toFixed(4))
+        assert.strictEqual(NumberFormatter.format(0.01), "0.01", "Number: 0.01 => 0.01 (decimal, toFixed(2))");
         assert.strictEqual(NumberFormatter.format(0.9999), "1", "Number: 0.9999 => 1 (decimal rounding)");
 
         assert.strictEqual(NumberFormatter.format(9.99), "9.99", "Number: 9.99 => 9.99 (decimal, toFixed(2))");
@@ -104,9 +116,9 @@ QUnit.module("NumberFormatter", function() {
 
         // Suffix boundaries
         assert.strictEqual(NumberFormatter.format(1e9), "1B", "Number: 1e9 => 1B (B suffix boundary)");
-        assert.strictEqual(NumberFormatter.format(1e12 - 1), "999B", "Number: 1e12 - 1 => 999B (B suffix boundary, truncate)");
+        assert.strictEqual(NumberFormatter.format(1e12 - 1), "999B", "Number: 1e12 - 1 => 999B (B suffix boundary, truncate rule)");
         assert.strictEqual(NumberFormatter.format(1e12), "1T", "Number: 1e12 => 1T (T suffix boundary)");
-        assert.strictEqual(NumberFormatter.format(1e15 - 1), "999T", "Number: 1e15 - 1 => 999T (T suffix boundary, truncate)");
+        assert.strictEqual(NumberFormatter.format(1e15 - 1), "999T", "Number: 1e15 - 1 => 999T (T suffix boundary, truncate rule)");
         assert.strictEqual(NumberFormatter.format(1e15), "1Qa", "Number: 1e15 => 1Qa (Qa suffix boundary)");
 
         // 1e18 - 1 cases
@@ -119,14 +131,14 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format(10n**18n), "1.00e18", "BigInt: 10n**18n => 1.00e18 (exponential boundary)");
 
         // Suffix value < 10 and < 100 boundaries
-        assert.strictEqual(NumberFormatter.format(9.999e9), "9.99B", "Number: 9.999e9 => 9.99B (B suffix, truncate)");
+        assert.strictEqual(NumberFormatter.format(9.999e9), "9.99B", "Number: 9.999e9 => 9.99B (B suffix, truncate rule)");
         assert.strictEqual(NumberFormatter.format(10e9), "10B", "Number: 10e9 => 10B (B suffix)");
-        assert.strictEqual(NumberFormatter.format(99.99e9), "99.9B", "Number: 99.99e9 => 99.9B (B suffix, truncate)");
+        assert.strictEqual(NumberFormatter.format(99.99e9), "99.9B", "Number: 99.99e9 => 99.9B (B suffix, truncate rule)");
         assert.strictEqual(NumberFormatter.format(100e9), "100B", "Number: 100e9 => 100B (B suffix)");
-        assert.strictEqual(NumberFormatter.format(9.999e12), "9.99T", "Number: 9.999e12 => 9.99T (T suffix, truncate)");
-        assert.strictEqual(NumberFormatter.format(99.99e12), "99.9T", "Number: 99.99e12 => 99.9T (T suffix, truncate)");
-        assert.strictEqual(NumberFormatter.format(9.999e15), "9.99Qa", "Number: 9.999e15 => 9.99Qa (Qa suffix, truncate)");
-        assert.strictEqual(NumberFormatter.format(99.99e15), "99.9Qa", "Number: 99.99e15 => 99.9Qa (Qa suffix, truncate)");
+        assert.strictEqual(NumberFormatter.format(9.999e12), "9.99T", "Number: 9.999e12 => 9.99T (T suffix, truncate rule)");
+        assert.strictEqual(NumberFormatter.format(99.99e12), "99.9T", "Number: 99.99e12 => 99.9T (T suffix, truncate rule)");
+        assert.strictEqual(NumberFormatter.format(9.999e15), "9.99Qa", "Number: 9.999e15 => 9.99Qa (Qa suffix, truncate rule)");
+        assert.strictEqual(NumberFormatter.format(99.99e15), "99.9Qa", "Number: 99.99e15 => 99.9Qa (Qa suffix, truncate rule)");
     });
 
     QUnit.test("quadrillions (Qa suffix - BigInt handling)", function(assert) {
@@ -238,6 +250,17 @@ QUnit.module("NumberFormatter", function() {
         QUnit.test("negative numbers (hex)", function(assert) {
             assert.strictEqual(NumberFormatter.format(-10), "-a", "Number: -10 => -a (negative hex)");
             assert.strictEqual(NumberFormatter.format(-255.75), "-ff.c", "Number: -255.75 => -ff.c (negative hex decimal)");
+        });
+
+        QUnit.test("BigInt inputs (converted to Number for hex)", function(assert) {
+            NumberFormatter.setSelectedFormat('hex');
+            assert.strictEqual(NumberFormatter.format(0n), "0", "BigInt: 0n => 0 (hex)");
+            assert.strictEqual(NumberFormatter.format(10n**15n), "38d7 ea4c 68000", "BigInt: 10n**15n => 38d7 ea4c 68000 (hex, from Number)");
+            assert.strictEqual(NumberFormatter.format(-(10n**15n)), "-38d7 ea4c 68000", "BigInt: -(10n**15n) => -38d7 ea4c 68000 (hex, from Number)");
+            assert.strictEqual(NumberFormatter.format(10n**18n - 1n), "de0b 6b3a 7640 0000", "BigInt: 10n**18n-1n => de0b 6b3a 7640 0000 (hex, from Number approx 1e18)");
+            assert.strictEqual(NumberFormatter.format(10n**21n), "21e1 9e0c 9bab 2400 0000", "BigInt: 10n**21n => 21e1 9e0c 9bab 2400 0000 (hex, from Number 1e21)");
+            assert.strictEqual(NumberFormatter.format(10n**30n), "c 9f2c 9cd0 4675 0000 0000 0000", "BigInt: 10n**30n => c 9f2c 9cd0 4675 0000 0000 0000 (hex, from Number)");
+            assert.strictEqual(NumberFormatter.format(10n**309n), "infinity", "BigInt: 10n**309n => infinity (hex, from Number)");
         });
     });
 
