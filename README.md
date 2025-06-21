@@ -1,5 +1,7 @@
 # idleinfinity
 
+Google Julesで作成しました。[こちら](https://rrrrr-euaeu.github.io/idleinfinity/)から遊べます。
+
 ## ゲームの遊び方
 
 このゲームは、放置系（アイドル）ゲームです。
