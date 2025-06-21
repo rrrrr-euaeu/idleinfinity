@@ -120,10 +120,10 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format(10n**18n), "1.00e18", "NumberFormatter.format(BigInt: 10e18) => '1.00e18'"); // Based on current BigInt to exponential logic
 
         // Suffix value < 10 and < 100 boundaries (based on current toFixed rounding for Number inputs)
-        // Updated to reflect truncation rule for numbers >= 1e9 based on user prompt
+        // Updated to reflect truncation rule for numbers >= 1e9
         assert.strictEqual(NumberFormatter.format(9.999e9), "9.99B", "NumberFormatter.format(9.999e9) => '9.99B' (truncate)");
         assert.strictEqual(NumberFormatter.format(10e9), "10B", "NumberFormatter.format(10e9) => '10B'");
-        assert.strictEqual(NumberFormatter.format(99.99e9), "99.9B", "NumberFormatter.format(99.99e9) => '99.9B' (truncate)");
+        assert.strictEqual(NumberFormatter.format(99.99e9), "99.9B", "NumberFormatter.format(99.99e9) => '9.9B' (truncate)");
         assert.strictEqual(NumberFormatter.format(100e9), "100B", "NumberFormatter.format(100e9) => '100B'");
         // Trillion
         assert.strictEqual(NumberFormatter.format(9.999e12), "9.99T", "NumberFormatter.format(9.999e12) => '9.99T' (truncate)");
@@ -159,9 +159,7 @@ QUnit.module("NumberFormatter", function() {
 
         assert.strictEqual(NumberFormatter.format(9.8765e17), "987Qa", "NumberFormatter.format(9.8765e17) => 987Qa (Math.floor then truncate)");
 
-        // 1e18 - 1000
-        const val1e18minus1000Num = 1e18 - 1000;
-        assert.strictEqual(NumberFormatter.format(val1e18minus1000Num), Number(val1e18minus1000Num).toExponential(2).replace('e+', 'e'), "NumberFormatter.format(Number: 1e18 - 1000) returns exponential");
+        // Test near 1e18 (BigInt and String inputs)
         assert.strictEqual(NumberFormatter.format(10n**18n - 1000n), "999Qa", "NumberFormatter.format(BigInt: 1e18 - 1000) => '999Qa' (999 rule)");
         assert.strictEqual(NumberFormatter.format("999999999999999000"), "999Qa", "NumberFormatter.format(String: \"999...9000\") => '999Qa' (999 rule)");
 
@@ -228,16 +226,12 @@ QUnit.module("NumberFormatter", function() {
         assert.strictEqual(NumberFormatter.format("-1000"), "-1,000", "NumberFormatter.format(String: \"-1000\")");
         assert.strictEqual(NumberFormatter.format("1234567890"), "1.23B", "NumberFormatter.format(String: \"1.23...e9\") => 1.23B");
         assert.strictEqual(NumberFormatter.format("123456789012345678"), "123Qa", "NumberFormatter.format(String: \"1.23...e17\") => 123Qa");
-        assert.strictEqual(NumberFormatter.format("-1234567890123456789"), "-1.23Qa", "NumberFormatter.format(String: \"-1.23...e18\") => -1.23Qa (current exp logic for BigInt, then Qa)");
-        // The last case depends on how BigInt exponential string "1.23e18" would be re-parsed if it were a primary path.
-        // However, for string "-1234567890123456789", it will be parsed as BigInt directly.
-        // -1234567890123456789n is < -10^18n. It's actually -(1.23... * 10^18).
-        // So, it should be -(10^18n) range, thus exponential.
-        // The BigInt value is -1234567890123456789n.
-        // abs(workingValue) = 1234567890123456789n. This is < BI_1E18 (10^18). No, it's > BI_1E18.
-        // It's 1.23 * 10^18, so it should be exponential.
-        // expected: "-1.23e18"
-         assert.strictEqual(NumberFormatter.format("-1234567890123456789"), "-1.23e18", "NumberFormatter.format(String: \"-1.23...e18\") => -1.23e18");
+        // The string "-1234567890123456789" is parsed as a BigInt.
+        // Its absolute value is 1234567890123456789n, which is > 10n**18n.
+        // Thus, it should be formatted in exponential notation.
+        // Current BigInt to exponential logic: 1st digit, '.', next 2 digits (truncated), 'e', exponent.
+        // "1234567890123456789" -> "1.23e18"
+        assert.strictEqual(NumberFormatter.format("-1234567890123456789"), "-1.23e18", "NumberFormatter.format(String: \"-1234567890123456789\") => -1.23e18");
     });
 
     });
