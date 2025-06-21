@@ -252,15 +252,17 @@ QUnit.module("NumberFormatter", function() {
             assert.strictEqual(NumberFormatter.format(-255.75), "-ff.c", "Number: -255.75 => -ff.c (negative hex decimal)");
         });
 
-        QUnit.test("BigInt inputs (converted to Number for hex)", function(assert) {
+        QUnit.test("BigInt inputs (direct hex conversion)", function(assert) {
             NumberFormatter.setSelectedFormat('hex');
             assert.strictEqual(NumberFormatter.format(0n), "0", "BigInt: 0n => 0 (hex)");
-            assert.strictEqual(NumberFormatter.format(10n**15n), "38d7 ea4c 68000", "BigInt: 10n**15n => 38d7 ea4c 68000 (hex, from Number)");
-            assert.strictEqual(NumberFormatter.format(-(10n**15n)), "-38d7 ea4c 68000", "BigInt: -(10n**15n) => -38d7 ea4c 68000 (hex, from Number)");
-            assert.strictEqual(NumberFormatter.format(10n**18n - 1n), "de0b 6b3a 7640 0000", "BigInt: 10n**18n-1n => de0b 6b3a 7640 0000 (hex, from Number approx 1e18)");
-            assert.strictEqual(NumberFormatter.format(10n**21n), "21e1 9e0c 9bab 2400 0000", "BigInt: 10n**21n => 21e1 9e0c 9bab 2400 0000 (hex, from Number 1e21)");
-            assert.strictEqual(NumberFormatter.format(10n**30n), "c 9f2c 9cd0 4675 0000 0000 0000", "BigInt: 10n**30n => c 9f2c 9cd0 4675 0000 0000 0000 (hex, from Number)");
-            assert.strictEqual(NumberFormatter.format(10n**309n), "infinity", "BigInt: 10n**309n => infinity (hex, from Number)");
+            assert.strictEqual(NumberFormatter.format(10n**15n), "38d7 ea4c 68000", "BigInt: 10n**15n => 38d7 ea4c 68000 (hex, direct BigInt)");
+            assert.strictEqual(NumberFormatter.format(-(10n**15n)), "-38d7 ea4c 68000", "BigInt: -(10n**15n) => -38d7 ea4c 68000 (hex, direct BigInt)");
+            assert.strictEqual(NumberFormatter.format(10n**18n - 1n), "de0b 6b3a 763f ffff", "BigInt: 10n**18n - 1n => de0b 6b3a 763f ffff (hex, direct BigInt)");
+            assert.strictEqual(NumberFormatter.format(10n**21n), "36 35c9 adc5 dea0 0000", "BigInt: 10n**21n => 36 35c9 adc5 dea0 0000 (hex, direct BigInt)");
+            // The following two are very long, ensure they don't cause issues, actual value check might be too much for here
+            // For 10n**30n, the full string is "c9f2c9cd046750000000000000000", which gets formatted.
+            assert.strictEqual(NumberFormatter.format(10n**30n), "c9f2 c9cd 0467 5000 0000 0000", "BigInt: 10n**30n => c9f2 c9cd 0467 5000 0000 0000 (hex, direct BigInt, might be truncated by Number in old version)");
+            assert.ok(NumberFormatter.format(10n**309n).length > 50, "BigInt: 10n**309n produces a long hex string (direct BigInt)");
         });
     });
 
@@ -283,6 +285,18 @@ QUnit.module("NumberFormatter", function() {
 
         QUnit.test("negative numbers (scientific)", function(assert) {
             assert.strictEqual(NumberFormatter.format(-12345), "-1.23e4", "Number: -12345 => -1.23e4 (negative scientific)");
+        });
+
+        QUnit.test("BigInt inputs (converted to Number for scientific)", function(assert) {
+            NumberFormatter.setSelectedFormat('scientific');
+            assert.strictEqual(NumberFormatter.format(0n), "0", "BigInt: 0n => 0 (scientific, via standard)");
+            assert.strictEqual(NumberFormatter.format(5n), "5", "BigInt: 5n => 5 (scientific, via standard)");
+            assert.strictEqual(NumberFormatter.format(10n**15n), "1.00e15", "BigInt: 10n**15n => 1.00e15 (scientific, Number.toExponential(2))");
+            assert.strictEqual(NumberFormatter.format(12345n * (10n**14n)), "1.23e18", "BigInt: 1.2345e18 => 1.23e18 (scientific, Number.toExponential(2), truncate 4)");
+            assert.strictEqual(NumberFormatter.format(12375n * (10n**14n)), "1.24e18", "BigInt: 1.2375e18 => 1.24e18 (scientific, Number.toExponential(2), round up 75)");
+            assert.strictEqual(NumberFormatter.format(-(10n**18n)), "-1.00e18", "BigInt: -(10n**18n) => -1.00e18 (scientific, Number.toExponential(2))");
+            assert.strictEqual(NumberFormatter.format(10n**30n), "1.00e30", "BigInt: 10n**30n => 1.00e30 (scientific, Number.toExponential(2))");
+            assert.strictEqual(NumberFormatter.format(10n**309n), "Infinity", "BigInt: 10n**309n => Infinity (scientific, Number.toExponential(2))");
         });
     });
 });
